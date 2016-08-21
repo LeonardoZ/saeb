@@ -30,7 +30,7 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
   override def preStart(): Unit = {
     Logger.debug("Starting SAEP Data Import...")
 
-    self ! DataImportOrder("C:\\Users\\Leonardo\\Desktop\\Perfil_eleitorado\\perfil_eleitorado_1998.txt")
+    // ex: self ! DataImportOrder("C:\\Users\\Leonardo\\Desktop\\Perfil_eleitorado\\perfil_eleitorado_1998.txt")
   }
 
   override def receive = LoggingReceive {
