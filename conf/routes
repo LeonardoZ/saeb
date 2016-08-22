@@ -1,11 +1,11 @@
 
 
 
-GET     /signin                              controllers.Application.signin()
-POST    /signup                              controllers.Application.signup
-POST    /login                               controllers.Application.doLogin
-GET     /logout                              controllers.Application.doLogout
-GET     /main                                controllers.MainController.index
+GET     /admin/signin                              controllers.Application.signin()
+POST    /admin/signup                              controllers.Application.signup
+POST    /admin/login                               controllers.Application.doLogin
+GET     /admin/logout                              controllers.Application.doLogout
+GET     /admin/main                                controllers.MainController.index
 
 
 # Map static resources from the /public folder to the /assets URL path

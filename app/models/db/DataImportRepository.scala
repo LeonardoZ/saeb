@@ -33,8 +33,9 @@ class DataImportRepository @Inject()(protected val tables: Tables,
   }
 
   def getAll(): Future[Seq[DataImport]] = db.run {
-    DataImports.result
+    DataImports.sortBy(_.fileYear).result
   }
+
 
   def insertAll(dataImports: Set[DataImport]) = db.run {
     (DataImports ++= dataImports).transactionally.asTry

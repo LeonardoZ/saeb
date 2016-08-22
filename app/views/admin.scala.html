@@ -1,0 +1,50 @@
+@(groups: Int, schoolings: Int, cities: Int, brazilianStates: Int, firstYear: String, lastYear: String)
+
+@main("Admin") {
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="info-box">
+            <!-- Apply any bg-* class to to the icon to color it -->
+            <span class="info-box-icon bg-red"><i class="fa fa-star-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Grupos de Idade</span>
+                <span class="info-box-number">@groups</span>
+            </div><!-- /.info-box-content -->
+        </div><!-- /.info-box -->
+    </div>
+    <div class="col-sm-3">
+        <div class="info-box">
+            <!-- Apply any bg-* class to to the icon to color it -->
+            <span class="info-box-icon bg-yellow"><i class="fa fa-star-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Graus de Escolaridade</span>
+                <span class="info-box-number">@schoolings</span>
+            </div><!-- /.info-box-content -->
+        </div><!-- /.info-box -->
+    </div>
+    <div class="col-sm-3">
+        <div class="info-box">
+            <!-- Apply any bg-* class to to the icon to color it -->
+            <span class="info-box-icon bg-blue"><i class="fa fa-star-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Cidades e Estados</span>
+                <span class="info-box-number">@cities cidades de @brazilianStates estados.</span>
+            </div><!-- /.info-box-content -->
+        </div><!-- /.info-box -->
+    </div>
+
+    <div class="col-sm-3">
+        <div class="info-box">
+            <!-- Apply any bg-* class to to the icon to color it -->
+            <span class="info-box-icon bg-purple"><i class="fa fa-star-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Anos analisados</span>
+                <span class="info-box-number">@firstYear - @lastYear</span>
+            </div><!-- /.info-box-content -->
+        </div><!-- /.info-box -->
+    </div>
+
+</div>
+
+}

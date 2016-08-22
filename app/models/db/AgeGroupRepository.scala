@@ -31,6 +31,10 @@ class AgeGroupRepository @Inject()(protected val tables: Tables,
     AgeGroups.result
   }
 
+  def count(): Future[Int] = db.run {
+    AgeGroups.countDistinct.result
+  }
+
   def insertAll(ageGroup: Set[AgeGroup]) = db.run {
     (AgeGroups ++= ageGroup).transactionally
   }

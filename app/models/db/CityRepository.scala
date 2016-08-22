@@ -36,6 +36,23 @@ class CityRepository @Inject()(protected val tables: Tables,
     Cities.result
   }
 
+  def getBrazilianCities = getAll().flatMap { cs =>
+    Future {
+      cs.filter(_.country == "Brazil")
+        .groupBy(_.code)
+        .size
+    }
+  }
+
+  def getBrazilianStates(): Future[Int] = getAll().flatMap {
+    cs => Future {
+      cs.filter(_.country == "Brazil")
+        .groupBy(_.state)
+        .size
+    }
+  }
+
+
   def insertAll(cities: Set[City]) = db.run {
     (Cities ++= cities).transactionally.asTry
   }.recover { case ex => Logger.debug("Error occurred while inserting cities", ex) }

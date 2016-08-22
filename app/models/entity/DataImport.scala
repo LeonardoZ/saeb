@@ -7,4 +7,4 @@ case class DataImport(id: Option[Int] = None,
                       importDateTime: Date,
                       fileName: String,
                       fileYear: String,
-                      fileMonth: String)
+                      fileMonth: String = "")

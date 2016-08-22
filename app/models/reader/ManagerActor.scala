@@ -47,7 +47,6 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
 
     case FileAlreadyImported(dataImport) => {
       Logger.debug("Nothing to do.")
-
     }
 
     case DataImportDone => {
