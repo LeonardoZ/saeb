@@ -6,6 +6,9 @@ POST    /admin/signup                              controllers.Application.signu
 POST    /admin/login                               controllers.Application.doLogin
 GET     /admin/logout                              controllers.Application.doLogout
 GET     /admin/main                                controllers.MainController.index
+GET     /admin/user/registration                   controllers.UserController.newUser
+POST    /admin/user/registration                   controllers.UserController.register()
+GET    /admin/users                               controllers.UserController.users()
 
 
 # Map static resources from the /public folder to the /assets URL path

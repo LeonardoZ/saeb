@@ -28,7 +28,6 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
 
   val signupForm: Form[SignupForm] = Form {
     mapping(
-      "name" -> nonEmptyText(minLength = 3, maxLength = 170),
       "email" -> nonEmptyText(minLength = 6, maxLength = 255),
       "password" -> nonEmptyText(minLength = 6),
       "repeatPassword" -> nonEmptyText(minLength = 6)
@@ -36,13 +35,19 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
   }
 
 
-  def signin(emailValue: String = "") = Action { implicit request =>
+  def signin(emailValue: String = "") = Action.async { implicit request =>
     loginForm.fill(LoginForm(login = emailValue, password = "", remember = false))
-    Ok(views.html.login(loginForm, signupForm))
+    userRepo.countUsers flatMap { users =>
+      Future {
+        Ok(views.html.login(loginForm, signupForm, users < 1))
+      }
+    }
   }
 
   val invalidCredentials =
-    Future{ Redirect(routes.Application.signin()).flashing(("login","Invalid credentials.")) }
+    Future {
+      Redirect(routes.Application.signin()).flashing(("login", "Credenciais inválidas."))
+    }
 
   def doLogin() = Action.async { implicit request =>
     loginForm.bindFromRequest.fold(
@@ -52,7 +57,7 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
         aFutureUser.flatMap {
           case Some(u) =>
             if (BCrypt.checkpw(form.password, u.password))
-                authenticatedUser(u, request)
+              authenticatedUser(u, request)
             else invalidCredentials
           case None => invalidCredentials
         }
@@ -60,27 +65,33 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
     )
   }
 
-  def doLogout() = SecureRequest { implicit request =>
-    Redirect(routes.Application.signin()).withNewSession
+  def doLogout() = SecureRequest.async { implicit request =>
+    Future {
+      Redirect(routes.Application.signin()).withNewSession
+    }
   }
 
   def authenticatedUser(user: User, request: Request[AnyContent]): Future[Result] = {
     Future {
       Redirect(routes.MainController.index())
-        .withNewSession.withSession(request.session +("logged-user", user.email))
+        .withNewSession.withSession(request.session + ("logged-user", user.email))
     }
   }
 
   def signup() = Action.async { implicit request =>
+
     signupForm.bindFromRequest.fold(
-      errorForm => Future{Redirect(routes.Application.signup())},
+      errorForm => Future {
+        Redirect(routes.Application.signup())
+      },
       form => {
         val salt = BCrypt.gensalt()
         val pass = BCrypt.hashpw(form.password, salt)
         val user = User(None, form.email, pass, false)
 
-        val created = userRepo.create(user)
-        Future(Redirect(routes.Application.signin()))
+        userRepo.create(user) map { f =>
+          Redirect(routes.Application.signin())
+        }
       }
     )
   }

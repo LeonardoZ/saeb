@@ -33,6 +33,22 @@ create table if not exists  profile (
     foreign key fk_schooling_id (schooling_id) references schooling(id)
 );
 
+create table if not exists data_import(
+	id int primary key not null auto_increment,
+    import_date_time datetime not null,
+    file_name varchar(150) not null,
+    file_year varchar(4) not null,
+    file_month varchar(2)
+);
+
+
+create table if not exists user (
+  id int(11) primary key auto_increment,
+  email varchar(120) not null,
+  remember tinyint(1) default 0,
+  password varchar(60) not null,
+  unique key unq_email(email)
+);
 
 
 

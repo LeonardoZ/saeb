@@ -2,9 +2,10 @@ package controllers
 
 import javax.inject.Inject
 
+import controllers.security.SecureRequest
 import models.db._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -18,7 +19,7 @@ class MainController @Inject()(val dataImportRepository: DataImportRepository,
 
 
 
-  def index = Action.async {
+  def index = SecureRequest.async {
     val values = for {
       groups <- ageGroupRepository.count
       schoolings <- schoolingRepository.count
