@@ -6,3 +6,5 @@ case class City(id: Option[Int] = None, name: String, code: String, state: Strin
                                 (that.name, that.code, that.state, that.country)
 
 }
+
+case class SimpleCity(id: String, name: String, state: String)

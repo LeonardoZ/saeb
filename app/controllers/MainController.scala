@@ -17,8 +17,6 @@ class MainController @Inject()(val dataImportRepository: DataImportRepository,
                                val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {
 
-
-
   def index = SecureRequest.async {
     val values = for {
       groups <- ageGroupRepository.count

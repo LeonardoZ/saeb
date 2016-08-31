@@ -94,7 +94,9 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
       val containCity = cityCountryPattern.findFirstIn(city).isDefined
       if (containCity) {
         val cityCountry = city.split("-")
-        City(code = line(cityCodeColumn), name = cityCountry(0).intern(), state = line(stateColumn), country = cityCountry(1).intern)
+
+        City(code = line(cityCodeColumn), name = cityCountry(0).intern(), state = line(stateColumn),
+          country = cityCountry(1).intern)
       } else {
         City(code = line(cityCodeColumn), name = notInformed, state = line(stateColumn).intern, country = city)
       }

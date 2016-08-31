@@ -1,0 +1,106 @@
+@(city: models.entity.City, result: models.entity.ProfileResult)(implicit messages: Messages)
+
+@import b3.vertical.fieldConstructor
+
+@site(city.name) {
+<input id="city-code" type="hidden" value="@city.code" />
+<div class="row">
+    <div class="content-box panel-group ">
+        <div class="panel panel-site-green">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <strong><span><i class="fa fa-arrow-right"></i></span>&nbsp;@city.name - @city.state</strong>
+                </h3>
+
+            </div>
+            <div class="panel-body inside-panel">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="box box-info">
+                            <div class="box-header with-border">
+                                <strong>Descrição</strong>
+                            </div>
+                            <div class="box-body">
+                                <dl>
+                                    <dd><strong>Cidade: </strong> @city.name</dd>
+                                    <dd><strong>Estado: </strong> @city.state</dd>
+                                    <dd><strong>Código: </strong> @city.code</dd>
+                                    <dd><strong>País: </strong> @city.country</dd>
+                                    <dd><strong>Última Data: </strong> @result.yearMonths.reverse.head</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="box box-info">
+                            <div class="box-header with-border">
+                               <strong>Informações Gerais</strong>
+                            </div>
+                            <div class="box-body">
+                                <dl>
+                                    <dd><strong>Anos registrados:</strong></dd>
+                                    <dd>
+                                        @result.yearMonths.map { year =>
+                                            <span class="label label-info">@year</span>
+                                        }
+                                    </dd>
+                                    <br />
+                                    <dd><strong>Zonas eleitorais:</strong></dd>
+                                    <dd>
+                                        @result.electoralZones.map {
+                                            case -1 => {
+                                                <span class="label label-danger label-xs">-1 (Não registrado)</span>
+                                            }
+                                            case elect => {
+                                                <span class="label label-success">@elect</span>
+                                            }
+                                        }
+                                    </dd>
+                                </dl>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel with-nav-tabs panel-success">
+                            <div class="panel-heading">
+                                <ul id="ul-years" class="nav nav-tabs nav-justified">
+                                    @result.yearMonths.reverse.map { year =>
+                                        <li class="year-tab">
+                                            <a class="year-tab-anchor" data-toggle="tab" data-year="@year" href="#tab-pane-@year">
+                                                @year
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <div class="panel-body panel-content">
+                                <div id="year-tab-content" class="tab-content">
+                                    @result.yearMonths.reverse.map { year =>
+                                        <div id="tab-pane-@year" class="tab-pane fade">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="box box-info">
+                                                        <div class="box-body">
+                                                           <canvas id="chart-@year" width="500" height="300"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+}

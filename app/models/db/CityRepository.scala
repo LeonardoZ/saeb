@@ -24,6 +24,10 @@ class CityRepository @Inject()(protected val tables: Tables,
     Cities.filter(_.id === cityId).result.headOption
   }
 
+  def getByCode(code: String): Future[Option[City]] = db.run {
+    Cities.filter(_.code === code).result.headOption
+  }
+
   def getByName(cityName: String): Future[Option[City]] = db.run {
     Cities.filter(_.name === cityName).result.headOption
   }
@@ -34,6 +38,13 @@ class CityRepository @Inject()(protected val tables: Tables,
 
   def getAll(): Future[Seq[City]] = db.run {
     Cities.result
+  }
+
+  def searchByName(content: String) = {
+    val query = for {
+      city <- Cities if city.name like s"%$content%"
+    } yield city
+    db.run(query.distinctOn(_.name).result)
   }
 
   def getBrazilianCities = getAll().flatMap { cs =>

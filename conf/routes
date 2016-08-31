@@ -1,6 +1,6 @@
 
 
-
+# Admin
 GET     /admin/signin                              controllers.Application.signin()
 POST    /admin/signup                              controllers.Application.signup
 POST    /admin/login                               controllers.Application.doLogin
@@ -8,7 +8,13 @@ GET     /admin/logout                              controllers.Application.doLog
 GET     /admin/main                                controllers.MainController.index
 GET     /admin/user/registration                   controllers.UserController.newUser
 POST    /admin/user/registration                   controllers.UserController.register()
-GET    /admin/users                               controllers.UserController.users()
+GET     /admin/users                               controllers.UserController.users()
+
+# Public Search
+GET    /                                           controllers.SearchController.main
+POST   /search/cities                              controllers.SearchController.searchContent()
+GET    /search                                     controllers.SearchController.cityPage()
+POST   /search/profiles/agegroup                   controllers.SearchController.getProfilesForYearAndCode()
 
 
 # Map static resources from the /public folder to the /assets URL path

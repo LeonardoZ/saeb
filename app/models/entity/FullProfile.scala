@@ -13,6 +13,7 @@ case class FullProfile(yearOrMonth: String,
                        city: City,
                        electoralDistrict: String,
                        sex: Sex,
-                       ageGroup: AgeGroup,
-                       schooling: Schooling,
+                       ageGroup: AgeGroup, schooling: Schooling,
                        quantityOfPeoples: Int)
+
+case class ProfileResult(yearMonths: Seq[String], electoralZones: Seq[Int], totalOfPeoplesByYear: Int)

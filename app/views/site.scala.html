@@ -1,0 +1,71 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("bootstrap/css/bootstrap.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/font-awesome.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/site.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("plugins/select2/select2.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("plugins/select2-bootstrap-theme/select2-bootstrap.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/box.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/site.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/custom-navbar.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/custom-panel-tabs.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/brasil.css")">
+    <!--<link rel="icon" href="@routes.Assets.at("images/favicon.ico")">-->
+    <script src="@routes.Assets.at("plugins/jQuery/jquery-2.2.3.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.at("bootstrap/js/bootstrap.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.at("plugins/select2/select2.full.min.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.at("plugins/select2/i18n/pt-BR.js")" type="text/javascript"></script>
+
+	<script src="@routes.Assets.at("plugins/chartjs/Chart.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.at("javascript/site.js")" type="text/javascript"></script>
+    <title>SAEB - Software de Análise do Eleitorado Brasileiro</title>
+    <![endif]-->
+</head>
+<body class="gray-body">
+<div class="container">
+    <nav id="custom-bootstrap-menu" class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header center-block"><a class="navbar-brand" href="#">
+                <strong>SAEB</strong></a></div>
+            <div class="collapse navbar-collapse custom-bootstrap-menu">
+                <ul class="nav navbar-nav navbar-left">
+                    <li><a href="/">Principal</a>
+                    </li>
+                    <li><a href="/products">Brasil</a>
+                    </li>
+                    <li><a href="/about-us">Estados</a>
+                    </li>
+                    <li><a href="/contact">Outros Países</a>
+                    </li>
+                    <li><a href="/contact">Comparações</a>
+                    </li>
+                    <li><a href="/contact">Ranking</a>
+                    </li>
+                    <li><a href="/contact">Contato</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </nav>
+
+    @content
+
+</div>
+<footer class="main-footer">
+        <!-- To the right -->
+        <div class="pull-right hidden-xs">
+
+        </div>
+        <!-- Default to the left -->
+        <strong>SAEB 2016.</strong> Uso consciente.<span class="pull-right">Fonte dos dados:<a href="http://www.dados.gov.br"> dados.gov.br</a><span>
+    </footer>
+</body>
+</html>
