@@ -2,7 +2,7 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.{AgeGroup, City, Profile}
+import models.entity.{AgeGroup, City, Profile, Schooling}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -43,6 +43,17 @@ class ProfileRepository @Inject()(protected val tables: Tables,
                                 .filter(_._1._1.yearOrMonth === year)
                                 .filter(_._1._2.code === cityCode)
     } yield (profileCityAndGroup._1._1, profileCityAndGroup._1._2, profileCityAndGroup._2)
+    db.run(query.result)
+  }
+
+  def getProfilesForSchoolings(year: String, cityCode: String): Future[Seq[(Profile, City, Schooling)]] = {
+    val query = for {
+      profileCityAndSchooling <- (Profiles.join(Cities).on(_.cityId === _.id))
+                              .join(Schoolings).on(_._1.schoolingId === _.id)
+                                .filter(_._1._1.yearOrMonth === year)
+                                .filter(_._1._2.code === cityCode)
+                                .sortBy(_._2.id)
+    } yield (profileCityAndSchooling._1._1, profileCityAndSchooling._1._2, profileCityAndSchooling._2)
     db.run(query.result)
   }
 

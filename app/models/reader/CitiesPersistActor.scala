@@ -26,8 +26,7 @@ object CitiesPersistActor {
 
 }
 
-class CitiesPersistActor @Inject()(val smallBatchFactory: SmallBatchCitiesInsertActor.Factory,
-                                   val cityRepository: CityRepository) extends Actor with InjectedActorSupport {
+class CitiesPersistActor @Inject()(val cityRepository: CityRepository) extends Actor with InjectedActorSupport {
 
   import CitiesPersistActor._
 

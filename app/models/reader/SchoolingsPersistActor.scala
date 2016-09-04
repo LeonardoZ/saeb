@@ -28,9 +28,10 @@ class SchoolingsPersistActor @Inject()(val schoolingRepository: SchoolingReposit
   def receive: Receive = {
     case SchoolingsPersistence(ref, newSchoolings) => {
       implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-      val schoolingsToPersist: Future[Set[Schooling]] = schoolingRepository.getAll map { oldSchoolings =>
+      val schoolingsToPersist: Future[Set[Schooling]] = schoolingRepository.getAll2 map { oldSchoolings =>
         newSchoolings.filter(ns => oldSchoolings.filter(ns.level == _.level).isEmpty)
       }
+      // Ae asasas
       val f = schoolingsToPersist.flatMap { cs =>
         if (cs.isEmpty)
           Future.successful()

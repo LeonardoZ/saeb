@@ -50,7 +50,9 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def level = column[String]("level", O.Length(30))
 
-    def * = (id, level) <> (Schooling.tupled, Schooling.unapply)
+    def position = column[Int]("position")
+
+    def * = (id, level, position) <> (Schooling.tupled, Schooling.unapply)
   }
 
   class CityTable(tag: Tag) extends Table[City](tag, "city") {

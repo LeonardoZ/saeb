@@ -10,7 +10,6 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActor[ManagerActor]("manager-actor")
     bindActorFactory[ValuesManagerActor, ValuesManagerActor.Factory]
     bindActorFactory[CitiesPersistActor, CitiesPersistActor.Factory]
-    bindActorFactory[SmallBatchCitiesInsertActor, SmallBatchCitiesInsertActor.Factory]
     bindActorFactory[AgeGroupPersistActor, AgeGroupPersistActor.Factory]
     bindActorFactory[SchoolingsPersistActor, SchoolingsPersistActor.Factory]
     bindActorFactory[ProfileWorkerActor, ProfileWorkerActor.Factory]

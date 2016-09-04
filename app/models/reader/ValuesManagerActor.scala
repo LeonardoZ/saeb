@@ -10,7 +10,6 @@ import akka.util.Timeout
 import models.reader.AgeGroupPersistActor.AgeGroupPersistence
 import models.reader.SchoolingsPersistActor.SchoolingsPersistence
 import models.service.ProfileFileParser
-import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.duration._
@@ -59,20 +58,17 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
 
   def receive: Receive = LoggingReceive {
     case CitiesPersistenceDone => {
-      Logger.debug("Done!")
       citiesReady = true
       checkIfEveryoneIsReady
     }
 
     case SchoolingsPersistenceDone => {
       schoolingsReady = true
-      Logger.debug("Doto!")
       checkIfEveryoneIsReady
     }
 
     case AgeGroupPersistenceDone => {
       agesReady = true
-      Logger.debug("Danone!")
       checkIfEveryoneIsReady
     }
 

@@ -1,0 +1,63 @@
+@(schoolings: Seq[models.entity.Schooling])(implicit messages: Messages)
+
+@import b3.vertical.fieldConstructor
+
+@main("Classificação") {
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Classificação de níveis de escolaridade para exibição</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="pull-right">
+                            <button id="btn-save-order" class="btn btn-primary">
+                                <strong><i class="fa fa-save"></i>&nbspSalvar Ordem</strong>
+                            </button>
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-lg-offset-3">
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h4><strong>Classifique os itens abaixo</strong></h4>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-lg-offset-3">
+                                        <button id="btn-up" class="btn btn-default btn-lg">
+                                            <i class="fa fa-hand-o-up"></i>
+                                        </button>
+                                        <button id="btn-down" class="btn btn-default btn-lg">
+                                            <i class="fa fa-hand-o-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <br />
+                                <div id="ordered-list" class="list-group">
+                                        @schoolings.map { sch =>
+                                            <a data-id=@sch.id class="list-group-item">
+                                                @sch.level
+                                            </a>
+                                        }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+}

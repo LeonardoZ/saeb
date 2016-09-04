@@ -8,12 +8,11 @@ scalaVersion := "2.11.7"
 
 routesGenerator := InjectedRoutesGenerator
 
-
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-    "com.adrianhurt" %% "play-bootstrap" % "1.1-P25-B3-SNAPSHOT",
+    "com.adrianhurt" %% "play-bootstrap" % "1.1-P25-B3",
     "org.webjars" % "font-awesome" % "4.5.0",
     "org.webjars" % "bootstrap-datepicker" % "1.4.0",
     "com.typesafe.play" %% "play-slick" % "2.0.0",

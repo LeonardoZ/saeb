@@ -9,12 +9,15 @@ GET     /admin/main                                controllers.MainController.in
 GET     /admin/user/registration                   controllers.UserController.newUser
 POST    /admin/user/registration                   controllers.UserController.register()
 GET     /admin/users                               controllers.UserController.users()
+GET     /admin/schooling/classification            controllers.SchoolingController.classification()
+POST    /admin/schooling/classification            controllers.SchoolingController.saveClassification()
 
 # Public Search
 GET    /                                           controllers.SearchController.main
 POST   /search/cities                              controllers.SearchController.searchContent()
 GET    /search                                     controllers.SearchController.cityPage()
 POST   /search/profiles/agegroup                   controllers.SearchController.getProfilesForYearAndCode()
+POST   /search/profiles/schooling                  controllers.SearchController.getProfilesBySchoolingForYearAndCode()
 
 
 # Map static resources from the /public folder to the /assets URL path

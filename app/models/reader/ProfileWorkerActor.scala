@@ -45,7 +45,7 @@ class ProfileWorkerActor @Inject()(val dataImportFactory: DataImportActor.Factor
   implicit val timeout: Timeout = 2 minutes
 
   // for db item cache
-  var cities = Map[(String, String), City]()
+  var cities = Map[(String, String, String), City]()
   var ages = Map[String, AgeGroup]()
   var schoolings = Map[String, Schooling]()
 
@@ -74,7 +74,7 @@ class ProfileWorkerActor @Inject()(val dataImportFactory: DataImportActor.Factor
       } yield (cs, as, sc)
 
       values.map { vals =>
-        cities = cities ++ (vals._1.map(c => ((c.name, c.country), c)))
+        cities = cities ++ (vals._1.map(c => ((c.code, c.name, c.country), c)))
         ages = ages ++ (vals._2.map(age => (age.group, age)))
         schoolings = schoolings ++ (vals._3.map(sc => (sc.level, sc)))
         self ! LoadValues(profiles)
@@ -102,21 +102,20 @@ class ProfileWorkerActor @Inject()(val dataImportFactory: DataImportActor.Factor
       importActor ! DataImportActor.SaveNewImport(filePath)
       valuesManagerActor ! ValuesManagerActor.ProfilePesistenceDone
     }
-
   }
-
 
   def persistProfiles(profile: FullProfile): Profile = {
 
     val values: Option[(FullProfile, AgeGroup, Schooling, City)] = for {
       ageF <- ages.get(profile.ageGroup.group)
       schoolingF <- schoolings.get(profile.schooling.level)
-      cityF <- cities.get((profile.city.name, profile.city.country))
+      cityF <- cities.get((profile.city.code, profile.city.name, profile.city.country))
     } yield (profile, ageF, schoolingF, cityF)
+
     // map those values
 
     values match {
-      case Some(vals) => convertToProfile(vals._1, vals._2, vals._3, vals._4)
+      case Some(vals: (FullProfile, AgeGroup, Schooling, City)) => convertToProfile(vals._1, vals._2, vals._3, vals._4)
       case None => (Profile())
     }
   }
