@@ -25,7 +25,7 @@ class CityRepository @Inject()(protected val tables: Tables,
   }
 
   def getByCode(code: String): Future[Option[City]] = db.run {
-    Cities.filter(_.code === code).result.headOption
+    Cities.filter(_.code === code).sortBy(_.name.desc).result.headOption
   }
 
   def getByName(cityName: String): Future[Option[City]] = db.run {

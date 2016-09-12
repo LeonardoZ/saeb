@@ -79,7 +79,9 @@ footer {
 .inside-panel {
     padding: 30px;
 }
-
+.panel-site-green {
+  border-color: #fff1c4;
+}
 .panel-site-green > .panel-heading {
   color: #fff;
   background-color: #00a65a;

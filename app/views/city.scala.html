@@ -16,53 +16,76 @@
             <div class="panel-body inside-panel">
                 <div class="row">
                     <div class="col-lg-4">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                                <strong>Descrição</strong>
-                            </div>
-                            <div class="box-body">
-                                <dl>
-                                    <dd><strong>Cidade: </strong> @city.name</dd>
-                                    <dd><strong>Estado: </strong> @city.state</dd>
-                                    <dd><strong>Código: </strong> @city.code</dd>
-                                    <dd><strong>País: </strong> @city.country</dd>
-                                    <dd><strong>Última Data: </strong> @result.yearMonths.reverse.head</dd>
-                                </dl>
+                        <div class="panel-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <strong>Descrição</strong>
+                                </div>
+                                <div class="panel-body">
+                                    <dl>
+                                        <dd><strong>Cidade: </strong> @city.name</dd>
+                                        <dd><strong>Estado: </strong> @city.state</dd>
+                                        <dd><strong>Código: </strong> @city.code</dd>
+                                        <dd><strong>País: </strong> @city.country</dd>
+                                        <dd><strong>Última Data: </strong> @result.yearMonths.reverse.head</dd>
+                                    </dl>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-8">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                               <strong>Informações Gerais</strong>
-                            </div>
-                            <div class="box-body">
-                                <dl>
-                                    <dd><strong>Anos registrados:</strong></dd>
-                                    <dd>
-                                        @result.yearMonths.map { year =>
-                                            <span class="label label-info">@year</span>
-                                        }
-                                    </dd>
-                                    <br />
-                                    <dd><strong>Zonas eleitorais:</strong></dd>
-                                    <dd>
-                                        @result.electoralZones.map {
-                                            case -1 => {
-                                                <span class="label label-danger label-xs">-1 (Não registrado)</span>
+                        <div class="panel-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                   <strong>Informações Gerais</strong>
+                                </div>
+                                <div class="panel-body">
+                                    <dl>
+                                        <dd><strong>Anos registrados:</strong></dd>
+                                        <dd>
+                                            @result.yearMonths.map { year =>
+                                                <span class="label label-info">@year</span>
                                             }
-                                            case elect => {
-                                                <span class="label label-success">@elect</span>
+                                        </dd>
+                                        <br />
+                                        <dd><strong>Zonas eleitorais:</strong></dd>
+                                        <dd>
+                                            @result.electoralZones.map {
+                                                case -1 => {
+                                                    <span class="label label-danger label-xs">-1 (Não registrado)</span>
+                                                }
+                                                case elect => {
+                                                    <span class="label label-success">@elect</span>
+                                                }
                                             }
-                                        }
-                                    </dd>
-                                </dl>
+                                        </dd>
+                                    </dl>
 
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <hr />
+                <div class="page-header">
+                    <h3>Análises gerais dos eleitores de <small>@city.name</small> </h3>
+                </div>
+                <div class="row">
+                    <div class="col-lg-10 col-lg-offset-1">
+                        <div class="panel-group">
+                            <div class="panel panel-warning">
+                                <div class="panel-heading">
+                                    <strong>Evolução do Número de Eleitores</strong>
+                                </div>
+                                <div class="panel-body">
+                                    <canvas id="chart-peoples-by-year" width="750" height="400"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <hr />
                 <div class="page-header">
                     <h3>Perfil dos eleitores de <small>@city.name</small></h3>
@@ -92,25 +115,9 @@
                                         <div class="row">
                                             <div class="col-lg-10 col-lg-offset-1">
                                                 <h3>Análises disponíveis</h3>
-                                                <ul class="list-group">
-                                                        <li class="list-group-item">
-                                                            <i class="fa fa-users" aria-hidden="true">&nbsp</i>
-                                                            <a href="#row-age-@year"><strong>Faixa etária</strong></a>
-                                                        </li>
-                                                        <li class="list-group-item">
-                                                            <i class="fa fa-graduation-cap" aria-hidden="true">&nbsp</i>
-                                                            <a href="#row-sch-@year"><strong>Escolaridade</strong></a>
-                                                        </li>
-                                                        <li class="list-group-item"><strong>
-                                                            <i class="fa fa-venus-mars ">&nbsp</i>
-                                                            <a href="#row-sch-@year">Proporção Masculino/Feminino</strong></a>
-                                                        </li>
-                                                        <li class="list-group-item"><strong>
-                                                            <a href="#row-sch-@year">
-                                                                Distribuição Escolaridade/Faixa etária</strong>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
+                                                <ul id="analyzes-@year" class="list-group">
+
+                                                </ul>
                                                 </div>
                                             </div>
                                             <div id="row-age-@year" class="row">
@@ -120,12 +127,13 @@
                                                             <h4><strong>Eleitores por Faixa Etária (@year)</strong></h4>
                                                         </div>
                                                         <div class="panel-body panel-content">
-                                                                <canvas id="chart-@year" width="750" height="500"></canvas>
+                                                            <div id="legend-age-@year" class="chart-legend"></div>
+                                                            <canvas id="chart-@year" width="750" height="500"></canvas>
                                                         </div>
                                                     </div>
                                                 </div>
                                         </div>
-                                            <hr />
+                                        <hr />
 
                                         <div id="row-sch-@year" class="row">
                                                 <div class="col-lg-10 col-lg-offset-1">
@@ -133,7 +141,22 @@
                                                         <div class="panel-heading"><h4><strong>Eleitores por nível de Escolaridade (@year)</strong></h4>
                                                             </div>
                                                         <div class="panel-body panel-content">
+                                                            <div id="legend-sch-@year"></div>
                                                             <canvas id="chart-sch-@year" width="750" height="500"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        </div>
+                                        <hr />
+
+                                        <div id="row-combined-@year" class="row">
+                                                <div class="col-lg-10 col-lg-offset-1">
+                                                    <div class="panel with-nav-tabs panel-info">
+                                                        <div class="panel-heading"><h4><strong>Eleitores por sexo registrados (@year)</strong></h4>
+                                                            </div>
+                                                        <div class="panel-body panel-content">
+                                                            <div id="legend-combined-@year"></div>
+                                                            <canvas id="chart-combined-@year" width="750" height="500"></canvas>
                                                         </div>
                                                     </div>
                                                 </div>

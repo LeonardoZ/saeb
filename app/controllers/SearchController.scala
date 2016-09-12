@@ -1,5 +1,6 @@
 package controllers
 
+import java.text.Collator
 import javax.inject.Inject
 
 import models.db._
@@ -39,7 +40,6 @@ class SearchController @Inject()(val cityRepository: CityRepository,
     )(SearchForm.apply)(SearchForm.unapply)
   }
 
-
   def cityPage = Action.async { implicit request =>
     searchForm.bindFromRequest.fold(
       error => Future {
@@ -55,9 +55,9 @@ class SearchController @Inject()(val cityRepository: CityRepository,
         val rs = for {
           profileResult <- cityToAggregatedResults(city)
         } yield (profileResult)
-        rs.flatMap(resultData => {
+        rs.flatMap { resultData =>
           Future(Ok(views.html.city(city, resultData)))
-        })
+        }
       }
       case None => Future {
         Redirect(routes.SearchController.main())
@@ -79,106 +79,6 @@ class SearchController @Inject()(val cityRepository: CityRepository,
     }
   }
 
-  def getProfilesForYearAndCode = Action.async(BodyParsers.parse.json) { implicit request =>
-    val jsonResult: JsResult[YearCityCode] = request.body.validate[YearCityCode](yearCityCodeReads)
-    jsonResult.fold(
-      error => {
-        Future {
-          println(error);
-          BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
-        }
-      },
-      yearCityCode => getAgeGroupChartData(yearCityCode)
-    )
-  }
-
-
-  def getAgeGroupChartData(yearCityCode: YearCityCode) = {
-    val profileCityGroupF = profileRepository.getProfilesForAgeGroups(yearCityCode.year, yearCityCode.code)
-
-    profileCityGroupF.flatMap { profileCityGroup =>
-
-      val byGroup: Map[String, Seq[(Profile, City, AgeGroup)]] = profileCityGroup.groupBy(_._3.group)
-      val byGroupAndThenSex =
-        byGroup.map { (ageGroupAndProfileValues: (String, Seq[(Profile, City, AgeGroup)])) =>
-          (ageGroupAndProfileValues._1, ageGroupAndProfileValues._2.groupBy {
-            (profileAndValues: (Profile, City, AgeGroup)) => profileAndValues._1.sex
-          })
-        }
-
-      val byGroupAndSexSum: Map[String, Map[String, Int]] =
-        byGroupAndThenSex.map { (groupAndMapOfSexAndValues: (String, Map[String, Seq[(Profile, City, AgeGroup)]])) =>
-          (groupAndMapOfSexAndValues._1, groupAndMapOfSexAndValues._2.mapValues {
-            _.map(_._1.quantityOfPeoples).sum
-          })
-        }
-
-      val profilesByAgeGroups = byGroupAndSexSum.map { (values) =>
-        val totalsOfProfiles: Iterable[TotalProfilesBySexUnderGroup] = values._2.map { valuesBySex =>
-          TotalProfilesBySexUnderGroup(valuesBySex._1, valuesBySex._2)
-        }
-        ProfilesByAgeGroup(values._1, totalsOfProfiles.toSeq)
-      }.toSeq.filter(_.ageGroup != "INVÁLIDA")
-
-      Future {
-        Ok(Json.obj("profiles" -> profilesByAgeGroups.sortBy(_.ageGroup)))
-      }
-    }
-  }
-
-  def getProfilesBySchoolingForYearAndCode = Action.async(BodyParsers.parse.json) { implicit request =>
-    val jsonResult: JsResult[YearCityCode] = request.body.validate[YearCityCode](yearCityCodeReads)
-    jsonResult.fold(
-      error => {
-        Future {
-          BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
-        }
-      },
-      yearCityCode => getSchoolingChartData(yearCityCode)
-    )
-  }
-
-  def getSchoolingChartData(yearCityCode: YearCityCode) = {
-    val profileCitySchoolingF = profileRepository.getProfilesForSchoolings(yearCityCode.year, yearCityCode.code)
-    profileCitySchoolingF.flatMap { profileCitySchooling =>
-      if (profileCitySchooling.isEmpty)
-        Future {
-          Ok(Json.obj("profiles" -> Seq[ProfilesBySchooling]()))
-        }
-      else {
-        // group by schooling
-        val bySchooling: Map[String, Seq[(Profile, City, Schooling)]] = profileCitySchooling.groupBy(_._3.level)
-
-        // then group the values bby sex
-        val bySchoolingAndThenSex =
-        bySchooling.map { (SchoolingAndProfileValues: (String, Seq[(Profile, City, Schooling)])) =>
-          (SchoolingAndProfileValues._1, SchoolingAndProfileValues._2.groupBy {
-            (profileAndValues: (Profile, City, Schooling)) => profileAndValues._1.sex
-          })
-        }
-
-        // get values for each sex, map and then sum
-        val bySchoolingAndSexSum: Map[String, Map[String, Int]] =
-        bySchoolingAndThenSex.map { (SchoolingAndMapOfSexAndValues: (String, Map[String, Seq[(Profile, City, Schooling)]])) =>
-          (SchoolingAndMapOfSexAndValues._1, SchoolingAndMapOfSexAndValues._2.mapValues {
-            _.map(_._1.quantityOfPeoples).sum
-          })
-        }
-
-        // simple map to a more specific type, with some filtering
-        val profilesBySchoolings: Seq[ProfilesBySchooling] = bySchoolingAndSexSum.map { (values) =>
-          val totalsOfProfiles: Iterable[TotalProfilesBySexUnderSchooling] = values._2.map { valuesBySex =>
-            TotalProfilesBySexUnderSchooling(valuesBySex._1, valuesBySex._2)
-          }
-          ProfilesBySchooling(values._1, totalsOfProfiles.toSeq)
-        }.toSeq.filter(_.schooling != "NÃO INFORMADO")
-
-        Future {
-          Ok(Json.obj("profiles" -> profilesBySchoolings))
-        }
-      }
-    }
-  }
 
   def searchContent = Action.async(BodyParsers.parse.json) {
     implicit request =>
@@ -193,14 +93,28 @@ class SearchController @Inject()(val cityRepository: CityRepository,
         content => {
           val cities: Future[Seq[City]] = cityRepository.searchByName(content)
           cities.flatMap {
-            cs =>
-              val simpleCities = cs.map(c => SimpleCity(id = c.code, name = c.name, state = c.state))
+            cs => {
+              val simpleCities = citiesToSimpleCity(cs)
+
               Future {
                 Ok(Json.obj("results" -> simpleCities))
               }
+            }
           }
         }
       )
+  }
+
+  def citiesToSimpleCity(cs: Seq[City]): Iterable[SimpleCity] = {
+    val collator = Collator.getInstance
+    collator.setStrength(Collator.NO_DECOMPOSITION)
+    cs.groupBy(_.code).map { groupedCities =>
+      val sorted = groupedCities._2.sortWith((c1, c2) => collator.equals(c2.name, c1.name))
+      val head = sorted.head
+      val names = sorted.map(_.name)
+
+      SimpleCity(id = head.code, name = head.name, otherNames = names, state = head.state)
+    }
   }
 
   def main() = Action.async {
@@ -208,5 +122,6 @@ class SearchController @Inject()(val cityRepository: CityRepository,
       Ok(views.html.saeb(searchForm))
     }
   }
+
 
 }

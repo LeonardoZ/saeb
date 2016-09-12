@@ -7,4 +7,4 @@ case class City(id: Option[Int] = None, name: String, code: String, state: Strin
 
 }
 
-case class SimpleCity(id: String, name: String, state: String)
+case class SimpleCity(id: String, name: String, otherNames: Seq[String], state: String)

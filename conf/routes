@@ -16,8 +16,10 @@ POST    /admin/schooling/classification            controllers.SchoolingControll
 GET    /                                           controllers.SearchController.main
 POST   /search/cities                              controllers.SearchController.searchContent()
 GET    /search                                     controllers.SearchController.cityPage()
-POST   /search/profiles/agegroup                   controllers.SearchController.getProfilesForYearAndCode()
-POST   /search/profiles/schooling                  controllers.SearchController.getProfilesBySchoolingForYearAndCode()
+POST   /profiles/agegroup                          controllers.CityPageController.getProfilesForYearAndCode()
+POST   /profiles/schooling                         controllers.CityPageController.getProfilesBySchoolingForYearAndCode()
+POST   /profiles/sex                               controllers.CityPageController.getProfilesBySex()
+POST   /profiles/year                              controllers.CityPageController.getPeoplesByYear()
 
 
 # Map static resources from the /public folder to the /assets URL path

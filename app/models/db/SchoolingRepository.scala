@@ -33,10 +33,6 @@ class SchoolingRepository @Inject()(protected val tables: Tables,
     Schoolings.result
   }
 
-  def getAll2(): Future[Seq[Schooling]] = db.run {
-    Schoolings.result
-  }
-
   def count(): Future[Int] = db.run {
     Schoolings.countDistinct.result
   }
