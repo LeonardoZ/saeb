@@ -12,11 +12,11 @@
             <div class="box-body">
                 <div id="signup">
                     @b3.form(routes.Application.signup) {
-                    @b3.email( signupForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
-                    @b3.password( signupForm("password"), '_label -> "Senha", 'placeholder -> "Senha" )
-                    @b3.password( signupForm("repeatPassword"), '_label -> "Digite a senha novamente", 'placeholder ->
-                    "Digita a senha novamente" )
-                    @b3.submit('class -> "btn btn-default"){ Cadastrar }
+                        @b3.email( signupForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
+                        @b3.password( signupForm("password"), '_label -> "Senha", 'placeholder -> "Senha" )
+                        @b3.password( signupForm("repeatPassword"), '_label -> "Digite a senha novamente", 'placeholder ->
+                        "Digita a senha novamente" )
+                        @b3.submit('class -> "btn btn-default"){ Cadastrar }
                     }
                 </div>
             </div>

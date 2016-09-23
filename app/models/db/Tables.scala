@@ -90,6 +90,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def * = (id, yearOrMonth, electoralDistrict, sex, cityId, ageGroupId, schoolingId, quantityOfPeoples).
       <>(Profile.tupled, Profile.unapply)
+
   }
 
   class DataImportTable(tag: Tag) extends Table[DataImport](tag, "data_import") {

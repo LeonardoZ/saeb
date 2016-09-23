@@ -48,6 +48,19 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     db.run(query.result)
   }
 
+
+  def getProfilesFullByCityAndYear(year: String, cityCode: String): Future[Seq[(Profile, Schooling, AgeGroup)]] = {
+    val query = for {
+      profileWithValues: (((tables.ProfileTable, tables.CityTable), tables.SchoolingTable), tables.AgeGroupTable) <-
+      ((Profiles.join(Cities).on(_.cityId === _.id)
+          .join(Schoolings).on(_._1.schoolingId === _.id)
+          .join(AgeGroups).on(_._1._1.ageGroupId === _.id)))
+        .filter(v => v._1._1._1.yearOrMonth === year)
+        .filter(v => v._1._1._2.code === cityCode)
+      } yield (profileWithValues._1._1._1, profileWithValues._1._2, profileWithValues._2)
+    db.run(query.result)
+  }
+
   implicit val getPeoplesByYearAndSex = GetResult(r => PeoplesByYearAndSex(r.<<, r.<<, r.<<))
 
   def countPeoplesByCityOnYearsAndSex(cityCode: String): Future[Vector[PeoplesByYearAndSex]] = {
@@ -63,7 +76,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
       on
         city.id = profile.city_id
       where
-        city_code = '71030'
+        city_code = $cityCode
       group by
         profile.year_or_month,
           profile.sex
