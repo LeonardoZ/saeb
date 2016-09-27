@@ -140,6 +140,7 @@
                             {
                                 pointRadius: 10,
                                 spanGaps: true,
+                                lineTension: 0,
                                 fill: false,
                                 label: "Feminino",
                                 backgroundColor : "#e39292",
@@ -147,6 +148,8 @@
                                 data : dataF
                             },{
                                 pointRadius: 10,
+                                spanGaps: true,
+                                lineTension: 0,
                                 fill: false,
                                 label: "Masculino",
                                 backgroundColor : "#849bc2",
@@ -315,8 +318,6 @@
                         tooltips: {
                             callbacks: {
                                 label: function(tooltipItems, data) {
-                                    console.log(tooltipItems);
-                                    console.log(data);
                                     var pre = data.datasets[tooltipItems.datasetIndex].label;
                                     return pre + ": " + numeral(tooltipItems.yLabel).format('0,0');
                                 }

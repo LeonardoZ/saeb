@@ -1,6 +1,24 @@
 create database if not exists saeb;
 use saeb;
 
+create table user (
+  id int(11) not null auto_increment primary key ,
+  email varchar(120) not null,
+  remember tinyint(1) default '0',
+  password varchar(60) not null,
+  unique key unq_email (email)
+)
+
+create table if not exists task (
+	id int primary key auto_increment,
+    description varchar(140) not null,
+    user_id int not null,
+    completed boolean not null default false,
+    failure boolean not null default false,
+    message varchar(140) not null,
+    foreign key (user_id) references user(id)
+);
+
 create table if not exists age_group (
 	id int primary key auto_increment,
     group_description varchar(30) not null unique

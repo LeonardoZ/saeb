@@ -4,8 +4,9 @@ import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
 import akka.event.LoggingReceive
-import models.entity.DataImport
+import models.entity.{DataImport, Task}
 import models.reader.ManagerActor.{DataImportDone, DataImportOrder, FileAlreadyImported, StartDataImport}
+import models.service.TaskService
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -14,45 +15,56 @@ object ManagerActor {
 
   def props = Props[ManagerActor]
 
-  case class DataImportOrder(path: String)
+  case class DataImportOrder(path: String, userEmail: String)
 
-  case class StartDataImport(path: String)
+  case class StartDataImport(task: Task, path: String)
 
-  case class FileAlreadyImported(dataImport: DataImport)
+  case class FileAlreadyImported(task: Task, dataImport: DataImport)
 
-  case object DataImportDone
+  case class DataImportDone(task: Task)
 
 }
 
 class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
-                             val valuesFactory: ValuesManagerActor.Factory) extends Actor with InjectedActorSupport {
-
+                             val valuesFactory: ValuesManagerActor.Factory,
+                             val taskService: TaskService) extends Actor with InjectedActorSupport {
   override def preStart(): Unit = {
     Logger.debug("Starting SAEP Data Import...")
-
-//     ex: self ! DataImportOrder("C:\\Users\\Leonardo\\Desktop\\Perfil_eleitorado\\perfil_eleitorado_1998.txt")
-//    self ! DataImportOrder("C:\\Users\\Leonardo\\Desktop\\Perfil_eleitorado\\perfil_eleitorado_ATUAL.txt")
   }
 
+
   override def receive = LoggingReceive {
+    case DataImportOrder(path, userEmail) => {
 
-    case DataImportOrder(path) => {
+      import scala.concurrent.ExecutionContext.Implicits.global
+
       val dataImportActor = injectedChild(dataImportFactory(), "data-import-actor$" + System.nanoTime())
-      dataImportActor ! DataImportActor.CheckFileAlreadyImported(self, path)
+      val taskF = taskService.createTask(description = "Importar aquivo", "Importação sendo analisada", userEmail)
+      taskF.map {
+        case Some(task) => dataImportActor ! DataImportActor.CheckFileAlreadyImported(self, task, path)
+        case None => None
+      }
     }
 
-    case StartDataImport(path) => {
+    case StartDataImport(task, path) => {
       val valuesManagerActor = injectedChild(valuesFactory(), "values-manager-actor-$" + System.nanoTime())
-      valuesManagerActor ! ValuesManagerActor.ReadValuesFromFile(self, path)
+      valuesManagerActor ! ValuesManagerActor.ReadValuesFromFile(self, task, path)
     }
 
-    case FileAlreadyImported(dataImport) => {
+    case FileAlreadyImported(task, dataImport) => {
+      taskService.updateTaskSuccess(task, "Arquivo já importado no sistema.")
       Logger.debug("Nothing to do.")
     }
 
-    case DataImportDone => {
-      context.stop(self)
+    case DataImportDone(task) => {
+      import scala.concurrent.ExecutionContext.Implicits.global
+
+      taskService.updateTaskSuccess(task, "Arquivo importado com sucesso").map { updated =>
+        context.stop(self)
+      }
     }
   }
+
+
 
 }

@@ -14,10 +14,11 @@ POST    /admin/schooling/classification            controllers.SchoolingControll
 GET     /admin/newfile/                            controllers.DocumentUploadController.uploadPage()
 POST    /admin/newfile/                            controllers.DocumentUploadController.doUpload()
 
-# Public Search
+# Public
 GET    /                                           controllers.SearchController.main
 POST   /search/cities                              controllers.SearchController.searchContent()
 GET    /search                                     controllers.SearchController.cityPage()
+GET    /search/:cityCode                           controllers.SearchController.cityPageWithCode(cityCode: String)
 POST   /profiles/agegroup                          controllers.CityPageController.getProfilesForYearAndCode()
 POST   /profiles/schooling                         controllers.CityPageController.getProfilesBySchoolingForYearAndCode()
 POST   /profiles/sex                               controllers.CityPageController.getProfilesBySex()
@@ -25,6 +26,8 @@ POST   /profiles/year                              controllers.CityPageControlle
 POST   /profiles/ageandschooling                   controllers.CityPageController.getQuantityForSchoolingAndAgeGroup()
 POST   /comparison                                 controllers.CityComparisonController.getComparisonForYearAndCodes()
 GET    /comparison                                 controllers.CityComparisonController.comparisonPage()
+GET    /states                                     controllers.StatesController.statesPage()
+GET    /states/:fu                                  controllers.StatesController.statePage(fu: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

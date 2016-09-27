@@ -10,6 +10,7 @@ import play.api.libs.json.{JsError, JsResult, Json}
 import play.api.mvc.{Action, BodyParsers, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.math.BigDecimal.RoundingMode
 
 
 class CityComparisonController @Inject()(val cityRepository: CityRepository,
@@ -18,28 +19,17 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
                                          val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {
 
-  implicit val cityReads = Json.reads[SimpleCity]
-  implicit val cityWrites = Json.writes[SimpleCity]
-  implicit val yearCityCodesReads = Json.reads[YearCityCodes]
-  implicit val comparedCityFormat = Json.format[ComparedCity]
-  implicit val comparedCityWrites = Json.writes[ComparedCity]
-  implicit val comparedCityFullFormat = Json.format[ComparedCityFull]
-  implicit val comparedCityFullWrites = Json.writes[ComparedCityFull]
-  implicit val comparedCitySchoolingFormat = Json.format[ComparedCitySchooling]
-  implicit val comparedCitySchoolingWrites = Json.writes[ComparedCitySchooling]
-  implicit val comparedCityAgeFormat = Json.format[ComparedCityAgeGroup]
-  implicit val comparedCityAgeWrites = Json.writes[ComparedCityAgeGroup]
-  implicit val comparisonReturnFormat = Json.format[ComparisonReturn]
-  implicit val comparisonReturnWrites = Json.writes[ComparisonReturn]
-
-
   def comparisonPage() = Action.async { implicit request =>
     dataImportRepository.getAll map { imports =>
-      val years: Seq[String] = imports.map(_.fileYear).distinct
-        .map { y =>
-          if (y.length > 4) y.substring(0, 4) + "-" + y.substring(4)
-          else y
-        }.sorted
+        val years = imports
+            .map { data =>
+              val year = data.fileYear
+              val month = data.fileMonth
+              val newMonth = if (month.length == 1) "0" + month else month
+              val newYear = if (!month.isEmpty) (year + "-" + newMonth) else year
+              val valueId = if (!month.isEmpty) year + newMonth else year
+              (newYear, valueId)
+            }
       Ok (views.html.city_comp(years))
     }
   }
@@ -73,13 +63,12 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
       for {
         comparedCityOne <- comparedCityOneF
         comparedCityTwo <- comparedCityTwoF
-      } yield (Ok(Json.toJson(ComparisonReturn(comparedCityOne, comparedCityTwo))))
+      } yield (Ok(views.html.city_comp_box(Seq(comparedCityOne, comparedCityTwo))))
     }
   }
 
   def calculateValuesComparison(cityCode: String, values: Seq[(Profile, Schooling, AgeGroup)]):
-  Future[ComparedCityFull] =
-  {
+  Future[ComparedCityFull] =  {
     val cityF: Future[City] = cityRepository.getByCode(cityCode).map(_.get)
 
     val population: Int = values.map(mapToPeoples).sum
@@ -103,11 +92,14 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
                 cityName = city.name,
                 male = maleCount,
                 female = femaleCount,
+                percentOfFemale = percentageOf(femaleCount, population),
+                percentOfMale = percentageOf(maleCount, population),
+                percentOfNotDefined = percentageOf(notInformedCount, population),
                 notDefined = notInformedCount,
                 population = population
               ),
-              schoolings = Json.toJson(schoolings),
-              ages = Json.toJson(ages),
+              schoolings = schoolings,
+              ages = ages,
               districts = districts
       )
   }
@@ -118,6 +110,8 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
           .groupBy{ case (_, _, ageGroup) => ageGroup }
           .map { case (ageGroup, xs: Seq[(Profile, Schooling, AgeGroup)]) =>
             (ageGroup, xs.map(mapToPeoples).sum)
+          }.filter {
+            case (group, value) => !group.group.contains("INVÁLIDA")
           }
         schoolingSum.map { case (schooling, peoples) =>
           ComparedCityAgeGroup(
@@ -125,7 +119,7 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
             peoples,
             percentageOf(peoples, population)
           )
-        }.toSeq
+        }.toSeq.sortBy(_.group)
       }
   }
 
@@ -135,14 +129,18 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
           .groupBy{ case (_, schooling, _) => schooling }
           .map { case (schooling, xs: Seq[(Profile, Schooling, AgeGroup)]) =>
                   (schooling, xs.map(mapToPeoples).sum)
+          }.filter {
+            case (schooling, value) => !schooling.level.contains("NÃO INFORMADO")
           }
+
       schoolingSum.map { case (schooling, peoples) =>
         ComparedCitySchooling(
+          schooling.position,
           schooling.level,
           peoples,
           percentageOf(peoples, population)
         )
-      }.toSeq
+      }.toSeq.sortBy(_.order)
 
     }
   }
@@ -153,20 +151,17 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
     }
   }
 
-  def calculateMaleFemaleNotDefinedValues(profilesSchoolingsAges: Seq[(Profile, Schooling, AgeGroup)]): Future[(Int, Int, Int)] = {
+  def calculateMaleFemaleNotDefinedValues(profilesSchoolingsAges: Seq[(Profile, Schooling, AgeGroup)]) = {
     Future {
-      val males = calculatePeoplesForSexPredicate("M", profilesSchoolingsAges)
-
-      val females = calculatePeoplesForSexPredicate("F", profilesSchoolingsAges)
-
-      val notDefined = calculatePeoplesForSexPredicate("N", profilesSchoolingsAges)
-
-      (males, females, notDefined)
+        val males = calculatePeoplesForSexPredicate("M", profilesSchoolingsAges)
+        val females = calculatePeoplesForSexPredicate("F", profilesSchoolingsAges)
+        val notDefined = calculatePeoplesForSexPredicate("N", profilesSchoolingsAges)
+        (males, females, notDefined)
     }
   }
 
-  def calculatePeoplesForSexPredicate(predicateValue:String, xs: Seq[(Profile, Schooling, AgeGroup)]) =
-    xs.filter { case (profile, _, _) => profile.sex.eq(predicateValue)}
+  def calculatePeoplesForSexPredicate(predicateValue: String, xs: Seq[(Profile, Schooling, AgeGroup)]) =
+    xs.filter { case (profile, _, _) => profile.sex == predicateValue }
       .map(mapToPeoples).sum
 
   def mapToPeoples(xs: (Profile, Schooling, AgeGroup)) =
@@ -175,7 +170,7 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   def percentageOf(aValue: Int, ofTotal: Int) ={
     val value = BigDecimal(aValue)
     val total = BigDecimal(ofTotal)
-    (value / total).toDouble
+    ((value / total) * 100).bigDecimal.setScale(2, RoundingMode.CEILING).toDouble
   }
 
 }

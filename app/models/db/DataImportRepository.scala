@@ -2,7 +2,7 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.DataImport
+import models.entity.{DataImport, Schooling}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -27,6 +27,13 @@ class DataImportRepository @Inject()(protected val tables: Tables,
   def getByFileNameAndYear(dataImport: DataImport): Future[Option[DataImport]] = db.run {
     DataImports.filter( di =>
       di.fileName === dataImport.fileName &&
+      di.fileYear === dataImport.fileYear &&
+      di.fileMonth === dataImport.fileMonth
+    ).result.headOption
+  }
+
+  def getByYearMonth(dataImport: DataImport): Future[Option[DataImport]] = db.run {
+    DataImports.filter( di =>
       di.fileYear === dataImport.fileYear &&
       di.fileMonth === dataImport.fileMonth
     ).result.headOption

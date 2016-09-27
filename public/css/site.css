@@ -76,12 +76,23 @@ footer {
     margin-top: 20px;
 }
 
+.block-form {
+    margin: 20px;
+}
+
 .inside-panel {
     padding: 30px;
 }
 .panel-site-green {
   border-color: #fff1c4;
 }
+
+
+.input-search {
+    min-width: 350px;
+}
+
+
 .panel-site-green > .panel-heading {
   color: #fff;
   background-color: #00a65a;

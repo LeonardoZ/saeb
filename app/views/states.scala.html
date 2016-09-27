@@ -1,0 +1,39 @@
+@(states: Seq[models.entity.State])(implicit messages: Messages)
+
+@import b3.vertical.fieldConstructor
+
+@site("Estados") {
+<div class="row">
+    <div class="col-lg-12">
+        <div class="input-group">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="content-box panel-group ">
+            <div class="panel panel-site-green">
+                <div class="panel panel-heading">
+                    <h2 class="panel-title">
+                        <strong><span><i class="fa fa-arrow-right"></i></span>&nbsp;Estados</strong>
+                    </h2>
+
+                </div>
+                <div class="panel panel-body">
+                    <h3 class="page-title">Selecione o estado que deseja conhecer mais sobre:</h3>
+                    <div class="list-group">
+                        @states.map { s =>
+                            <a href="@routes.StatesController.statePage(s.federativeUnit)" class="list-group-item">
+                                <span class="badge">@s.federativeUnit</span>
+                                <span class="badge">@s.region</span>
+                                <span><strong>@s.name</strong></span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+}

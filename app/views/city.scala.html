@@ -25,7 +25,12 @@
                                 <div class="panel-body">
                                     <dl>
                                         <dd><strong>Cidade: </strong> @city.name</dd>
-                                        <dd><strong>Estado: </strong> @city.state</dd>
+                                        <dd>
+                                            <strong>UF: </strong>
+                                             <a target="_blank" href="@routes.StatesController.statePage(city.state)">
+                                                 @city.state
+                                            </a>
+                                        </dd>
                                         <dd><strong>Código: </strong> @city.code</dd>
                                         <dd><strong>País: </strong> @city.country</dd>
                                         <dd><strong>Última Data: </strong> @result.yearMonths.reverse.head</dd>
@@ -115,7 +120,7 @@
                                     <div id="tab-pane-@year" class="tab-pane fade">
                                         <div class="row">
                                             <div class="col-lg-10 col-lg-offset-1">
-                                                <h3 id="adisp">Análises disponíveis</h3>
+                                                <h3 id="adisp-@year">Análises disponíveis para @city.name (@year)</h3>
                                                 <ul id="analyzes-@year" class="list-group">
 
                                                 </ul>
@@ -142,7 +147,7 @@
                                                         </div>
                                                     </div>
                                                     <br />
-                                                    <a href="#adisp" class="btn btn-default">Voltar</a>
+                                                    <a href="#adisp-@year" class="btn btn-default">Voltar</a>
                                                 </div>
                                         </div>
                                         <hr />
@@ -158,7 +163,7 @@
                                                         </div>
                                                     </div>
                                                     <br />
-                                                    <a href="#adisp" class="btn btn-default">Voltar</a>
+                                                    <a href="#adisp-@year" class="btn btn-default">Voltar</a>
                                                 </div>
                                         </div>
                                         <hr />
@@ -175,7 +180,7 @@
                                                     </div>
                                                     <br />
                                                     <br />
-                                                    <a href="#adisp" class="btn btn-default">Voltar</a>
+                                                    <a href="#adisp-@year" class="btn btn-default">Voltar</a>
                                                 </div>
                                         </div>
                                         <hr />
@@ -191,7 +196,7 @@
                                                         </div>
                                                     </div>
                                                     <br />
-                                                    <a href="#adisp" class="btn btn-default">Voltar</a>
+                                                    <a href="#adisp-@year" class="btn btn-default">Voltar</a>
                                                 </div>
                                         </div>
                                     </div>

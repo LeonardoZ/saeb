@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import akka.actor.{Actor, ActorRef}
 import models.db.DataImportRepository
+import models.entity.Task
 import models.service.ProfileFileParser
 import play.api.Logger
 
@@ -13,7 +14,7 @@ object DataImportActor {
     def apply(): Actor
   }
 
-  case class CheckFileAlreadyImported(ref: ActorRef, path: String)
+  case class CheckFileAlreadyImported(ref: ActorRef, task: Task, path: String)
 
   case class SaveNewImport(path: String)
 
@@ -27,19 +28,20 @@ class DataImportActor @Inject()(val dataImportRepository: DataImportRepository,
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def receive: Receive = {
-    case CheckFileAlreadyImported(ref, path) => {
+    case CheckFileAlreadyImported(ref, task, path) => {
       val dataImport = profileFileParser.parseFileData(path)
-      dataImportRepository.getByFileNameAndYear(dataImport) map {
+      dataImportRepository.getByYearMonth(dataImport) map {
         case Some(dataImport) => {
           Logger.debug("Found: "+dataImport)
-          ref ! ManagerActor.FileAlreadyImported(dataImport)
+          ref ! ManagerActor.FileAlreadyImported(task, dataImport)
         }
         case None => {
           Logger.debug("File not imported yet: "+path)
-          ref ! ManagerActor.StartDataImport(path)
+          ref ! ManagerActor.StartDataImport(task, path)
         }
       }
     }
+
     case SaveNewImport(path) => {
       val dataImport = profileFileParser.parseFileData(path)
       dataImportRepository.insertReturningId(dataImport)

@@ -1,0 +1,74 @@
+@(state: models.entity.State, cities: Seq[models.entity.SimpleCity])(implicit messages: Messages)
+
+@import b3.vertical.fieldConstructor
+
+@site("Estados") {
+<div class="row">
+    <div class="col-lg-12">
+        <div class="input-group">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="content-box panel-group ">
+            <div class="panel panel-site-green">
+                <div class="panel panel-heading">
+                    <h2 class="panel-title">
+                        <strong><span><i class="fa fa-arrow-right"></i></span>&nbsp;@state.name - @state.federativeUnit</strong>
+                    </h2>
+
+                </div>
+                <div class="panel panel-body">
+                    <div class="panel-body panel-content">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <strong>Informações gerais</strong>
+                                        </div>
+                                        <div class="panel-body">
+                                            <dl>
+                                                <dd><strong>Estado: </strong> @state.name</dd>
+                                                <dd><strong>UF: </strong> @state.federativeUnit</dd>
+                                                <dd><strong>Região: </strong> @state.region</dd>
+                                                <dd><strong>Número de municípios analisados: </strong> @cities.size</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="page-title">
+                            <strong>Municípios no estado de @state.name: </strong>
+                        </h3>
+                        <hr />
+                        <table id="cities-table" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Código</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @cities.map { c =>
+                                    <tr>
+                                        <td>
+                                            <a target="_blank" href="@routes.SearchController.cityPageWithCode(c.id)">
+                                                @c.name
+                                            </a>
+                                        </td>
+                                        <td>@c.id</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+}

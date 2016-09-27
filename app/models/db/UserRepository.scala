@@ -36,4 +36,9 @@ class UserRepository @Inject()(protected val tables: Tables,
     db.run {
       Users.filter(_.email === email).result.headOption
     }
+
+  def getUserUnsafe(email: String): Future[User] =
+    db.run {
+      Users.filter(_.email === email).result.head
+    }
 }

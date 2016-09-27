@@ -21,6 +21,7 @@
     <!-- Data Table -->
     <link rel="stylesheet" href="@routes.Assets.at("plugins/datatables/dataTables.bootstrap.css")">
     <link rel="stylesheet" href="@routes.Assets.at("plugins/datatables/jquery.dataTables.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("plugins/jQuery-File-Upload-9.12.5/css/jquery.fileupload.css")">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -37,9 +38,9 @@
     <header class="main-header">
 
         <!-- Logo -->
-        <a href="index2.html" class="logo">
+        <a href="@routes.MainController.index" class="logo">
             <!-- mini logo for sidebar mini 50x50 pixels -->
-            <span class="logo-mini"><b>SAEB</span>
+            <span class="logo-mini"><strong>SAEB</strong></span>
             <!-- logo for regular state and mobile devices -->
             <span class="logo-lg"><b>SAEB</b> admin</span>
         </a>
@@ -105,7 +106,7 @@
                 <!-- Optionally, you can add icons to the links -->
                 <li class="active"><a href=@routes.UserController.register><i class="fa fa-user-plus"></i> <span>Novo usuário</span></a></li>
                 <li><a href=@routes.UserController.users><i class="fa fa-users"></i> <span>Todos Usuários</span></a></li>
-                <li><a href="#"><i class="fa fa-link"></i> <span>Novo arquivo</span></a></li>
+                <li><a href="@routes.DocumentUploadController.uploadPage"><i class="fa fa-link"></i> <span>Novo arquivo</span></a></li>
                 <li>
                     <a href=@routes.SchoolingController.classification>
                         <i class="fa fa-link"></i> <span>Classificar escolaridade</span>
@@ -169,7 +170,10 @@
 <!-- DataTable Jquery -->
 <script src="@routes.Assets.at("plugins/dataTables/jquery.dataTables.js")")></script>
 <script src="@routes.Assets.at("plugins/dataTables/dataTables.bootstrap.js")")></script>
-
-
+<script src="@routes.Assets.at("plugins/jQuery-File-Upload-9.12.5/js/vendor/jquery.ui.widget.js")")></script>
+<script src="@routes.Assets.at("plugins/jQuery-File-Upload-9.12.5/js/jquery.iframe-transport.js")")></script>
+<script src="@routes.Assets.at("plugins/jQuery-File-Upload-9.12.5/js/jquery.fileupload.js")")></script>
+<script src="@routes.Assets.at("plugins/jQuery-File-Upload-9.12.5/js/jquery.fileupload-process.js")")></script>
+<script src="@routes.Assets.at("plugins/jQuery-File-Upload-9.12.5/js/jquery.fileupload-validate.js")")></script>
 </body>
 </html>

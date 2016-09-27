@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import controllers.security.SecureRequest
 import models.db._
+import models.entity.DataImport
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 
@@ -26,17 +27,19 @@ class MainController @Inject()(val dataImportRepository: DataImportRepository,
       dataImports <- dataImportRepository.getAll
     } yield (groups, schoolings, cities, brStates, dataImports)
 
-    val newValues: Future[(Int, Int, Int, Int, String, String)] = values.flatMap(vals => {
+    val newValues: Future[(Int, Int, Int, Int, String, String, Seq[DataImport])] = values.flatMap(vals => {
       val imports = vals._5
       val firstAndLastYears = if (imports.size > 0)
         (imports.head.fileYear, imports.last.fileYear)
       else
         ("Nada encontrado.", "Nada encontrado")
-      Future((vals._1, vals._2, vals._3, vals._4, firstAndLastYears._1, firstAndLastYears._2))
+      Future {
+        (vals._1, vals._2, vals._3, vals._4, firstAndLastYears._1, firstAndLastYears._2, vals._5)
+      }
     })
 
     newValues map { vals =>
-      Ok(views.html.admin(vals._1, vals._2, vals._3, vals._4, vals._5, vals._6))
+      Ok(views.html.admin(vals._1, vals._2, vals._3, vals._4, vals._5, vals._6, vals._7))
     }
   }
 

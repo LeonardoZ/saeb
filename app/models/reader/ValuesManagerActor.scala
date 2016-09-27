@@ -7,6 +7,7 @@ import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
+import models.entity.Task
 import models.reader.AgeGroupPersistActor.AgeGroupPersistence
 import models.reader.SchoolingsPersistActor.SchoolingsPersistence
 import models.service.ProfileFileParser
@@ -23,7 +24,7 @@ object ValuesManagerActor {
 
   case class StartProfileExtraction(file: String)
 
-  case class ReadValuesFromFile(managerActor: ActorRef, file: String)
+  case class ReadValuesFromFile(managerActor: ActorRef, task: Task, file: String)
 
   case class CitiesPersistenceDone()
 
@@ -48,6 +49,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
   var schoolingsReady: Boolean = false
   var filePath: String = ""
   var managerActor: ActorRef = null
+  var task: Task = null
 
   def checkIfEveryoneIsReady = {
 
@@ -72,7 +74,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
       checkIfEveryoneIsReady
     }
 
-    case ReadValuesFromFile(managerActor, file) => {
+    case ReadValuesFromFile(managerActor, task, file) => {
 
       import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -80,7 +82,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
 
       this.filePath = file
       this.managerActor = managerActor
-
+      this.task = task
       val values = profileFileParser.parseValues(file)
       val citiesActor = injectedChild(cityFactory(), "cities-persist-actor")
       val agesActor = injectedChild(ageFactory(), "ages-persist-actor")
@@ -97,7 +99,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
     }
 
     case ProfilePesistenceDone => {
-      managerActor ! ManagerActor.DataImportDone
+      managerActor ! ManagerActor.DataImportDone(task)
     }
   }
 

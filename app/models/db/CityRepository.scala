@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CityRepository @Inject()(protected val tables: Tables,
                                protected val dbConfigProvider: DatabaseConfigProvider)(implicit ex: ExecutionContext) {
 
+
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
@@ -22,6 +23,10 @@ class CityRepository @Inject()(protected val tables: Tables,
 
   def getById(cityId: Int): Future[Option[City]] = db.run {
     Cities.filter(_.id === cityId).result.headOption
+  }
+
+  def getAllByState(federativeUnit: String) = db.run {
+    Cities.filter(_.state === federativeUnit).result
   }
 
   def getByCode(code: String): Future[Option[City]] = db.run {

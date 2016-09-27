@@ -1,6 +1,5 @@
 package models.db
 
-import java.util.Date
 import javax.inject.{Inject, Singleton}
 
 import models.entity._
@@ -106,6 +105,23 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
     def fileMonth = column[String]("file_month", O.Length(2))
 
     def * = (id, importDateTime, fileName, fileYear, fileMonth) <> (DataImport.tupled, DataImport.unapply)
+  }
+
+  class TaskTable(tag: Tag) extends Table[Task](tag, "task") {
+
+    def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
+
+    def description = column[String]("description", O.Length(140))
+
+    def completed = column[Boolean]("completed")
+
+    def failure = column[Boolean]("failure")
+
+    def message = column[String]("message", O.Length(140))
+
+    def userId = column[Int]("user_id")
+
+    def * = (id, description, userId,completed, failure, message) <> (Task.tupled, Task.unapply)
   }
 
 }

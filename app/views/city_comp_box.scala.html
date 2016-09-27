@@ -1,0 +1,104 @@
+@(comparisons: Seq[models.query.ComparedCityFull])(implicit messages: Messages)
+
+@comparisons.map { city =>
+<div class="col-lg-6">
+    <div class="content-box panel-group panel-site-green">
+        <div class="panel panel-heading">
+            <strong>@city.comparedCity.cityName</strong>
+        </div>
+        <div class="panel panel-body">
+            <dl class="list-group">
+                <dd>
+                    <div class="panel-group">
+                        <div class="panel panel-heading">
+                            <strong>Informações gerais</strong>
+                        </div>
+                        <div class="panel panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <span><strong>Código: </strong></span>
+                                    <span>@city.comparedCity.cityCode</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <span><strong>População: </strong></span>
+                                    <span class="round-int">@city.comparedCity.population</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <span><strong>Homens: </strong></span>
+                                    <span class="round-int">@city.comparedCity.male</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <span><strong>Mulheres: </strong></span>
+                                    <span class="round-int">@city.comparedCity.female</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <span><strong>Não informado: </strong></span>
+                                    <span class="round-int">@city.comparedCity.notDefined</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </dd>
+
+                <dd>
+                    <div class="panel-group ">
+                        <div class="panel panel-heading">
+                            <strong>Escolaridade</strong>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                @city.schoolings.map { sch =>
+                                    <li class="list-group-item">
+                                        <span><strong>@sch.level: </strong></span>
+                                        <span class="round-int">@sch.quantity </span>
+                                        <span class="rounds-pct">(@sch.percentOfTotal%)</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </dd>
+                <dd>
+                    <div class="panel-group">
+                        <div class="panel panel-heading">
+                            <strong>Faixa etária</strong>
+                        </div>
+                        <div class="panel-body">
+                            @city.ages.map { age =>
+                                <li class="list-group-item">
+                                    <span><strong>@age.group: </strong></span>
+                                    <span class="round-int">@age.quantity </span>
+                                    <span class="rounds-pct">(@age.percentOfTotal%)</span>
+                                </li>
+                            }
+                        </div>
+                    </div>
+                </dd>
+                <dd>
+                    <div class="panel-group ">
+                        <div class="panel panel-heading">
+                            <strong>Proporção</strong>
+                        </div>
+                        <div class="panel-body">
+                        </div>
+                    </div>
+                </dd>
+                <dd>
+                    <div class="panel-group">
+                        <div class="panel panel-heading">
+                            <strong>Zonas eleitorais</strong>
+                        </div>
+                        <div class="panel panel-body">
+                            @city.districts.map {
+                            case elect => {
+                                <span class="label label-success">@elect</span>
+                            }
+                            }
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+}
