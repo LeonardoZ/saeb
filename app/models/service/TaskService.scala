@@ -25,9 +25,9 @@ class TaskService @Inject()(val taskRepository: TaskRepository, val userReposito
     }
   }
 
-  def updateTaskSuccess(task: Task, message: String) =  updateTask(task, message,true, false)
+  def updateTaskSuccess(task: Task, message: String) =  updateTask(task, message, true, false)
 
-  def updateTaskFailure(task: Task, message: String) = updateTask(task, message,false, true)
+  def updateTaskFailure(task: Task, message: String) = updateTask(task, message, false, true)
 
   private def updateTask(task: Task, messageP: String, successP: Boolean, failureP: Boolean) = {
     val updatedTask = task.copy(message = messageP, failure = failureP, completed = successP)

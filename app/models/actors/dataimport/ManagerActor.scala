@@ -1,17 +1,16 @@
-package models.reader
+package models.actors.dataimport
 
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
 import akka.event.LoggingReceive
+import models.actors.dataimport.ManagerActor.{DataImportDone, DataImportOrder, FileAlreadyImported, StartDataImport}
 import models.entity.{DataImport, Task}
-import models.reader.ManagerActor.{DataImportDone, DataImportOrder, FileAlreadyImported, StartDataImport}
 import models.service.TaskService
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
 object ManagerActor {
-
 
   def props = Props[ManagerActor]
 
@@ -28,10 +27,10 @@ object ManagerActor {
 class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
                              val valuesFactory: ValuesManagerActor.Factory,
                              val taskService: TaskService) extends Actor with InjectedActorSupport {
+
   override def preStart(): Unit = {
     Logger.debug("Starting SAEP Data Import...")
   }
-
 
   override def receive = LoggingReceive {
     case DataImportOrder(path, userEmail) => {

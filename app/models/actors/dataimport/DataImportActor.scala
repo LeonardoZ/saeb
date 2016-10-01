@@ -1,4 +1,4 @@
-package models.reader
+package models.actors.dataimport
 
 import javax.inject.Inject
 
@@ -25,6 +25,7 @@ class DataImportActor @Inject()(val dataImportRepository: DataImportRepository,
                                 val profileFileParser: ProfileFileParser) extends Actor {
 
   import DataImportActor._
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def receive: Receive = {

@@ -124,4 +124,43 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
     def * = (id, description, userId,completed, failure, message) <> (Task.tupled, Task.unapply)
   }
 
+
+  class AgeGroupRankingTable(tag: Tag) extends Table[AgeGroupRanking](tag, "age_group_ranking") {
+
+    def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
+
+    def cityCode = column[String]("city_code", O.Length(7))
+
+    def yearMonth = column[String]("year_or_month", O.Length(7))
+
+    def ageGroupId = column[Int]("age_group_id")
+
+    def peoples = column[Int]("peoples")
+
+    def percentageOfTotal = column[Double]("percent_total")
+
+    def total = column[Int]("total")
+
+    def * = (id, cityCode, yearMonth, ageGroupId, peoples, percentageOfTotal, total) <> (AgeGroupRanking.tupled, AgeGroupRanking.unapply)
+  }
+
+  class SchoolingRankingTable(tag: Tag) extends Table[SchoolingRanking](tag, "schooling_ranking") {
+
+    def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
+
+    def cityCode = column[String]("city_code", O.Length(7))
+
+    def yearMonth = column[String]("year_or_month", O.Length(7))
+
+    def schoolingId = column[Int]("schooling_id")
+
+    def peoples = column[Int]("peoples")
+
+    def percentageOfTotal = column[Double]("percent_total")
+
+    def total = column[Int]("total")
+
+    def * = (id, cityCode, yearMonth, schoolingId, peoples, percentageOfTotal, total) <> (SchoolingRanking.tupled, SchoolingRanking.unapply)
+  }
+
 }

@@ -59,14 +59,29 @@ create table if not exists data_import(
     file_month varchar(2)
 );
 
+create table if not exists schooling_ranking (
+	id int primary key not null auto_increment,
+    city_code varchar(7) not null,
+    year_or_month varchar(7),
+    peoples int not null,
+    percent_total decimal(10, 2) not null,
+    total int not null,
+    schooling_id int not null,
+    unique unq_schooling_ranking (city_code, year_or_month, schooling_id),
+    foreign key fk_schooling_id (schooling_id) references schooling(id)
+)
 
-create table if not exists user (
-  id int(11) primary key auto_increment,
-  email varchar(120) not null,
-  remember tinyint(1) default 0,
-  password varchar(60) not null,
-  unique key unq_email(email)
-);
 
+create table if not exists age_group_ranking (
+	id int primary key not null auto_increment,
+    city_code varchar(7) not null,
+    year_or_month varchar(7),
+    peoples int not null,
+    percent_total decimal(10, 2) not null,
+    total int not null,
+    age_group_id int not null,
+    unique unq_age_group_ranking (city_code, year_or_month, age_group_id),
+    foreign key fk_age_group_id (age_group_id) references age_group(id)
+)
 
 

@@ -2,7 +2,7 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.Task
+import models.entity.{Task, User}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -19,18 +19,19 @@ class TaskRepository @Inject()(protected val tables: Tables,
   import dbConfig.driver.api._
 
   val Tasks = TableQuery[tables.TaskTable]
+  val Users = TableQuery[tables.UserTable]
 
   def getById(taskId: Int): Future[Option[Task]] = db.run {
     Tasks.filter(_.id === taskId).result.headOption
   }
 
-  def getAll(): Future[Seq[Task]] = db.run {
-    Tasks.result
+  def getAll(): Future[Seq[(Task, User)]] = db.run {
+    Tasks.join(Users).on(_.userId === _.id).result
   }
 
   def updateTask(task: Task)  = db.run {
-    val q = for {t <- Tasks if t.id == task.id} yield  (t.completed, t.failure)
-    q.update(task.completed, task.failure)
+    val q = for {t <- Tasks if t.id === task.id} yield  (t.message, t.completed, t.failure)
+    q.update(task.message, task.completed, task.failure)
   }
 
   def insertAll(tasks: Set[Task]) = db.run {

@@ -18,8 +18,9 @@
 
     <logger name="play" level="INFO" />
     <logger name="application" level="DEBUG" />
-
-    <logger name="slick.jdbc.JdbcBackend.statement"  level="DEBUG" /> <!-- Will log all statements -->
+    <!--<logger name="slick.jdbc" level="DEBUG" />-->
+    <logger name="slick.jdbc.JdbcBackend.statement"  level="DEBUG" /><!-- Will log all statements -->
+    <!--<logger name="slick.compiler.QueryCompilerBenchmark"  level="DEBUG" />&lt;!&ndash; Will log all statements &ndash;&gt;-->
     <logger name="models.db"  level="DEBUG" />
 
     <root level="INFO">
@@ -27,12 +28,11 @@
     </root>
 
     <!-- Set logging for all Akka library classes to INFO -->
-    <logger name="akka" level="DEBUG" />
+    <!--<logger name="akka" level="DEBUG" />-->
     <!-- Set a specific actor to DEBUG -->
-    <logger name="models.reader.ManagerActor'" level="DEBUG" />
-    <logger name="models.reader.ValuesManagerActor" level="DEBUG" />
-    <logger name="models.reader.SmallBatchCitiesInsertActor" level="DEBUG" />
-    <logger name="models.reader.ProfileWorkerActor" level="DEBUG" />
-    <logger name="models.reader.ProfileManager2Actor" level="DEBUG" />
+    <logger name="models.actors.analyses" level="DEBUG" />
+    <logger name="models.actors.analyses.AnalysesActor" level="DEBUG" />
+    <!--<logger name="models.actors.analyses.CityAnalysesActor" level="DEBUG" />-->
+
 
 </configuration>

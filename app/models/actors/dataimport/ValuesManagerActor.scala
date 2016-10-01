@@ -1,5 +1,4 @@
-package models.reader
-
+package models.actors.dataimport
 
 import javax.inject.Inject
 
@@ -7,9 +6,9 @@ import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
+import models.actors.dataimport.AgeGroupPersistActor.AgeGroupPersistence
+import models.actors.dataimport.SchoolingsPersistActor.SchoolingsPersistence
 import models.entity.Task
-import models.reader.AgeGroupPersistActor.AgeGroupPersistence
-import models.reader.SchoolingsPersistActor.SchoolingsPersistence
 import models.service.ProfileFileParser
 import play.api.libs.concurrent.InjectedActorSupport
 

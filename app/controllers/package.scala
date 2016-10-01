@@ -1,4 +1,4 @@
-import models.entity.SimpleCity
+import models.entity.{DataImport, SimpleCity}
 import models.query._
 import play.api.libs.json.Json
 
@@ -27,6 +27,17 @@ package object controllers {
   implicit val peoplesInAgeGroupSchoolingWrite = Json.writes[PeoplesInAgeGroupSchooling]
   implicit val peoplesInAgeGroupSchoolingFormat = Json.format[PeoplesInAgeGroupSchooling]
   implicit val yearCityCodesReads = Json.reads[YearCityCodes]
+
+
+  def importsToYearsForView(dataImports: Seq[DataImport]) = dataImports
+    .map { data =>
+      val year = data.fileYear
+      val month = data.fileMonth
+      val newMonth = if (month.length == 1) "0" + month else month
+      val newYear = if (!month.isEmpty) (year + "-" + newMonth) else year
+      val valueId = if (!month.isEmpty) year + newMonth else year
+      (valueId, newYear)
+    }.sortBy(_._2).reverse
 
 
 }

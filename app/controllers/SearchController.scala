@@ -1,6 +1,5 @@
 package controllers
 
-import java.text.Collator
 import javax.inject.Inject
 
 import models.db._
@@ -13,7 +12,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsError, JsPath, JsResult, Json}
 import play.api.mvc.{Action, BodyParsers, Controller}
 
-import scala.collection.immutable.Iterable
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -74,7 +72,6 @@ class SearchController @Inject()(val cityRepository: CityRepository,
     }
   }
 
-
   def cityToAggregatedResults(city: City): Future[ProfileResult] = {
     profileRepository.getProfilesForCity(city.code).map { ps =>
       val years: Seq[String] = ps.map(_._1.yearOrMonth).distinct
@@ -113,8 +110,6 @@ class SearchController @Inject()(val cityRepository: CityRepository,
         }
       )
   }
-
-
 
   def main() = Action.async {
     Future {

@@ -5,8 +5,8 @@ import javax.inject.Inject
 import akka.actor.ActorRef
 import com.google.inject.name.Named
 import controllers.security.SecureRequest
+import models.actors.dataimport.ManagerActor
 import models.db._
-import models.reader.ManagerActor
 import models.service.TaskService
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -21,28 +21,13 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
                                          val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {
 
-  def uploadPage = SecureRequest.async { implicit request =>
-    Future(Ok(views.html.file_upload()).flashing())
-  }
-  var str = """
-  {
-    files:
-    [
-    {
-      url: "http://url.to/file/or/page",
-      thumbnail_url: "http://url.to/thumnail.jpg ",
-      name: "thumb2.jpg",
-      type: "image/jpeg",
-      size: 46353,
-      delete_url: "http://url.to/delete /file/",
-      delete_type: "DELETE"
-    }
-    ]
-  }
-  """
   case class FileUploadReturn(error: String, name: String, size: Long);
   implicit val peoplesInAgeGroupSchoolingFormat = Json.format[FileUploadReturn]
   implicit val yearCityCodesReads = Json.reads[FileUploadReturn]
+
+  def uploadPage = SecureRequest.async { implicit request =>
+    Future(Ok(views.html.file_upload()).flashing())
+  }
 
   def doUpload = SecureRequest(parse.multipartFormData) { request =>
     request.body.file("document").map { document =>

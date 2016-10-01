@@ -1,0 +1,134 @@
+package controllers
+
+import javax.inject.Inject
+
+import models.db._
+import models.entity.{Cities, SchoolingRanking, SimpleCity}
+import models.form.AnalysesForm
+import models.query.{SchoolingRankingDetails, SchoolingRankingLevel, SchoolingRankingsByLimit}
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, Controller}
+
+import scala.concurrent.{ExecutionContext, Future}
+
+
+class RankingController @Inject()(val schoolingRankingRepository: SchoolingRankingRepository,
+                                  val cityRepository: CityRepository,
+                                  val schoolingRepository: SchoolingRepository,
+                                  val dataImportRepository: DataImportRepository,
+                                  val ageGroupRankingRankingRepository: AgeGroupRankingRankingRepository,
+                                  val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
+  extends Controller with I18nSupport {
+
+  val analysesForm: Form[AnalysesForm] = Form {
+    mapping(
+      "yearMonth" -> nonEmptyText
+    )(AnalysesForm.apply)(AnalysesForm.unapply)
+  }
+
+  def schoolingViewRequest = Action.async { implicit request =>
+    analysesForm.bindFromRequest.fold(
+      error => {
+        Future {
+          Redirect(routes.RankingController.schoolingAnalysesPage)
+        }
+      },
+      analyses => dataImportRepository.getAll flatMap { imports =>
+        val years = importsToYearsForView(imports)
+        (for {
+          transformed <- schoolingTransformation(analyses.yearMonth)
+          rankings <- schoolingViewParser(transformed)
+        } yield (rankings)) flatMap { rankings =>
+          Future (Ok(views.html.schooling_ranking(
+            years.filter(_._1 == analyses.yearMonth).head._2,
+            analysesForm,
+            years,
+            rankings))
+          )
+        }
+    })
+  }
+
+  def schoolingAnalysesPage = Action.async { implicit request =>
+    dataImportRepository.getAll flatMap { imports =>
+      val years = importsToYearsForView(imports)
+      val lastYear = imports.last.fileYear+imports.last.fileMonth
+      (for {
+        transformed <- schoolingTransformation(lastYear)
+        rankings <- schoolingViewParser(transformed)
+      } yield (rankings)) map { rankings =>
+        Ok(views.html.schooling_ranking(lastYear,analysesForm, years, rankings))
+      }
+    }
+  }
+
+  val betwennRules = Seq[((Int, Int), String)](
+    ((0, 10000), "Até 10.000 eleitores apenas"),
+    ((10001, 50000), "Entre 10.001 e 50.000 eleitores"),
+    ((50001, 100000), "Entre 50.001 e 100.000 eleitores"),
+    ((100001, 500000), "Entre 100.001 e 500.000 eleitores"),
+    ((500001, 1000000), "Entre 500.001 até 1.000.000 eleitores"),
+    ((1000000, 9999999), "Acima de 1.000.000 de eleitores")
+  )
+
+
+  def schoolingViewParser(rankings: Map[Int, Seq[((Int, Int, String), Seq[SchoolingRanking])]]): Future[Seq[SchoolingRankingLevel]] = {
+    (for {
+      schoolings <- schoolingRepository.getAll
+      cities <- cityRepository.getAll
+    } yield (schoolings, Cities.citiesToSimpleCity(cities).toSeq)) map {
+      case (schoolings, cities) =>
+        rankings.map {
+          case (schoolingId, values) =>
+            val schooling = schoolings.filter {
+              _.id.get == schoolingId
+            }.head
+            val rankingsByLimit = values.map {
+              case ((base, limit, message), schoolingRankings) =>
+                SchoolingRankingsByLimit(base, limit, message, schoolingRankings.map(toDetail(cities, _)))
+            }
+            SchoolingRankingLevel(schooling.position, schooling.level, rankingsByLimit)
+        }.toSeq.sortBy(_.position)
+    }
+
+  }
+
+  def toDetail(cities: Seq[SimpleCity], schoolingRanking: SchoolingRanking) = {
+    val city = cities.filter(_.id == schoolingRanking.cityCode).head
+    SchoolingRankingDetails(
+      cityCode = schoolingRanking.cityCode,
+      name = city.name,
+      state = city.state,
+      percent = schoolingRanking.percentOfTotal,
+      peoples = schoolingRanking.peoples,
+      total = schoolingRanking.total)
+  }
+
+  def schoolingTransformation(yearMonth: String = "2016"): Future[Map[Int, Seq[((Int, Int, String), Seq[SchoolingRanking])]]] = {
+    (for {
+      foreignCities <- cityRepository.getForeignCities()
+      rankings <- schoolingRankingRepository.getAllByYearMonth(yearMonth)
+    } yield (foreignCities.map(_.code).toSet, rankings)) map { case (foreignCitiesCode, rankings) =>
+      val groupedBySchooling = rankings.groupBy(_.schoolingId)
+      groupedBySchooling.map {
+        case (id, rankings) =>
+          val filtered = betwennRules.map {
+            case ((base, limit), message) => {
+              val mapped = rankings
+                .filter { ranking => foreignCitiesCode.contains(ranking.cityCode) }
+                .filter { ranking => ranking.total >= base && ranking.total <= limit }
+                .sortBy {
+                  _.percentOfTotal
+                }(Ordering[Double].reverse)
+                .take(10)
+              ((base, limit, message), mapped)
+            }
+          }
+          (id, filtered)
+      }
+    }
+  }
+
+}

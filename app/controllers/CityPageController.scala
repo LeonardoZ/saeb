@@ -34,8 +34,6 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     )
   }
 
-
-
   def getAgeGroupChartData(yearCityCode: YearCityCode) = {
     val profileCityGroupF = profileRepository.getProfilesForAgeGroups(yearCityCode.year, yearCityCode.code)
 

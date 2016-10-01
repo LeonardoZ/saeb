@@ -3,7 +3,7 @@ package models.db
 import javax.inject.Inject
 
 import models.entity.{AgeGroup, City, Profile, Schooling}
-import models.query.PeoplesByYearAndSex
+import models.query.{PeoplesByYearAndSex, ProfileWithCode}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -12,6 +12,7 @@ import slick.jdbc.GetResult
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 class ProfileRepository @Inject()(protected val tables: Tables,
                                   protected val dbConfigProvider: DatabaseConfigProvider) {
@@ -25,6 +26,10 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   val Cities = TableQuery[tables.CityTable]
   val AgeGroups = TableQuery[tables.AgeGroupTable]
   val Schoolings = TableQuery[tables.SchoolingTable]
+
+  implicit val getPeoplesByYearAndSex = GetResult(r => PeoplesByYearAndSex(r.<<, r.<<, r.<<))
+  implicit val getProfileWithCode = GetResult(r => ProfileWithCode(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
+
 
   def insertAll(profiles: List[Profile]): Future[Any] = db.run {
     (Profiles ++= profiles).transactionally.asTry
@@ -45,9 +50,32 @@ class ProfileRepository @Inject()(protected val tables: Tables,
         .filter(_._1.yearOrMonth === year)
         .filter(_._2.code === cityCode)
     } yield (profileCity._1)
+
     db.run(query.result)
   }
 
+  def getProfilesByCitiesAndYear2(yearMonth: String, citiesIds: Seq[Int]): Future[Seq[(Profile, City)]] = {
+    val query = for {
+      profileCity <- (Profiles.join(Cities).on(_.cityId === _.id))
+        .filter(_._1.yearOrMonth === yearMonth)
+        .filter(_._1.cityId inSet citiesIds)
+    } yield (profileCity)
+
+    db.run(query.result)
+  }
+
+  def getProfilesByCitiesAndYear(yearMonth: String, citiesIdsFormatted: String): Future[Try[Vector[ProfileWithCode]]] = {
+    val query =
+      sql"""
+           select p.id, p.year_or_month as yearOrMonth, p.electoral_district as electoralDistrict, p.sex,
+           p.quantity_of_peoples as quantityOfPeoples, p.city_id as cityId, p.age_group_id as ageGroupId,
+           p.schooling_id as schoolingId, c.city_code as cityCode from profile p
+           inner join city c on c.id = p.city_id
+           where p.year_or_month = $yearMonth and p.city_id in ($citiesIdsFormatted)
+           order by p.city_id
+        """.as[ProfileWithCode]
+    db.run(query.asTry)
+  }
 
   def getProfilesFullByCityAndYear(year: String, cityCode: String): Future[Seq[(Profile, Schooling, AgeGroup)]] = {
     val query = for {
@@ -60,8 +88,6 @@ class ProfileRepository @Inject()(protected val tables: Tables,
       } yield (profileWithValues._1._1._1, profileWithValues._1._2, profileWithValues._2)
     db.run(query.result)
   }
-
-  implicit val getPeoplesByYearAndSex = GetResult(r => PeoplesByYearAndSex(r.<<, r.<<, r.<<))
 
   def countPeoplesByCityOnYearsAndSex(cityCode: String): Future[Vector[PeoplesByYearAndSex]] = {
     val query = sql"""

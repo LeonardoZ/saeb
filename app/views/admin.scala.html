@@ -1,5 +1,5 @@
 @(groups: Int, schoolings: Int, cities: Int, brazilianStates: Int, firstYear: String, lastYear: String,
-imports: Seq[models.entity.DataImport])
+imports: Seq[models.entity.DataImport], tasks: Seq[(models.entity.Task, String)])
 
 @main("Admin") {
 
@@ -49,26 +49,65 @@ imports: Seq[models.entity.DataImport])
 </div>
 
 <div class="row">
-    <div class="col-lg-12">
-        <h3>Anos importados disponíveis no software.</h3>
-        <table id="uploads-table" class="table table-bordered">
-            <thead>
-            <tr>
-                <th>Ano</th>
-                <th>Mês</th>
-            </tr>
-            </thead>
-            <tbody>
-            @imports.map { i =>
-            <tr>
-                <td>@i.fileYear</td>
-                <td>@i.fileMonth</td>
-            </tr>
-            }
-            </tbody>
-        </table>
-    </div>
+    <div class="col-lg-8">
+        <div class="panel-group">
+            <div class="panel panel-heading">
+                <strong>Informações gerais</strong>
+            </div>
+            <div class="panel panel-body">
+                <table id="uploads-table" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Descrição</th>
+                        <th>Estado</th>
+                        <th>Mensagem</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @tasks.map { case(task, email) =>
+                    <tr>
+                        <td>@email</td>
+                        <td>@task.description</td>
+                        <td>
+                            @if(task.completed) {
+                            <span class="label label-success">Completa</span>
+                            } else { @if(task.failure) {
+                            <span class="label label-danger">Falha</span>
+                            } else {
+                            <span class="label label-primary">Em execução</span>
+                            }
+                            }
 
+                        </td>
+                        <td>
+                            @task.message
+                        </td>
+                    </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel-group">
+            <div class="panel panel-heading">
+                <strong>Anos importados disponíveis no software.</strong>
+            </div>
+            <div class="panel panel-body">
+                <ul class="list-group">
+                    @imports.map { i =>
+                    <li class="list-group-item">
+                        @i.fileYear &nbsp
+                        <span class="badge">@i.fileMonth</span>
+                    </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 

@@ -41,6 +41,12 @@ class CityRepository @Inject()(protected val tables: Tables,
     Cities.filter(_.country === country).result.headOption
   }
 
+  def getForeignCities(): Future[Seq[City]] =  db.run {
+    Cities.filterNot(_.state === "ZZ").result
+  }
+
+
+
   def getAll(): Future[Seq[City]] = db.run {
     Cities.result
   }

@@ -1,4 +1,4 @@
-package models.reader
+package models.actors.dataimport
 
 import javax.inject.Inject
 

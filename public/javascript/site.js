@@ -20,7 +20,9 @@ $(function(){
                    "oAria": {
                      "sSortAscending": ": Ordenar colunas de forma ascendente",
                      "sSortDescending": ": Ordenar colunas de forma descendente"
-                   }
+                   },
+                    "decimal": ",",
+                    "thousands": "."
 
     }
 
@@ -79,6 +81,30 @@ $(function(){
         });
     }
 
+    function roundUtil() {
+        console.log(numeral.language());
+        var formatInt = "0,0";
+        var formatPct = "0,00.00";
+        var formatPct4 = "0,00.0000";
+        $.each($(".round-int"), function(key, value) {
+            var $value = $(value);
+            var numValue = $value.html();
+            $value.text(numeral(numValue).format(formatInt));
+        });
+
+        $.each($(".round-pct"), function(key, value) {
+            var $value = $(value);
+            var numValue = $value.html();
+            $value.text(numeral(numValue).format(formatPct));
+        });
+
+        $.each($(".round-pct"), function(key, value) {
+            var $value = $(value);
+            var numValue = $value.html();
+            $value.text(numeral(numValue).format(formatPct4));
+        });
+    }
+
     function cityComparisonModule() {
         var $firstCityName = $("#firstCity-input");
         var $secondCityName = $("#secondCity-input");
@@ -87,7 +113,6 @@ $(function(){
         var cityOneCode = "";
         var cityTwoCode = "";
         var year = "";
-        var formatInt = '0,0';
         var $comparisonsRow = $("#comparisons-row");
         var selectedOne = false;
         var selectedTwo = false;
@@ -108,17 +133,7 @@ $(function(){
             $comparisonsRow.empty();
             $comparisonsRow.append($(data));
 
-            $.each($(".round-int"), function(key, value) {
-                var $value = $(value);
-                var numValue = $value.html();
-                $value.text(numeral(numValue).format(formatInt));
-            });
-
-            $.each($(".round-pct"), function(key, value) {
-                var $value = $(value);
-                var numValue = $value.html();
-                $value.text(numeral(numValue).format(formatPercent));
-            });
+            roundUtil();
         }
 
         function cityOneSelected(e) {
@@ -168,9 +183,25 @@ $(function(){
         });
     }
 
+    function rankingPagesModules(){
+        var $contentTabs = $("div.ranking-content");
+        $.each($contentTabs, function(key, value) {
+            var $child = $($(value).children()[0]);
+            $child.toggleClass("in active");
+        });
+        roundUtil();
+    }
+
+    function numeralConfig() {
+        numeral.language('pt-br');
+        console.log(numeral.language);
+    }
     // Load modules
+    numeralConfig();
     frontPageModule();
     cityComparisonModule();
     statePageModule();
+    rankingPagesModules();
+
 });
 

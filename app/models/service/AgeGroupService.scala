@@ -7,9 +7,8 @@ import models.entity.{AgeGroup, City, Profile}
 import models.query._
 
 import scala.collection.immutable.Iterable
-import scala.concurrent.ExecutionContext
 
-class AgeGroupService @Inject()()(implicit ec: ExecutionContext) {
+class AgeGroupService @Inject()() {
 
   val filterValue = "INVÁLIDA"
 

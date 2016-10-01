@@ -1,4 +1,4 @@
-package models.reader
+package models.actors.dataimport
 
 import javax.inject.Inject
 
@@ -31,6 +31,7 @@ class CitiesPersistActor @Inject()(val cityRepository: CityRepository) extends A
   import CitiesPersistActor._
 
   implicit val timeout: Timeout = 2 minutes
+
 
   def receive: Receive = LoggingReceive {
 

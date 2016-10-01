@@ -30,9 +30,11 @@
                    "oAria": {
                      "sSortAscending": ": Ordenar colunas de forma ascendente",
                      "sSortDescending": ": Ordenar colunas de forma descendente"
-                   }
-
+                   },
+                   "decimal": ",",
+                   "thousands": "."
               }
+
             function onLoad() {
                 var $yearTabs = $(".year-tab");
                 var hasChilds = $yearTabs.children().length > 0;
@@ -143,8 +145,8 @@
                                 lineTension: 0,
                                 fill: false,
                                 label: "Feminino",
-                                backgroundColor : "#e39292",
-                                strokeColor : "#e57575",
+                                backgroundColor : "#e57575",
+                                strokeColor : "#e39292",
                                 data : dataF
                             },{
                                 pointRadius: 10,
@@ -152,8 +154,8 @@
                                 lineTension: 0,
                                 fill: false,
                                 label: "Masculino",
-                                backgroundColor : "#849bc2",
-                                strokeColor : "#6d8cc2",
+                                backgroundColor : "#6d8cc2",
+                                strokeColor : "#849bc2",
                                 data : dataM
                             }
 
@@ -343,23 +345,23 @@
                         datasets: [
                             {
                                 label: "Feminino",
-                                backgroundColor : "#e39292",
-                                strokeColor : "#e57575",
+                                backgroundColor : "#e57575",
+                                strokeColor : "#e39292",
                                 pointColor : "#fff",
                                 pointStrokeColor : "#b86da6",
                                 data : dataF
                             },{
                                 label: "Masculino",
-                                backgroundColor : "#849bc2",
-                                strokeColor : "#6d8cc2",
+                                backgroundColor : "#6d8cc2",
+                                strokeColor : "#849bc2",
                                 pointColor : "#fff",
                                 pointStrokeColor : "#6db2b8",
                                 data : dataM
                             },
                             {
                                 label: "Não informado",
-                                backgroundColor : "rgba(172,194,132,0.4)",
-                                strokeColor : "#ACC26D",
+                                backgroundColor : "#ACC26D",
+                                strokeColor : "rgba(172,194,132,0.4)",
                                 pointColor : "#fff",
                                 pointStrokeColor : "#9DB86D",
                                 data : dataN
@@ -425,8 +427,8 @@
                                     data: [dataF, dataM, dataN],
                                     backgroundColor: [
                                         "#e39292",
-                                        "#849bc2",
-                                        "#rgba(172,194,132,0.4)"
+                                        "#6d8cc2",
+                                        "#ACC26D"
                                     ]
                                 }
                             ]
@@ -434,8 +436,8 @@
                     };
 
                     $($chartCanvas).css({
-                        "width": 750,
-                        "height": 500
+                        "width": 550,
+                        "height": 300
                     });
 
 

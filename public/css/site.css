@@ -83,8 +83,9 @@ footer {
 .inside-panel {
     padding: 30px;
 }
+
 .panel-site-green {
-  border-color: #fff1c4;
+    border-color: #fff1c4;
 }
 
 
@@ -92,6 +93,9 @@ footer {
     min-width: 350px;
 }
 
+.tab-pane:not(.active) {
+    display: none;
+}
 
 .panel-site-green > .panel-heading {
   color: #fff;
