@@ -7,7 +7,7 @@ create table user (
   remember tinyint(1) default '0',
   password varchar(60) not null,
   unique key unq_email (email)
-)
+);
 
 create table if not exists task (
 	id int primary key auto_increment,
@@ -21,17 +21,18 @@ create table if not exists task (
 
 create table if not exists age_group (
 	id int primary key auto_increment,
-    group_description varchar(30) not null unique
+    group_description varchar(30) not null
 );
 
 create table if not exists  schooling (
 	id int primary key auto_increment,
-	level varchar(30) not null unique
+	position int not null default 0,
+	level varchar(30) not null
 );
 
 create table if not exists city (
 	id int primary key auto_increment,
-	name varchar(45) not null unique,
+	name varchar(45) not null,
     city_code varchar(7) not null,
     state varchar(2) not null,
     country varchar(35) not null
@@ -64,12 +65,12 @@ create table if not exists schooling_ranking (
     city_code varchar(7) not null,
     year_or_month varchar(7),
     peoples int not null,
-    percent_total decimal(10, 2) not null,
+    percent_total decimal(10, 6) not null,
     total int not null,
     schooling_id int not null,
     unique unq_schooling_ranking (city_code, year_or_month, schooling_id),
     foreign key fk_schooling_id (schooling_id) references schooling(id)
-)
+);
 
 
 create table if not exists age_group_ranking (
@@ -77,11 +78,22 @@ create table if not exists age_group_ranking (
     city_code varchar(7) not null,
     year_or_month varchar(7),
     peoples int not null,
-    percent_total decimal(10, 2) not null,
+    percent_total decimal(10, 6) not null,
     total int not null,
     age_group_id int not null,
     unique unq_age_group_ranking (city_code, year_or_month, age_group_id),
     foreign key fk_age_group_id (age_group_id) references age_group(id)
-)
+);
 
 
+alter table age_group
+add index idx_group(group_description);
+
+alter table schooling
+add index idx_schooling(level);
+
+alter table city
+add index idx_city(city_code, name, state);
+
+alter table profile
+add index idx(year_or_month, sex);

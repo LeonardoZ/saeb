@@ -238,6 +238,6 @@ $(function(){
 
     usersModule();
     schoolingModule();
-    mainModule();
     secUploadModule();
+    mainModule();
 });

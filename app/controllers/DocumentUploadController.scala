@@ -1,8 +1,11 @@
 package controllers
 
+import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 
 import akka.actor.ActorRef
+import com.google.common.io.Files
 import com.google.inject.name.Named
 import controllers.security.SecureRequest
 import models.actors.dataimport.ManagerActor
@@ -21,7 +24,8 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
                                          val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {
 
-  case class FileUploadReturn(error: String, name: String, size: Long);
+  case class FileUploadReturn(error: String, name: String, size: Long)
+
   implicit val peoplesInAgeGroupSchoolingFormat = Json.format[FileUploadReturn]
   implicit val yearCityCodesReads = Json.reads[FileUploadReturn]
 
@@ -29,13 +33,14 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
     Future(Ok(views.html.file_upload()).flashing())
   }
 
-  def doUpload = SecureRequest(parse.multipartFormData) { request =>
+  def doUpload = SecureRequest(parse.multipartFormData) { implicit request =>
     request.body.file("document").map { document =>
-      import java.io.File
-      val filename = document.filename
-      val file = new File(s"/tmp/document/$filename")
-      managerActor ! ManagerActor.DataImportOrder(document.ref.file.getPath, request.userEmail)
-      Ok(Json.obj("files" -> FileUploadReturn("", name = filename, size = file.length())))
+      val filename = UUID.randomUUID().toString
+      val file = document.ref
+      val moved = file.moveTo(new File("/tmp/" + filename))
+      val filePath = moved.getAbsolutePath
+      managerActor ! ManagerActor.DataImportOrder(filePath, request.userEmail)
+      Ok(Json.obj("files" -> FileUploadReturn("", name = filename, size = moved.length)))
     }.getOrElse {
       Ok(Json.obj("files" -> FileUploadReturn("", name = "No file", size = 0)))
     }

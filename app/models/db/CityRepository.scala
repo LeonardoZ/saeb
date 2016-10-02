@@ -74,10 +74,9 @@ class CityRepository @Inject()(protected val tables: Tables,
     }
   }
 
-
   def insertAll(cities: Set[City]) = db.run {
-    (Cities ++= cities).transactionally.asTry
-  }.recover { case ex => Logger.debug("Error occurred while inserting cities", ex) }
+    (Cities ++= cities).transactionally
+  }.recover { case ex => Logger.debug("Error occurred while inserting cities") }
 
   def insertReturningId(city: City) = db.run {
     ((Cities returning Cities.map(_.id) into ((ci, genId) => ci.copy(id = genId))) += city)

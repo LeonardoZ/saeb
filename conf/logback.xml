@@ -1,7 +1,3 @@
-<!--
-  ~ Copyright (C) 2009-2016 Lightbend Inc. <https://www.lightbend.com>
-  -->
-<!-- The default logback configuration that Play uses if no other configuration is provided -->
 <configuration>
 
     <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
@@ -30,9 +26,7 @@
     <!-- Set logging for all Akka library classes to INFO -->
     <!--<logger name="akka" level="DEBUG" />-->
     <!-- Set a specific actor to DEBUG -->
-    <logger name="models.actors.analyses" level="DEBUG" />
-    <logger name="models.actors.analyses.AnalysesActor" level="DEBUG" />
-    <!--<logger name="models.actors.analyses.CityAnalysesActor" level="DEBUG" />-->
+    <logger name="models.actors.dataimport" level="DEBUG" />
 
 
 </configuration>

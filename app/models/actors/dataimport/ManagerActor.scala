@@ -35,9 +35,9 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
   override def receive = LoggingReceive {
     case DataImportOrder(path, userEmail) => {
 
-      import scala.concurrent.ExecutionContext.Implicits.global
-
       val dataImportActor = injectedChild(dataImportFactory(), "data-import-actor$" + System.nanoTime())
+
+      import scala.concurrent.ExecutionContext.Implicits.global
       val taskF = taskService.createTask(description = "Importar aquivo", "Importação sendo analisada", userEmail)
       taskF.map {
         case Some(task) => dataImportActor ! DataImportActor.CheckFileAlreadyImported(self, task, path)
@@ -56,11 +56,8 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
     }
 
     case DataImportDone(task) => {
-      import scala.concurrent.ExecutionContext.Implicits.global
 
-      taskService.updateTaskSuccess(task, "Arquivo importado com sucesso").map { updated =>
-        context.stop(self)
-      }
+      taskService.updateTaskSuccess(task, "Arquivo importado com sucesso")
     }
   }
 

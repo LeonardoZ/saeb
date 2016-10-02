@@ -10,6 +10,7 @@ import models.actors.dataimport.AgeGroupPersistActor.AgeGroupPersistence
 import models.actors.dataimport.SchoolingsPersistActor.SchoolingsPersistence
 import models.entity.Task
 import models.service.ProfileFileParser
+import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.duration._
@@ -53,6 +54,9 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
   def checkIfEveryoneIsReady = {
 
     if (citiesReady && agesReady && schoolingsReady) {
+      Logger.debug("Cities " + citiesReady)
+      Logger.debug("Ages " + agesReady)
+      Logger.debug("Schoolings " + schoolingsReady)
       self ! StartProfileExtraction(filePath)
     }
   }
@@ -83,13 +87,16 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
       this.managerActor = managerActor
       this.task = task
       val values = profileFileParser.parseValues(file)
-      val citiesActor = injectedChild(cityFactory(), "cities-persist-actor")
-      val agesActor = injectedChild(ageFactory(), "ages-persist-actor")
-      val schoolingsActor = injectedChild(schoolingFactory(), "schoolings-persist-actor")
+      val citiesActor = injectedChild(cityFactory(), "cities-persist-actor$"+System.nanoTime())
+      val agesActor = injectedChild(ageFactory(), "ages-persist-actor$"+System.nanoTime())
+      val schoolingsActor = injectedChild(schoolingFactory(), "schoolings-persist-actor$"+System.nanoTime())
 
-      (citiesActor ? CitiesPersistActor.CitiesPersistence(self, values._1)).mapTo[CitiesPersistenceDone] pipeTo sender
-      (agesActor ? AgeGroupPersistence(self, values._2)).mapTo[AgeGroupPersistenceDone] pipeTo sender
-      (schoolingsActor ? SchoolingsPersistence(self, values._3)).mapTo[SchoolingsPersistenceDone] pipeTo sender
+      (citiesActor ? CitiesPersistActor.CitiesPersistence(self, values._1))
+          .mapTo[CitiesPersistenceDone] pipeTo sender
+      (agesActor ? AgeGroupPersistence(self, values._2))
+          .mapTo[AgeGroupPersistenceDone] pipeTo sender
+      (schoolingsActor ? SchoolingsPersistence(self, values._3))
+          .mapTo[SchoolingsPersistenceDone] pipeTo sender
     }
 
     case StartProfileExtraction(file) => {

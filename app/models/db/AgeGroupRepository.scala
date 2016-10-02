@@ -3,6 +3,7 @@ package models.db
 import javax.inject.Inject
 
 import models.entity.AgeGroup
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
@@ -37,7 +38,7 @@ class AgeGroupRepository @Inject()(protected val tables: Tables,
 
   def insertAll(ageGroup: Set[AgeGroup]) = db.run {
     (AgeGroups ++= ageGroup).transactionally
-  }
+  }.recover { case ex => Logger.debug("Error occurred while inserting profile", ex) }
 
   def insertReturningId(ageGroup: AgeGroup): Future[Int] = db.run {
     ((AgeGroups returning AgeGroups.map(_.id) into ((ag, genId) => ag.copy(id = genId))) += ageGroup)
