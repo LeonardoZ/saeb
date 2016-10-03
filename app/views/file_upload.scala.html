@@ -12,22 +12,11 @@
             </div>
             <div class="box-body">
                 <div id="file-upload">
-                    @flash.get("error").map { msg =>
-                    <div class="alert alert-danger block" role="alert">
-                        @msg
-                    </div>
-                    }
-                    @flash.get("success").map{ msg =>
-                        <div class="alert alert-info block" role="alert">
-                            @msg
-                        </div>
-                    }
                     <p>Selecione o arquivo baixado pelo portal www.dados.gov.br que deseja importar no sistema.</p>
                             <!-- OK -->
                             <span class="btn btn-success fileinput-button">
                                 <i class="glyphicon glyphicon-plus"></i>
-                                <span>Add files...</span>
-                                <!-- The file input field used as target for the file upload widget -->
+                                <span>Adicionar arquivos</span>
                                 <input id="fileupload" type="file" name="document"
                                        data-url="@routes.DocumentUploadController.doUpload">
                             </span>

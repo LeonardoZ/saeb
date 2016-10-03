@@ -10,7 +10,10 @@ import com.google.inject.name.Named
 import controllers.security.SecureRequest
 import models.actors.dataimport.ManagerActor
 import models.db._
+import models.form.{AnalysesForm, RemovalForm}
 import models.service.TaskService
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
@@ -25,11 +28,18 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
   extends Controller with I18nSupport {
 
   case class FileUploadReturn(error: String, name: String, size: Long)
+  val removalForm: Form[RemovalForm] = Form {
+    mapping(
+      "yearMonth" -> nonEmptyText
+    )(RemovalForm.apply)(RemovalForm.unapply)
+  }
 
   implicit val peoplesInAgeGroupSchoolingFormat = Json.format[FileUploadReturn]
   implicit val yearCityCodesReads = Json.reads[FileUploadReturn]
 
-  def uploadPage = SecureRequest.async { implicit request =>
+
+
+  def uploadPage() = SecureRequest.async { implicit request =>
     Future(Ok(views.html.file_upload()).flashing())
   }
 
@@ -44,6 +54,26 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
     }.getOrElse {
       Ok(Json.obj("files" -> FileUploadReturn("", name = "No file", size = 0)))
     }
+  }
+
+
+  def removePage() = SecureRequest.async { implicit request =>
+    dataImportRepository.getAll map { imports =>
+      val years = importsToYearsForView(imports)
+      Ok(views.html.file_removal(removalForm, years))
+    }
+  }
+
+  def doRemove = SecureRequest.async { implicit request =>
+    removalForm.bindFromRequest.fold(
+      error => Future {
+        Redirect(routes.DocumentUploadController.removePage()).flashing("failure" -> "Falha ao ordenar a remoção")
+      },
+      removal => Future {
+        managerActor ! ManagerActor.DataRemovalOrder(removal.yearMonth, request.userEmail)
+        Redirect(routes.DocumentUploadController.removePage()).flashing("success" -> s"Os dados de ${removal.yearMonth} serão removidos em breve.")
+      }
+    )
   }
 
 }

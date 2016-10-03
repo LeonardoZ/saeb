@@ -5,7 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 import akka.util.Timeout
-import models.db.AgeGroupRankingRankingRepository
+import models.db.AgeGroupRankingRepository
 import models.entity.{AgeGroupRanking, Profile}
 import models.query.ProfileWithCode
 import play.api.libs.concurrent.InjectedActorSupport
@@ -26,7 +26,7 @@ object AgeGroupAnalysesActor {
 
 }
 
-class AgeGroupAnalysesActor @Inject()(val rankingRepository: AgeGroupRankingRankingRepository)
+class AgeGroupAnalysesActor @Inject()(val rankingRepository: AgeGroupRankingRepository)
   extends Actor with InjectedActorSupport {
 
   implicit val timeout: Timeout = 2 minutes

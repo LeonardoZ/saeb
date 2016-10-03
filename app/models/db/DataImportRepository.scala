@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class DataImportRepository @Inject()(protected val tables: Tables,
                                      protected val dbConfigProvider: DatabaseConfigProvider)(implicit ex: ExecutionContext) {
 
+
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
@@ -43,6 +44,11 @@ class DataImportRepository @Inject()(protected val tables: Tables,
     DataImports.sortBy(_.fileYear).result
   }
 
+  def remove(yearMonth: String) = db.run {
+    val year = yearMonth.substring(0, 4)
+    val month = yearMonth.substring(4)
+    DataImports.filter(_.fileYear === year).filter(_.fileMonth === month).delete
+  }
 
   def insertAll(dataImports: Set[DataImport]) = db.run {
     (DataImports ++= dataImports).transactionally.asTry

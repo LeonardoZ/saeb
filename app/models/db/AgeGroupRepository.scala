@@ -2,7 +2,7 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.AgeGroup
+import models.entity._
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -44,6 +44,8 @@ class AgeGroupRepository @Inject()(protected val tables: Tables,
     ((AgeGroups returning AgeGroups.map(_.id) into ((ag, genId) => ag.copy(id = genId))) += ageGroup)
       .map(_.id.getOrElse(0))
   }
+
+
 
 
 }

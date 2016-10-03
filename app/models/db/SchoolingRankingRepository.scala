@@ -70,6 +70,10 @@ class SchoolingRankingRepository @Inject()(protected val tables: Tables,
     SchoolingRankings.filter(sch => sch.yearMonth === yearMonth).delete
   }
 
+  def tryRemove(yearMonth: String) = db.run {
+    SchoolingRankings.filter(sch => sch.yearMonth === yearMonth).delete.asTry
+  }
+
   def insertReturningId(schooling: SchoolingRanking): Future[Int] = db.run {
     ((SchoolingRankings returning SchoolingRankings.map(_.id) into ((ag, genId) => ag.copy(id = genId))) += schooling)
       .map(_.id.getOrElse(0))

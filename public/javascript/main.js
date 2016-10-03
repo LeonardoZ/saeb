@@ -150,13 +150,15 @@ $(function(){
                     data = $this.data();
                 $this
                     .off('click')
-                    .text('Abort')
+                    .text('Cancelar')
                     .on('click', function () {
                         $this.remove();
                         data.abort();
+
                     });
                 data.submit().always(function () {
                     $this.remove();
+                    $("#success").html("<p>Envio de arquivo realizado com sucesso. Em breve será processado.</p>");
                 });
             });
         $('#fileupload').fileupload({
@@ -194,7 +196,7 @@ $(function(){
             }
             if (index + 1 === data.files.length) {
                 data.context.find('button')
-                    .text('Upload')
+                    .text('Enviar')
                     .prop('disabled', !!data.files.error);
             }
         }).on('fileuploadprogressall', function (e, data) {
@@ -211,6 +213,7 @@ $(function(){
                         .prop('href', file.url);
                     $(data.context.children()[index])
                         .wrap(link);
+
                 } else if (file.error) {
                     var error = $('<span class="text-danger"/>').text(file.error);
                     $(data.context.children()[index])
@@ -220,7 +223,7 @@ $(function(){
             });
         }).on('fileuploadfail', function (e, data) {
             $.each(data.files, function (index) {
-                var error = $('<span class="text-danger"/>').text('File upload failed.');
+                var error = $('<span class="text-danger"/>').text('Falha ao enviar arquivo.');
                 $(data.context.children()[index])
                     .append('<br>')
                     .append(error);

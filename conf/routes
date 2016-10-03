@@ -13,6 +13,8 @@ GET     /admin/schooling/classification            controllers.SchoolingControll
 POST    /admin/schooling/classification            controllers.SchoolingController.saveClassification()
 GET     /admin/newfile/                            controllers.DocumentUploadController.uploadPage()
 POST    /admin/newfile/                            controllers.DocumentUploadController.doUpload()
+GET     /admin/removeFile/                         controllers.DocumentUploadController.removePage()
+POST    /admin/removeFile/                         controllers.DocumentUploadController.doRemove()
 GET     /admin/analyses/                           controllers.AnalysesController.analysesPage()
 POST    /admin/analyses/                           controllers.AnalysesController.doAnalyses()
 
@@ -31,7 +33,9 @@ GET    /comparison                                 controllers.CityComparisonCon
 GET    /states                                     controllers.StatesController.statesPage()
 GET    /states/:fu                                 controllers.StatesController.statePage(fu: String)
 GET    /ranking/schooling                          controllers.RankingController.schoolingAnalysesPage
-POST   /ranking/schooling                          controllers.RankingController.schoolingViewRequest()
+POST   /ranking/schooling                          controllers.RankingController.schoolingViewRequest
+GET    /ranking/agegroup                           controllers.RankingController.ageGroupAnalysesPage
+POST   /ranking/agegroup                           controllers.RankingController.ageGroupViewRequest()
 
 
 # Map static resources from the /public folder to the /assets URL path

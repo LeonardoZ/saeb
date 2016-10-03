@@ -30,7 +30,7 @@ class SchoolingRepository @Inject()(protected val tables: Tables,
   }
 
   def getAll(): Future[Seq[Schooling]] = db.run {
-    Schoolings.result
+    Schoolings.sortBy(_.position.asc).result
   }
 
   def count(): Future[Int] = db.run {

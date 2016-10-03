@@ -36,7 +36,7 @@ class MainController @Inject()(val dataImportRepository: DataImportRepository,
       else
         ("Nada encontrado.", "Nada encontrado")
       Future {
-        (vals._1, vals._2, vals._3, vals._4, firstAndLastYears._1, firstAndLastYears._2, vals._5, (vals._6.map{
+        (vals._1, vals._2, vals._3, vals._4, firstAndLastYears._1, firstAndLastYears._2, vals._5.sortBy(_.fileYear), (vals._6.map{
           case (task,user) => (task, user.email)
         }))
       }

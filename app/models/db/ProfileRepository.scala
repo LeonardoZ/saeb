@@ -17,6 +17,8 @@ import scala.util.Try
 class ProfileRepository @Inject()(protected val tables: Tables,
                                   protected val dbConfigProvider: DatabaseConfigProvider) {
 
+
+
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
@@ -136,5 +138,13 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   def insert(profile: Profile) = db.run {
     (Profiles += profile).asTry
   }.recover { case ex => Logger.debug("Error occurred while inserting profile", ex) }
+
+  def remove(yearMonth: String) = db.run {
+    Profiles.filter(_.yearOrMonth === yearMonth).delete
+  }
+
+  def tryRemove(yearMonth: String) = db.run {
+    Profiles.filter(_.yearOrMonth === yearMonth).delete.asTry
+  }
 
 }

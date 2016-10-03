@@ -2,17 +2,18 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.AgeGroupRanking
+import models.entity.{AgeGroup, AgeGroupRanking, Cities, City}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
-class AgeGroupRankingRankingRepository @Inject()(protected val tables: Tables,
-                                                 protected val dbConfigProvider: DatabaseConfigProvider)
-                                                 (implicit ec: ExecutionContext) {
+class AgeGroupRankingRepository @Inject()(protected val tables: Tables,
+                                          protected val dbConfigProvider: DatabaseConfigProvider)
+                                         (implicit ec: ExecutionContext) {
 
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
@@ -20,6 +21,8 @@ class AgeGroupRankingRankingRepository @Inject()(protected val tables: Tables,
   import dbConfig.driver.api._
 
   val AgeGroupRankings = TableQuery[tables.AgeGroupRankingTable]
+  val AgeGroups = TableQuery[tables.AgeGroupTable]
+  val Cities = TableQuery[tables.CityTable]
 
   def getById(ageGroupId: Int): Future[Option[AgeGroupRanking]] = db.run {
     AgeGroupRankings.filter(_.id === ageGroupId).result.headOption
@@ -41,6 +44,10 @@ class AgeGroupRankingRankingRepository @Inject()(protected val tables: Tables,
     AgeGroupRankings.filter(age => age.cityCode === cityCode && age.yearMonth === yearMonth).delete
   }
 
+  def tryRemove(yearMonth: String, cityCode:String): Future[Try[Int]] = db.run {
+    AgeGroupRankings.filter(age => age.cityCode === cityCode && age.yearMonth === yearMonth).delete.asTry
+  }
+
   def remove(yearMonth: String) = db.run {
     AgeGroupRankings.filter(age => age.yearMonth === yearMonth).delete
   }
@@ -48,6 +55,30 @@ class AgeGroupRankingRankingRepository @Inject()(protected val tables: Tables,
   def insertReturningId(ageGroup: AgeGroupRanking): Future[Int] = db.run {
     ((AgeGroupRankings returning AgeGroupRankings.map(_.id) into ((ag, genId) => ag.copy(id = genId))) += ageGroup)
       .map(_.id.getOrElse(0))
+  }
+
+  def getAllByYearMonthFull(yearMonth: String): Future[Seq[(AgeGroupRanking, City, AgeGroup)]] = db.run {
+    val x = for {
+      rankings <- (AgeGroupRankings.join(Cities).on {
+        case (ranking, city) => ranking.cityCode === city.code
+      }.join(AgeGroups).on {
+        case ((ranking, city), ageGroup) => ranking.ageGroupId === ageGroup.id
+      }).filter {
+        case ( (ranking, city), ageGroup) =>
+          (ranking.yearMonth === yearMonth)
+      }.filterNot {
+        case ( (ranking, city), ageGroup) =>
+          (city.state === "ZZ")
+      }.distinctOn {
+        case ( (ranking, city), ageGroup) => (ranking.cityCode, city.code)
+      }
+    } yield (rankings._1._1, rankings._1._2, rankings._2)
+
+    x.result
+  }
+
+  def getAllByYearMonth(yearMonth: String): Future[Seq[AgeGroupRanking]] = db.run {
+    AgeGroupRankings.filter(_.yearMonth === yearMonth).result
   }
 
 

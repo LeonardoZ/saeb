@@ -8,7 +8,7 @@ import javax.inject.Inject
 import akka.actor.Actor
 import akka.event.LoggingReceive
 import akka.util.Timeout
-import models.db.{AgeGroupRankingRankingRepository, ProfileRepository, SchoolingRankingRepository}
+import models.db.{AgeGroupRankingRepository, ProfileRepository, SchoolingRankingRepository}
 import models.entity.City
 import models.query.ProfileWithCode
 import models.service.TaskService
@@ -28,7 +28,7 @@ object AnalysesActor {
 }
 
 class AnalysesActor @Inject()(val taskService: TaskService,
-                              val ageGroupRankingRepository: AgeGroupRankingRankingRepository,
+                              val ageGroupRankingRepository: AgeGroupRankingRepository,
                               val schoolingRankingRepository: SchoolingRankingRepository,
                               val citiesRetrieveFactory: CitiesRetrieveActor.Factory,
                               val profileRepository: ProfileRepository,
@@ -84,14 +84,6 @@ class AnalysesActor @Inject()(val taskService: TaskService,
 
           cityAnalysesActor ! CityAnalysesActor.CheckCities(self, yearMonth, np)
         }
-//        profileRepository.getProfilesByCitiesAndYear(yearMonth, ids) map {
-//          case Success(profiles) => {
-//            cityAnalysesActor ! CityAnalysesActor.CheckCities(self, yearMonth, profiles)
-//          }
-//          case Failure(ex) => {
-//            println("FALHOOOU +"+ex.getMessage)
-//          }
-//        }
       }
     }
 

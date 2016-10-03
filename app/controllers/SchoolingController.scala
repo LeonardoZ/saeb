@@ -24,6 +24,7 @@ class SchoolingController @Inject()(val schoolingRepository: SchoolingRepository
   def classification = SecureRequest.async {
     schoolingRepository.getAll().flatMap { schoolings =>
       Future {
+
         Ok(views.html.schooling_classification(schoolings))
       }
     }

@@ -11,6 +11,7 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
   def configure(): Unit = {
     bindActor[ManagerActor]("manager-actor")
     bindActor[AnalysesActor]("analyses-actor")
+
     // import data actors
     bindActorFactory[ValuesManagerActor, ValuesManagerActor.Factory]
     bindActorFactory[CitiesPersistActor, CitiesPersistActor.Factory]
@@ -18,6 +19,7 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActorFactory[SchoolingsPersistActor, SchoolingsPersistActor.Factory]
     bindActorFactory[ProfileWorkerActor, ProfileWorkerActor.Factory]
     bindActorFactory[DataImportActor, DataImportActor.Factory]
+    bindActorFactory[DataRemovalActor, DataRemovalActor.Factory]
 
 
     // analyses actors
