@@ -4,7 +4,7 @@ use saeb;
 create table user (
   id int(11) not null auto_increment primary key ,
   email varchar(120) not null,
-  remember tinyint(1) default '0',
+  active boolean default true,
   password varchar(60) not null,
   unique key unq_email (email)
 );

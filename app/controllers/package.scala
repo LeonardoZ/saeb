@@ -1,11 +1,14 @@
 import models.entity.{DataImport, SimpleCity}
+import models.form.{NewPasswordForm, SchoolingOrder}
 import models.query._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 /**
   * Created by Leonardo on 24/09/2016.
   */
 package object controllers {
+
+
   implicit val cityReads = Json.reads[SimpleCity]
   implicit val cityWrites = Json.writes[SimpleCity]
   implicit val yearCityCodeReads = Json.reads[YearCityCode]
@@ -27,7 +30,10 @@ package object controllers {
   implicit val peoplesInAgeGroupSchoolingWrite = Json.writes[PeoplesInAgeGroupSchooling]
   implicit val peoplesInAgeGroupSchoolingFormat = Json.format[PeoplesInAgeGroupSchooling]
   implicit val yearCityCodesReads = Json.reads[YearCityCodes]
-
+  implicit val orderFormat = Json.format[SchoolingOrder]
+  implicit val newPasswordReads = Json.reads[NewPasswordForm]
+  implicit val newPasswordFormat = Json.format[NewPasswordForm]
+  implicit val ordersFormat = Reads.seq(orderFormat)
 
   def importsToYearsForView(dataImports: Seq[DataImport]) = dataImports
     .map { data =>

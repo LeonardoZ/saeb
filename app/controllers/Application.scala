@@ -2,10 +2,10 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.security.SecureRequest
 import models.db.UserRepository
-import models.entity.User
-import models.form.{LoginForm, SignupForm}
+import models.entity.{User, UserPasswordManager}
+import models.form.{ForgotPasswordForm, LoginForm, NewSimplesPasswordForm, SignupForm}
+import models.mail.{ForgotPasswordEmail, MailComponent}
 import org.mindrot.jbcrypt.BCrypt
 import play.api.data.Form
 import play.api.data.Forms._
@@ -14,21 +14,38 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Application @Inject()(val userRepo: UserRepository, val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
+class Application @Inject()(val userRepo: UserRepository,
+                            val messagesApi: MessagesApi,
+                            val configuration: play.api.Configuration,
+                            val emailComponent: MailComponent)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {
 
 
   val loginForm: Form[LoginForm] = Form {
     mapping(
       "login" -> email,
-      "password" -> nonEmptyText(minLength = 6),
-      "remember" -> boolean
+      "password" -> nonEmptyText(minLength = 6)
     )(LoginForm.apply)(LoginForm.unapply)
+  }
+
+  val forgotPasswordForm: Form[ForgotPasswordForm] = Form {
+    mapping(
+      "email" -> email
+    )(ForgotPasswordForm.apply)(ForgotPasswordForm.unapply)
+  }
+
+  val newPasswordForm: Form[NewSimplesPasswordForm] = Form {
+    mapping(
+      "jwt" -> nonEmptyText,
+      "email" -> email,
+      "newPassword" -> nonEmptyText(minLength = 6),
+      "repeatNewPassword" -> nonEmptyText(minLength = 6)
+    )(NewSimplesPasswordForm.apply)(NewSimplesPasswordForm.unapply)
   }
 
   val signupForm: Form[SignupForm] = Form {
     mapping(
-      "email" -> nonEmptyText(minLength = 6, maxLength = 255),
+      "email" -> email,
       "password" -> nonEmptyText(minLength = 6),
       "repeatPassword" -> nonEmptyText(minLength = 6)
     )(SignupForm.apply)(SignupForm.unapply)
@@ -36,7 +53,9 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
 
 
   def signin(emailValue: String = "") = Action.async { implicit request =>
-    loginForm.fill(LoginForm(login = emailValue, password = "", remember = false))
+    println(System.getenv("PLAY_MAIL_HOST"))
+      println(System.getenv("PLAY_MAIL_USER"))
+    loginForm.fill(LoginForm(login = emailValue, password = ""))
     userRepo.countUsers flatMap { users =>
       Future {
         Ok(views.html.login(loginForm, signupForm, users < 1))
@@ -46,6 +65,7 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
 
   val invalidCredentials =
     Future {
+
       Redirect(routes.Application.signin()).flashing(("login", "Credenciais inválidas."))
     }
 
@@ -55,11 +75,8 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
       form => {
         val aFutureUser = userRepo.getUser(form.login)
         aFutureUser.flatMap {
-          case Some(u) =>
-            if (BCrypt.checkpw(form.password, u.password))
-              authenticatedUser(u, request)
-            else invalidCredentials
-          case None => invalidCredentials
+          case Some(u) if BCrypt.checkpw(form.password, u.password) => authenticatedUser(u, request)
+          case _ => invalidCredentials
         }
       }
     )
@@ -78,7 +95,95 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
     }
   }
 
+  def forgotPassword = Action.async { implicit request =>
+    forgotPasswordForm.bindFromRequest.fold(
+      errorForm => Future {
+        Redirect(routes.Application.signin())
+          .flashing(("forgotPasswordEmailError" -> "Erro ao processar requisição."))
+      },
+      form => {
+        val secret = configuration.getString("play.crypto.secret").getOrElse("XXX")
+
+        userRepo.getUser(form.email) flatMap {
+          case Some(user) => for {
+            url <- Future {
+              UserPasswordManager.generateChangePasswordUrl(user.email, secret)
+            }
+            email <- Future { ForgotPasswordEmail(host = request.host, url = s"admin/forgot/$url", to = user.email) }
+            sendEmail <- emailComponent.sendEmail(email)
+            redirect <- Future {
+              Redirect(routes.Application.signin()).flashing(("forgotPasswordEmailOk" -> "E-mail enviado ao destinatário."))
+            }
+          } yield (redirect)
+          case None => Future {
+            Redirect(routes.Application.signin())
+              .flashing(("forgotPasswordEmailError" -> "E-mail não cadastrado."))
+          }
+        }
+      }
+    )
+  }
+
+  def changePasswordPage(jwt: String) = Action.async { implicit request =>
+    val secret = configuration.getString("play.crypto.secret").getOrElse("XXX")
+
+    UserPasswordManager.emailFromJwt(jwt, secret) match {
+      case Some(email) => Future {
+        Ok {
+          val newForm = newPasswordForm.fill(NewSimplesPasswordForm(jwt = jwt, email = email, "", ""))
+          views.html.new_password_remember(newForm)
+        }
+      }
+      case None => Future {
+        Redirect(routes.Application.signin())
+      }
+    }
+  }
+
+  def saveNewPassword = Action.async { implicit request =>
+    newPasswordForm.bindFromRequest.fold(
+      errorForm => Future {
+        Redirect(routes.Application.signin()).flashing(("forgotPasswordEmailError" -> "Erro ao processar requisição."))
+      },
+      form => {
+        val secret = configuration.getString("play.crypto.secret").getOrElse("XXX")
+        UserPasswordManager.emailFromJwt(form.jwt, secret) match {
+          case Some(email) if email == form.email => processUpdate(form)
+          case _ => Future {
+            Redirect(routes.Application.signin())
+              .flashing(("forgotPasswordEmailError" -> "E-mail não cadastrado nessa operação."))
+          }
+        }
+      }
+    )
+  }
+
+  def processUpdate(form: NewSimplesPasswordForm): Future[Result] = {
+    userRepo.updatePassword(form.email, form.newPassword).map { x =>
+      Redirect(routes.Application.signin())
+        .flashing(("forgotPasswordEmailOk" -> "Senha alterada com sucesso."))
+    }
+  }
+
+
   def signup() = Action.async { implicit request =>
+
+    signupForm.bindFromRequest.fold(
+      errorForm => Future {
+        Redirect(routes.Application.signin())
+      },
+      form => {
+        val pass = UserPasswordManager.encryptPassword(form.password)
+        val user = User(None, form.email, pass, true)
+
+        userRepo.create(user) map { f =>
+          Redirect(routes.Application.signin())
+        }
+      }
+    )
+  }
+
+  def loggedSignup() = Action.async { implicit request =>
 
     signupForm.bindFromRequest.fold(
       errorForm => Future {
@@ -87,10 +192,10 @@ class Application @Inject()(val userRepo: UserRepository, val messagesApi: Messa
       form => {
         val salt = BCrypt.gensalt()
         val pass = BCrypt.hashpw(form.password, salt)
-        val user = User(None, form.email, pass, false)
+        val user = User(None, form.email, pass, true)
 
         userRepo.create(user) map { f =>
-          Redirect(routes.Application.signin())
+          Redirect(routes.UserController.register())
         }
       }
     )

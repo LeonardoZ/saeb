@@ -1,4 +1,4 @@
-@(signupForm: Form[models.form.SignupForm])(implicit messages: Messages, flash: Flash)
+@(signupForm: Form[models.form.SignupForm])(implicit messages: Messages, flash: Flash, email: Option[String])
 
 @import b3.vertical.fieldConstructor
 @main("Admin") {

@@ -5,12 +5,10 @@ import java.util.UUID
 import javax.inject.Inject
 
 import akka.actor.ActorRef
-import com.google.common.io.Files
 import com.google.inject.name.Named
-import controllers.security.SecureRequest
 import models.actors.dataimport.ManagerActor
 import models.db._
-import models.form.{AnalysesForm, RemovalForm}
+import models.form.RemovalForm
 import models.service.TaskService
 import play.api.data.Form
 import play.api.data.Forms._
@@ -25,7 +23,7 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
                                          val taskService: TaskService,
                                          val userRepo: UserRepository,
                                          val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
-  extends Controller with I18nSupport {
+  extends Controller with I18nSupport with UserInfo {
 
   case class FileUploadReturn(error: String, name: String, size: Long)
   val removalForm: Form[RemovalForm] = Form {

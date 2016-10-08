@@ -2,11 +2,10 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.security.SecureRequest
 import models.db._
 import models.entity.{DataImport, Task}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Controller
+import play.api.mvc.{AnyContent, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,9 +16,10 @@ class MainController @Inject()(val dataImportRepository: DataImportRepository,
                                val ageGroupRepository: AgeGroupRepository,
                                val userRepo: UserRepository,
                                val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
-  extends Controller with I18nSupport {
 
-  def index = SecureRequest.async { implicit request =>
+  extends Controller with I18nSupport with UserInfo {
+
+  def index = SecureRequest.async { implicit request: AuthenticatedRequest[AnyContent] =>
     val values = for {
       groups <- ageGroupRepository.count
       schoolings <- schoolingRepository.count

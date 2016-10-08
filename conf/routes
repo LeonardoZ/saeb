@@ -2,13 +2,20 @@
 
 # Admin
 GET     /admin/signin                              controllers.Application.signin()
+POST    /admin/forgot                              controllers.Application.forgotPassword()
+GET     /admin/forgot/:jwt                         controllers.Application.changePasswordPage(jwt: String)
+POST    /admin/forgot/change                       controllers.Application.saveNewPassword()
 POST    /admin/signup                              controllers.Application.signup
 POST    /admin/login                               controllers.Application.doLogin
-GET     /admin/logout                              controllers.Application.doLogout
+POST    /admin/logout                              controllers.Application.doLogout
 GET     /admin/main                                controllers.MainController.index
 GET     /admin/user/registration                   controllers.UserController.newUser
 POST    /admin/user/registration                   controllers.UserController.register()
+GET     /admin/user                                controllers.UserController.user()
 GET     /admin/users                               controllers.UserController.users()
+POST    /admin/user/inactivate                     controllers.UserController.setUserInactive()
+POST    /admin/user/change/password                controllers.UserController.changeUserPassword()
+GET     /admin/user/activate/:email                controllers.UserController.sendReactivationEmailFor(email: String)
 GET     /admin/schooling/classification            controllers.SchoolingController.classification()
 POST    /admin/schooling/classification            controllers.SchoolingController.saveClassification()
 GET     /admin/newfile/                            controllers.DocumentUploadController.uploadPage()

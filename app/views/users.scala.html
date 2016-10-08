@@ -1,4 +1,5 @@
-@(users: Seq[models.entity.User])(implicit messages: Messages, flash: Flash)
+@(users: Seq[models.entity.User], inactiveUsers: Seq[models.entity.User])(implicit email: Option[String], messages: Messages, flash: Flash)
+
 @main("Admin") {
 
 <div class="row">
@@ -8,6 +9,12 @@
                 <h3 class="box-title">Usuários</h3>
             </div>
             <div class="box-body">
+                @flash.get("reactivation").map { msg =>
+                    <div class="alert alert-info block" role="alert">
+                        @msg
+                    </div>
+                }
+                <h3>Usuários</h3>
                 <table id="users" class="table table-bordered table-hover">
                     <thead>
                         <tr>
@@ -22,6 +29,30 @@
                                 </td>
                             </tr>
                         }
+                    </tbody>
+                </table>
+                <hr />
+                <h3>Usuários inativos</h3>
+                <table id="users-inactive" class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>E-mail</th>
+                        <th>Reativar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @inactiveUsers.map { user =>
+                    <tr>
+                        <td>
+                            @user.email
+                        </td>
+                        <td>
+                            <a href="@routes.UserController.sendReactivationEmailFor(user.email)">
+                                Enviar E-mail de Reativação
+                            </a>
+                        </td>
+                    </tr>
+                    }
                     </tbody>
                 </table>
             </div>

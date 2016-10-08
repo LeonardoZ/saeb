@@ -28,9 +28,9 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def password = column[String]("password")
 
-    def remember = column[Boolean]("remember")
+    def active = column[Boolean]("active")
 
-    def * = (id, email, password, remember) <> (User.tupled, User.unapply)
+    def * = (id, email, password, active) <> (User.tupled, User.unapply)
   }
 
   class AgeGroupTable(tag: Tag) extends Table[AgeGroup](tag, "age_group") {

@@ -20,18 +20,6 @@ class SearchController @Inject()(val cityRepository: CityRepository,
                                  val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {
 
-  implicit val cityReads = Json.reads[SimpleCity]
-  implicit val cityWrites = Json.writes[SimpleCity]
-  implicit val yearCityCodeReads = Json.reads[YearCityCode]
-  implicit val totalProfilesBySexUnderGroupFormat = Json.format[TotalProfilesBySexUnderGroup]
-  implicit val totalProfilesBySexUnderGroupWrites = Json.writes[TotalProfilesBySexUnderGroup]
-  implicit val totalProfilesBySexUnderSchoolingFormat = Json.format[TotalProfilesBySexUnderSchooling]
-  implicit val totalProfilesBySexUnderSchoolingWrites = Json.writes[TotalProfilesBySexUnderSchooling]
-  implicit val profilesByAgeGroupWrites = Json.writes[ProfilesByAgeGroup]
-  implicit val profilesByAgeGroupFormat = Json.format[ProfilesByAgeGroup]
-  implicit val profilesBySchoolingWrites = Json.writes[ProfilesBySchooling]
-  implicit val profilesBySchoolingFormat = Json.format[ProfilesBySchooling]
-
   val searchForm: Form[SearchForm] = Form {
     mapping(
       "cityCode" -> nonEmptyText

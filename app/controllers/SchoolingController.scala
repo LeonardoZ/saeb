@@ -2,34 +2,22 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.security.SecureRequest
 import models.db._
-import models.form.SchoolingOrder
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsError, Json, Reads}
+import play.api.libs.json.{JsError, Json}
 import play.api.mvc.{BodyParsers, Controller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class SchoolingController @Inject()(val schoolingRepository: SchoolingRepository,
                                     val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
-  extends Controller with I18nSupport {
+  extends Controller with I18nSupport with UserInfo  {
 
-  case class Orders(orders: Seq[SchoolingOrder])
-
-  implicit val orderFormat = Json.format[SchoolingOrder]
-  implicit val ordersFormat = Reads.seq(orderFormat)
-
-
-  def classification = SecureRequest.async {
-    schoolingRepository.getAll().flatMap { schoolings =>
-      Future {
-
-        Ok(views.html.schooling_classification(schoolings))
-      }
+  def classification = SecureRequest.async { implicit request =>
+    schoolingRepository.getAll.map { schoolings =>
+      Ok(views.html.schooling_classification(schoolings))
     }
   }
-
 
   def saveClassification = SecureRequest.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult = request.body.validate(ordersFormat)

@@ -1,0 +1,85 @@
+@(user: models.entity.User)(implicit email: Option[String], messages: Messages, flash: Flash)
+
+@import b3.vertical.fieldConstructor
+
+@main("Admin") {
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><strong>Perfil - @email.getOrElse("N/A")</strong></h3>
+            </div>
+            <div class="box-body">
+                @flash.get("changePasswordError").map { msg =>
+                    <div class="alert alert-danger block" role="alert">
+                        @msg
+                    </div>
+                }
+
+                <p>O que gostaria de fazer hoje?</p>
+                <button type="button" class="btn btn-primary"  data-toggle="modal" data-target="#change-password-modal">Trocar Senha</button>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#disable-modal">Desativar conta</button>
+            </div>
+        </div>
+    </div>
+    <!-- Disable account Modal -->
+    <div class="modal fade" id="disable-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Desativar sua conta</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Deseja mesmo desativar sua conta?</p>
+                    <p class="help-block">Apenas outro usuário poderá reativar sua conta, mediante sua permissão por e-mail.</p>
+                </div>
+                <div class="modal-footer">
+                    <form action="@routes.UserController.setUserInactive()" method="POST">
+                        <button type="submit" class="btn btn-danger">Desativar</button>
+                    </form>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <!-- change password Modal -->
+    <div class="modal fade" id="change-password-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Alterar Senha</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@routes.UserController.changeUserPassword" method="post" id="change-password-form"
+                          data-toggle="validator" method="POST">
+                        <div class="form-group">
+                            <label for="password">Senha atual</label>
+                            <input id="password" class="form-control" type="password" data-minlength="6" name="password"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Nova senha</label>
+                            <input id="new-password" type="password"  class="form-control" data-minlength="6" name="newPassword"/>
+                        </div>
+                        <div class="form-group">
+                                <label for="repeat-new-password">Repita a nova senha</label>
+                            <input id="repeat-new-password" type="password" data-match="#new-password"
+                               class="form-control" name="repeatNewPassword"/>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">Alterar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+
+
+}

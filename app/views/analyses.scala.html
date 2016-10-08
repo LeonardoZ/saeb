@@ -1,4 +1,4 @@
-@(analysesForm: Form[models.form.AnalysesForm], years: Seq[(String, String)])(implicit messages: Messages)
+@(analysesForm: Form[models.form.AnalysesForm], years: Seq[(String, String)])(implicit messages: Messages, email: Option[String])
 
 @import b3.vertical.fieldConstructor
 

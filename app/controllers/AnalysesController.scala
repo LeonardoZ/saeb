@@ -3,7 +3,6 @@ package controllers
 import javax.inject.{Inject, Named}
 
 import akka.actor.ActorRef
-import controllers.security.SecureRequest
 import models.actors.analyses.AnalysesActor
 import models.db._
 import models.form.AnalysesForm
@@ -18,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AnalysesController @Inject()(@Named("analyses-actor") val analysesActor: ActorRef,
                                    val dataImportRepository: DataImportRepository,
                                    val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
-  extends Controller with I18nSupport {
+  extends Controller with I18nSupport with UserInfo {
 
   val analysesForm: Form[AnalysesForm] = Form {
     mapping(

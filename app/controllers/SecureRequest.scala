@@ -1,14 +1,11 @@
-package controllers.security
+package controllers
 
-import controllers.routes
 import play.api.mvc.Results._
 import play.api.mvc.{ActionBuilder, Request, Result, WrappedRequest}
 
 import scala.concurrent.Future
 
-
-
-class AuthenticatedRequest[A](val userEmail: String, request: Request[A]) extends WrappedRequest[A](request)
+case class AuthenticatedRequest[A](val userEmail: String, val request: Request[A]) extends WrappedRequest[A](request)
 
 object SecureRequest extends ActionBuilder[AuthenticatedRequest] {
 

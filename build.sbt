@@ -22,6 +22,8 @@ libraryDependencies ++= Seq(
     "com.h2database" % "h2" % "1.4.187",
     "com.github.t3hnar" %% "scala-bcrypt" % "2.6",
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test",
+    "com.typesafe.play" %% "play-mailer" % "5.0.0",
+    "com.jason-goodwin" %% "authentikat-jwt" % "0.4.1",
     cache,
     specs2 % Test
 )
