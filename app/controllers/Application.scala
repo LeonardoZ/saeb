@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models.db.UserRepository
 import models.entity.{User, UserPasswordManager}
-import models.form.{ForgotPasswordForm, LoginForm, NewSimplesPasswordForm, SignupForm}
+import models.form._
 import models.mail.{ForgotPasswordEmail, MailComponent}
 import org.mindrot.jbcrypt.BCrypt
 import play.api.data.Form
@@ -34,13 +34,20 @@ class Application @Inject()(val userRepo: UserRepository,
     )(ForgotPasswordForm.apply)(ForgotPasswordForm.unapply)
   }
 
-  val newPasswordForm: Form[NewSimplesPasswordForm] = Form {
+  val newPasswordForm: Form[NewSimplePasswordForm] = Form {
     mapping(
       "jwt" -> nonEmptyText,
       "email" -> email,
       "newPassword" -> nonEmptyText(minLength = 6),
       "repeatNewPassword" -> nonEmptyText(minLength = 6)
-    )(NewSimplesPasswordForm.apply)(NewSimplesPasswordForm.unapply)
+    )(NewSimplePasswordForm.apply)(NewSimplePasswordForm.unapply)
+  }
+
+  val reactivateForm: Form[ReactivateForm] = Form {
+    mapping(
+      "jwt" -> nonEmptyText,
+      "email" -> email
+    )(ReactivateForm.apply)(ReactivateForm.unapply)
   }
 
   val signupForm: Form[SignupForm] = Form {
@@ -107,7 +114,7 @@ class Application @Inject()(val userRepo: UserRepository,
         userRepo.getUser(form.email) flatMap {
           case Some(user) => for {
             url <- Future {
-              UserPasswordManager.generateChangePasswordUrl(user.email, secret)
+              UserPasswordManager.generateEmailAndCreatedJwt(user.email, secret)
             }
             email <- Future { ForgotPasswordEmail(host = request.host, url = s"admin/forgot/$url", to = user.email) }
             sendEmail <- emailComponent.sendEmail(email)
@@ -130,12 +137,30 @@ class Application @Inject()(val userRepo: UserRepository,
     UserPasswordManager.emailFromJwt(jwt, secret) match {
       case Some(email) => Future {
         Ok {
-          val newForm = newPasswordForm.fill(NewSimplesPasswordForm(jwt = jwt, email = email, "", ""))
+          val newForm = newPasswordForm.fill(NewSimplePasswordForm(jwt = jwt, email = email, "", ""))
           views.html.new_password_remember(newForm)
         }
       }
       case None => Future {
-        Redirect(routes.Application.signin())
+        Redirect(routes.Application.signin()).flashing(("forgotPasswordEmailError" ->
+          "Falha ao tentar reativar sua conta. E-mail não encontrado"))
+      }
+    }
+  }
+
+  def reactivatePage(jwt: String) = Action.async { implicit request =>
+    val secret = configuration.getString("play.crypto.secret").getOrElse("XXX")
+
+    UserPasswordManager.emailFromJwt(jwt, secret) match {
+      case Some(email) => Future {
+        val newForm = reactivateForm.fill(ReactivateForm(jwt = jwt, email = email))
+        Ok {
+          views.html.reactivate_account(newForm)
+        }
+      }
+      case None => Future {
+        Redirect(routes.Application.signin()).flashing(("reactivateError" ->
+          "Falha ao tentar reativar sua conta. E-mail não encontrado"))
       }
     }
   }
@@ -158,10 +183,36 @@ class Application @Inject()(val userRepo: UserRepository,
     )
   }
 
-  def processUpdate(form: NewSimplesPasswordForm): Future[Result] = {
-    userRepo.updatePassword(form.email, form.newPassword).map { x =>
+
+  def reactivate = Action.async { implicit request =>
+    reactivateForm.bindFromRequest.fold(
+      errorForm => Future {
+        Redirect(routes.Application.signin()).flashing(("reactivateError" -> "Erro ao processar requisição."))
+      },
+      form => {
+        val secret = configuration.getString("play.crypto.secret").getOrElse("XXX")
+        UserPasswordManager.emailFromJwt(form.jwt, secret) match {
+          case Some(email) if email == form.email => processReactivation(form)
+          case _ => Future {
+            Redirect(routes.Application.signin())
+              .flashing(("reactivateError" -> "E-mail não cadastrado nessa operação."))
+          }
+        }
+      }
+    )
+  }
+
+  def processUpdate(form: NewSimplePasswordForm): Future[Result] = {
+    userRepo.updatePassword(form.email, UserPasswordManager.encryptPassword(form.newPassword)).map { x =>
       Redirect(routes.Application.signin())
         .flashing(("forgotPasswordEmailOk" -> "Senha alterada com sucesso."))
+    }
+  }
+
+  def processReactivation(form: ReactivateForm): Future[Result] = {
+    userRepo.setUserActive(form.email).map { x =>
+      Redirect(routes.Application.signin())
+        .flashing(("reactivate" -> "Conta reativada com sucesso."))
     }
   }
 

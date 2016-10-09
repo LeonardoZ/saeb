@@ -37,12 +37,14 @@ class AnalysesController @Inject()(@Named("analyses-actor") val analysesActor: A
   def doAnalyses = SecureRequest.async { implicit request =>
     analysesForm.bindFromRequest.fold(
       error => Future {
-        Redirect(routes.AnalysesController.analysesPage())
+        Redirect(routes.AnalysesController.analysesPage()).flashing(("error") ->
+          s"Falha ao realizar análise.")
       },
       form => {
         analysesActor ! AnalysesActor.StartAnalyses(request.userEmail, form.yearMonth)
         Future {
-          Redirect(routes.AnalysesController.analysesPage())
+          Redirect(routes.AnalysesController.analysesPage()).flashing(("success") ->
+            s"Análises para ${form.yearMonth} sendo realizadas. O processo será concluído em breve.")
         }
       }
     )

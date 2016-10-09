@@ -41,7 +41,7 @@ object UserPasswordManager {
     } else None
   }
 
-  def generateChangePasswordUrl(email: String, secret: String) = {
+  def generateEmailAndCreatedJwt(email: String, secret: String) = {
     val header = JwtHeader("HS256")
     val claimsSet = JwtClaimsSet(Map(
       "email" -> email,
@@ -51,6 +51,7 @@ object UserPasswordManager {
     println("Return "+r)
     r
   }
+
 
   def validNewPassword(form: NewPasswordForm) = form.newPassword.length > 5 && form.newPassword == form.repeatedNewPassword
 

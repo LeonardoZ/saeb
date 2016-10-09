@@ -62,14 +62,25 @@
                     </div>
                 }
 
+                @flash.get("reactivate").map { msg =>
+                    <div class="alert alert-success block" role="alert">
+                        @msg
+                    </div>
+                }
+
+                @flash.get("reactivateError").map{ msg =>
+                    <div class="alert alert-danger block" role="alert">
+                        @msg
+                    </div>
+                }
+
                 <p class="block helphelp-block">Entre com suas informações de login.</p>
                 @b3.form(routes.Application.doLogin) {
                     @b3.email( loginForm("login"), '_label -> "Email", 'placeholder -> "exemplo@mail.com" )
                     @b3.password( loginForm("password"), '_label -> "Senha", 'placeholder -> "Senha" )
                     @b3.submit('class -> "btn btn-default"){ Entrar }
                 }
-                <button type="button" class="btn btn-primary"  data-toggle="modal"
-                data-target="#forgot-password-modal">Esqueci minha senha.</button>
+                <a data-toggle="modal" data-target="#forgot-password-modal">Esqueci minha senha</a>
 
             </div>
             @if(hasNoUser) {

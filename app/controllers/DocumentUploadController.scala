@@ -69,7 +69,8 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
       },
       removal => Future {
         managerActor ! ManagerActor.DataRemovalOrder(removal.yearMonth, request.userEmail)
-        Redirect(routes.DocumentUploadController.removePage()).flashing("success" -> s"Os dados de ${removal.yearMonth} serão removidos em breve.")
+        Redirect(routes.DocumentUploadController.removePage()).
+          flashing("success" -> s"Os dados de ${removal.yearMonth} serão removidos em breve.")
       }
     )
   }

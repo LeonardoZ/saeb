@@ -4,7 +4,9 @@
 GET     /admin/signin                              controllers.Application.signin()
 POST    /admin/forgot                              controllers.Application.forgotPassword()
 GET     /admin/forgot/:jwt                         controllers.Application.changePasswordPage(jwt: String)
+GET     /admin/reactivate/:jwt                     controllers.Application.reactivatePage(jwt: String)
 POST    /admin/forgot/change                       controllers.Application.saveNewPassword()
+POST    /admin/forgot/reactivate                   controllers.Application.reactivate()
 POST    /admin/signup                              controllers.Application.signup
 POST    /admin/login                               controllers.Application.doLogin
 POST    /admin/logout                              controllers.Application.doLogout
@@ -14,6 +16,7 @@ POST    /admin/user/registration                   controllers.UserController.re
 GET     /admin/user                                controllers.UserController.user()
 GET     /admin/users                               controllers.UserController.users()
 POST    /admin/user/inactivate                     controllers.UserController.setUserInactive()
+GET     /admin/user/reactivate/:email              controllers.UserController.sendReactivationEmailFor(email: String)
 POST    /admin/user/change/password                controllers.UserController.changeUserPassword()
 GET     /admin/user/activate/:email                controllers.UserController.sendReactivationEmailFor(email: String)
 GET     /admin/schooling/classification            controllers.SchoolingController.classification()

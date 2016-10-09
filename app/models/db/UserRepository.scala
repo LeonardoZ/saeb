@@ -14,7 +14,6 @@ class UserRepository @Inject()(protected val tables: Tables,
                                protected val dbConfigProvider: DatabaseConfigProvider) {
 
 
-
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
@@ -43,6 +42,12 @@ class UserRepository @Inject()(protected val tables: Tables,
     userActive.update(false)
   }
 
+  def setUserActive(email: String) =  db.run {
+    val userActive = for (user <- Users if user.email === email) yield (user.active)
+    userActive.update(true)
+  }
+
+
   def updatePassword(user: User, newPassword: String) = db.run {
     val userPassword = for (user <- Users if user.email === user.email) yield (user.password)
     userPassword.update(newPassword).asTry
@@ -56,6 +61,10 @@ class UserRepository @Inject()(protected val tables: Tables,
   def getUser(email: String): Future[Option[User]] =
     db.run {
       Users.filter(_.active === true).filter(_.email === email).result.headOption
+    }
+  def getUserInactive(email: String): Future[Option[User]] =
+    db.run {
+      Users.filter(_.active === false).filter(_.email === email).result.headOption
     }
 
   def getUserUnsafe(email: String): Future[User] =

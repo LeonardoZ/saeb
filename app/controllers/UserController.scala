@@ -5,6 +5,7 @@ import javax.inject.Inject
 import models.db.UserRepository
 import models.entity.{User, UserPasswordManager}
 import models.form.{NewPasswordForm, SignupForm}
+import models.mail.{MailComponent, ReactivateAccountEmail}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -14,6 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class UserController @Inject()(val userRepo: UserRepository,
+                               val configuration: play.api.Configuration,
+                               val mailComponent: MailComponent,
                                val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport with UserInfo {
 
@@ -104,9 +107,23 @@ class UserController @Inject()(val userRepo: UserRepository,
   }
 
   def sendReactivationEmailFor(email: String) = SecureRequest.async { implicit request =>
-    Future {
-      Redirect(routes.UserController.users()).flashing(
-        ("reactivation" -> s"E-mail enviado para usuário ${email}"))
+    val secret = configuration.getString("play.crypto.secret").getOrElse("XXX")
+
+    userRepo.getUserInactive(email) flatMap {
+      case Some(user) => for {
+        url <- Future {
+          UserPasswordManager.generateEmailAndCreatedJwt(user.email, secret)
+        }
+        email <- Future { ReactivateAccountEmail(host = request.host, url = s"admin/reactivate/$url", to = user.email) }
+        sendEmail <- mailComponent.sendEmail(email)
+        redirect <- Future {
+          Redirect(routes.UserController.users()).flashing(("reactivation" -> "E-mail enviado ao destinatário."))
+        }
+      } yield (redirect)
+      case None => Future {
+        Redirect(routes.UserController.users())
+          .flashing(("reactivationError" -> "E-mail não pode ser enviado. Contate os administradores."))
+      }
     }
   }
 

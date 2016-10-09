@@ -1,4 +1,4 @@
-@(analysesForm: Form[models.form.AnalysesForm], years: Seq[(String, String)])(implicit messages: Messages, email: Option[String])
+@(analysesForm: Form[models.form.AnalysesForm], years: Seq[(String, String)])(implicit messages: Messages, email: Option[String], flash: Flash)
 
 @import b3.vertical.fieldConstructor
 
@@ -13,6 +13,17 @@
             <div class="box-body">
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
+                        @flash.get("error").map{ msg =>
+                        <div class="alert alert-danger block" role="alert">
+                            @msg
+                        </div>
+                        }
+
+                        @flash.get("success").map { msg =>
+                        <div class="alert alert-success block" role="alert">
+                            @msg
+                        </div>
+                        }
                         @b3.form(routes.AnalysesController.doAnalyses) {
                           @b3.select(analysesForm("yearMonth"), options = years, '_label -> "Seleciona um ano para análise" )
                             @b3.submit('class -> "btn btn-default"){ Analisar }
