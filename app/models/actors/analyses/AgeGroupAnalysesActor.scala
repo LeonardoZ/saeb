@@ -42,13 +42,6 @@ class AgeGroupAnalysesActor @Inject()(val rankingRepository: AgeGroupRankingRepo
       }.toSeq
       rankingRepository.insertAll(allProfilesInChunk)
     }
-
-//    case AgeGroupMultiAnalyses2(cityAnalysesActor, yearMonth, profiles: Vector[ProfileWithCode]) => {
-//      val allProfilesInChunk: Seq[AgeGroupRanking] = profiles.groupBy(p => p.cityCode).flatMap {
-//        case (code, profiles) => profilesAnalyze(code, yearMonth, profiles)
-//      }.toSeq
-//      rankingRepository.insertAll(allProfilesInChunk)
-//    }
   }
 
   def profilesAnalyze(code: String, year: String, profiles: Vector[ProfileWithCode]): Seq[AgeGroupRanking] = {

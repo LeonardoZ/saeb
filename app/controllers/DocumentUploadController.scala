@@ -45,7 +45,8 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
     request.body.file("document").map { document =>
       val filename = UUID.randomUUID().toString
       val file = document.ref
-      val moved = file.moveTo(new File("/tmp/" + filename))
+      val tmp = System.getProperty("java.io.tmpdir")
+      val moved = file.moveTo(new File(s"$tmp/$filename"))
       val filePath = moved.getAbsolutePath
       managerActor ! ManagerActor.DataImportOrder(filePath, request.userEmail)
       Ok(Json.obj("files" -> FileUploadReturn("", name = filename, size = moved.length)))

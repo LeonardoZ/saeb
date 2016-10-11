@@ -1,18 +1,37 @@
 SAEB - Sistema de Análise do Eleitorado Brasileiro
 ==================
 
-Application built with Play Framework 2.5, Slick 3.1 and Akka.
+Software desenvolvido utilizando Play Framework 2.5, Slick 3.1 and Akka.
 
 ==================
 
-<b>Database configuration</b>
+<h2>Configurar banco de dados</h2>
 
-Set the following variables on your system path.  The database should by named <b>"saeb"</b>.
+<p>Configure, conforme exemplo abaixo, variáveis de ambiente.
+ O schema deve ser chamado de <strong>"saeb"</strong>.</p>
 
-*MYSQL_HOST 
-*MYSQL_USER 
-*MYSQL_PASS
+<ul>
+    <li>MYSQL_HOST</li>
+    <li>MYSQL_USER</li> 
+    <li>MYSQL_PASS</li>
+</ul>
 
-MYSQL_HOST is the host address of the database, like and IPV4 Address ou an DNS.
-MYSQL_USER is the user required to login
-MYSQL_PASS is the password of the user specified in MYSQL_USER
+===================
+
+<h2>Configurar SMTP para envio de e-mail</h2>
+
+<p>Configure, conforme exemplo abaixo, variáveis de ambiente.
+ Não há suporte para https, efetivamente, por enquanto.</p>
+
+<ul>
+   <li>PLAY_MAIL_HOST</li>
+   <li>PLAY_MAIL_PORT</li>
+   <li>PLAY_MAIL_SSl</li>
+   <li>PLAY_MAIL_TSL</li>
+   <li>PLAY_MAIL_USER</li>
+   <li>PLAY_MAIL_PASS</li>
+</ul>
+
+===================
+
+<h2>Como encontrar os arquivos para download</h2>

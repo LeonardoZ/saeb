@@ -5,7 +5,7 @@ import javax.inject.Inject
 import models.db._
 import models.entity._
 import models.form.SearchForm
-import models.query._
+import models.service.CityFactsComparison
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -16,6 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 class SearchController @Inject()(val cityRepository: CityRepository,
+                                 val cityFactsComparison: CityFactsComparison,
                                  val profileRepository: ProfileRepository,
                                  val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
   extends Controller with I18nSupport {

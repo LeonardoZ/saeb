@@ -34,6 +34,16 @@ package object controllers {
   implicit val newPasswordReads = Json.reads[NewPasswordForm]
   implicit val newPasswordFormat = Json.format[NewPasswordForm]
   implicit val ordersFormat = Reads.seq(orderFormat)
+  implicit val peoplesByYearReads = Json.reads[PeoplesByYear]
+  implicit val peoplesByYearFormat = Json.format[PeoplesByYear]
+  implicit val peoplesByYearGroupedReads = Json.reads[PeoplesByYearGrouped]
+  implicit val peoplesByYearGroupedFormat = Json.format[PeoplesByYearGrouped]
+  implicit val profilesBySchoolingUnifiedReads = Json.reads[ProfilesBySchoolingUnified]
+  implicit val profilesBySchoolingUnifiedFormat = Json.format[ProfilesBySchoolingUnified]
+  implicit val profilesByAgeGroupUnifiedReads = Json.reads[ProfilesByAgeGroupUnified]
+  implicit val profilesByAgeGroupUnifiedFormat = Json.format[ProfilesByAgeGroupUnified]
+  implicit val growthReads = Json.reads[Growth]
+  implicit val growthFormat = Json.format[Growth]
 
   def importsToYearsForView(dataImports: Seq[DataImport]) = dataImports
     .map { data =>

@@ -1,0 +1,85 @@
+@(comparison: models.query.ComparedCityFull)(implicit messages: Messages)
+
+
+<div class="col-lg-3">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="page-header">
+                    <h3><i class="fa fa-venus-mars">&nbsp;</i>População</h3>
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item" >
+                        <span><strong>População: </strong></span>
+                        <span class="round-int">@comparison.comparedCity.population</span>
+                    </li>
+                    <li class="list-group-item" >
+                        <span><strong>Homens: </strong></span>
+                        <span class="round-int">@comparison.comparedCity.male</span>
+                    </li>
+                    <li class="list-group-item" >
+                        <span><strong>Mulheres: </strong></span>
+                        <span class="round-int">@comparison.comparedCity.female</span>
+                    </li>
+                    <li class="list-group-item" >
+                        <span><strong>Não informado: </strong></span>
+                        <span class="round-int">@comparison.comparedCity.notDefined</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-5">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="page-header">
+                    <h3><i class="fa fa-graduation-cap">&nbsp;</i>Escolaridade</h3>
+                </div>
+                <ul class="list-group" >
+                    @comparison.schoolings.map { sch =>
+                    <li class="list-group-item">
+                        <span><strong>@sch.level: </strong></span>
+                        <span class="round-int">@sch.quantity </span>
+                        (<span class="round-pct">@sch.percentOfTotal</span>%)
+                    </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-4">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="page-header">
+                    <h3><i class="fa fa-users">&nbsp;</i>Faixa etária</h3>
+                </div>
+                <ul class="list-group">
+                    @comparison.ages.map { age =>
+                    <li class="list-group-item" >
+                        <span><strong>@age.group: </strong></span>
+                        <span class="round-int">@age.quantity </span>
+                        (<span class="round-pct">@age.percentOfTotal</span>%)
+                    </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+</div>
+
+<div class="col-lg-5">
+
+</div>
+
+<div class="col-lg-4">
+
+</div>

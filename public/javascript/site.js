@@ -82,7 +82,6 @@ $(function(){
     }
 
     function roundUtil() {
-        console.log(numeral.language());
         var formatInt = "0,0";
         var formatPct = "0,00.00";
         var formatPct4 = "0,00.0000";
@@ -91,14 +90,13 @@ $(function(){
             var numValue = $value.html();
             $value.text(numeral(numValue).format(formatInt));
         });
-
         $.each($(".round-pct"), function(key, value) {
             var $value = $(value);
             var numValue = $value.html();
             $value.text(numeral(numValue).format(formatPct));
         });
 
-        $.each($(".round-pct"), function(key, value) {
+        $.each($(".round-pct4"), function(key, value) {
             var $value = $(value);
             var numValue = $value.html();
             $value.text(numeral(numValue).format(formatPct4));

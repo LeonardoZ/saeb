@@ -54,9 +54,6 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
   def checkIfEveryoneIsReady = {
 
     if (citiesReady && agesReady && schoolingsReady) {
-      Logger.debug("Cities " + citiesReady)
-      Logger.debug("Ages " + agesReady)
-      Logger.debug("Schoolings " + schoolingsReady)
       self ! StartProfileExtraction(filePath)
     }
   }

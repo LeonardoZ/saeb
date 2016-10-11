@@ -36,9 +36,6 @@ class SchoolingAnalysesActor @Inject()(val rankingRepository: SchoolingRankingRe
       val allProfilesInChunk: Seq[SchoolingRanking] = profiles.groupBy(_.cityCode).flatMap {
         case (code, profiles) => profilesAnalyze(code, yearMonth, profiles)
       }.toSeq
-      println("All size :"+profiles.size)
-      println("Grouped :"+ profiles.groupBy(_.cityCode).size)
-      println("Chunk size :"+allProfilesInChunk.size)
       rankingRepository.insertAll(allProfilesInChunk)
     }
   }

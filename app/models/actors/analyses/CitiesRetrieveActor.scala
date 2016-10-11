@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 import models.actors.analyses.CitiesRetrieveActor.RetrieveCities
 import models.db.CityRepository
+import models.entity.Task
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.ExecutionContext
@@ -16,7 +17,7 @@ object CitiesRetrieveActor {
     def apply(): Actor
   }
 
-  case class RetrieveCities(analysesActorRef: ActorRef, yearMonth: String)
+  case class RetrieveCities(analysesActorRef: ActorRef, yearMonth: String, task: Task)
 
 }
 
@@ -25,9 +26,9 @@ class CitiesRetrieveActor @Inject()(val cityRepository: CityRepository) extends 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   override def receive: Receive = LoggingReceive {
-    case RetrieveCities(analysesActorRef, yearMonth) =>
+    case RetrieveCities(analysesActorRef, yearMonth, task) =>
       cityRepository.getAll().map { cities =>
-        analysesActorRef ! AnalysesActor.OnCitiesRetrieval(cities, yearMonth)
+        analysesActorRef ! AnalysesActor.OnCitiesRetrieval(cities, yearMonth, task)
       }
 
   }

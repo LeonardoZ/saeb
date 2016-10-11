@@ -3,7 +3,7 @@ package models.service
 import javax.inject.Inject
 
 import models._
-import models.query.{ProfilesBySchooling, ProfilesBySchoolingAndPosition, TotalProfilesBySexUnderSchooling}
+import models.query._
 
 import scala.collection.immutable.Iterable
 import scala.concurrent.ExecutionContext
@@ -73,6 +73,20 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
 
     }.toSeq.filter(_.positionAndSchooling._2 != filterValue).sortBy(_.positionAndSchooling._1).map {
       ps => ProfilesBySchooling(ps.positionAndSchooling._2, ps.profilesBySex)
+    }
+  }
+
+  def getSchoolingChartDataUnified(profilesCitiesSchoolings:  Seq[ProfileCitySchooling]) = {
+    // group by schooling
+    profilesCitiesSchoolings.groupBy {
+      case (_, _, schooling) => (schooling.position, schooling.level)
+    }.map {
+      case (level, profilesCitiesSchoolings) =>
+        (level, profilesCitiesSchoolings.map { case (profile, _, _) => profile.quantityOfPeoples }.sum)
+    }.toSeq.filter(_._1._2 != filterValue).sortBy(_._1._1).map {
+      ps => ProfilesBySchoolingPositionUnified(ps._1, ps._2)
+    }.map {
+      p => ProfilesBySchoolingUnified(p.positionAndSchooling._2, p.peoples)
     }
   }
 }

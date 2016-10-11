@@ -3,7 +3,7 @@ package models.db
 import javax.inject.Inject
 
 import models.entity.{AgeGroup, City, Profile, Schooling}
-import models.query.{PeoplesByYearAndSex, ProfileWithCode}
+import models.query.{PeoplesByYear, PeoplesByYearAndSex, ProfileWithCode}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -30,6 +30,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   val Schoolings = TableQuery[tables.SchoolingTable]
 
   implicit val getPeoplesByYearAndSex = GetResult(r => PeoplesByYearAndSex(r.<<, r.<<, r.<<))
+  implicit val getPeoplesByYear = GetResult(r => PeoplesByYear(r.<<, r.<<))
   implicit val getProfileWithCode = GetResult(r => ProfileWithCode(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
 
 
@@ -110,6 +111,26 @@ class ProfileRepository @Inject()(protected val tables: Tables,
           profile.sex
       order by profile.year_or_month;
     """.as[PeoplesByYearAndSex]
+    db.run(query)
+  }
+
+  def countPeoplesByCityOnYears(cityCode: String): Future[Vector[PeoplesByYear]] = {
+    val query = sql"""
+      select
+        profile.year_or_month,
+        sum(profile.quantity_of_peoples) as total
+      from
+        profile
+      inner join
+        city
+      on
+        city.id = profile.city_id
+      where
+        city_code = $cityCode
+      group by
+        profile.year_or_month
+      order by profile.year_or_month;
+    """.as[PeoplesByYear]
     db.run(query)
   }
 

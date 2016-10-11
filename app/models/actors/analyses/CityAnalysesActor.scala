@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
+import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.util.Timeout
 import models.db.ProfileRepository
 import models.entity.Profile
@@ -22,6 +23,7 @@ object CityAnalysesActor {
   }
 
   case class CheckCities(father: ActorRef, yearMonth: String, profilesWithCode: Vector[ProfileWithCode])
+
   case class CheckCities2(father: ActorRef, yearMonth: String, profilesWithCode: Seq[Profile])
 
 }
@@ -29,7 +31,6 @@ object CityAnalysesActor {
 class CityAnalysesActor @Inject()(val schoolingFactory: SchoolingAnalysesActor.Factory,
                                   val ageGroupFactory: AgeGroupAnalysesActor.Factory,
                                   val profileRepository: ProfileRepository) extends Actor with InjectedActorSupport {
-
   implicit val timeout: Timeout = 2 minutes
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -37,26 +38,37 @@ class CityAnalysesActor @Inject()(val schoolingFactory: SchoolingAnalysesActor.F
 
   val ageAnalysesActorS = injectedChild(ageGroupFactory(), s"age-group-analyses-single")
   val schoolingAnalysesActorS = injectedChild(schoolingFactory(), s"schooling-analyses-single")
-  var counter : AtomicInteger = new AtomicInteger(0)
+  var counter: AtomicInteger = new AtomicInteger(0)
+
+  var ageGroupRouter = {
+    val routees = Vector.fill(Runtime.getRuntime.availableProcessors()) {
+      val r = injectedChild(ageGroupFactory(), s"age-group-analyses-" + System.nanoTime())
+      context watch r
+      ActorRefRoutee(r)
+    }
+    Router(RoundRobinRoutingLogic(), routees)
+  }
+
+  var schoolingRouter = {
+    val routees = Vector.fill(Runtime.getRuntime.availableProcessors()) {
+      val r =  injectedChild(schoolingFactory(), s"schooling-analyses-" + System.nanoTime())
+      context watch r
+      ActorRefRoutee(r)
+    }
+    Router(RoundRobinRoutingLogic(), routees)
+  }
+
 
   def receive: Receive = LoggingReceive {
 
     case CheckCities(father, yearMonth, profilesWithCode: Vector[ProfileWithCode]) => {
-      println("===== Size "+ profilesWithCode.size)
-      val ageAnalysesActor = injectedChild(ageGroupFactory(), s"age-group-analyses-" + System.nanoTime())
-      val schoolingAnalysesActor = injectedChild(schoolingFactory(), s"schooling-analyses-" + System.nanoTime())
-      schoolingAnalysesActor ! SchoolingAnalysesActor.SchoolingMultiAnalyses(self, yearMonth, profilesWithCode)
-      ageAnalysesActor ! AgeGroupAnalysesActor.AgeGroupMultiAnalyses(self, yearMonth, profilesWithCode)
-    }
-//
-//    case CheckCities2(father, yearMonth, profilesWithCode: Seq[ProfileWithCode]) => {
-//      println("===== Size "+ profilesWithCode.size)
 //      val ageAnalysesActor = injectedChild(ageGroupFactory(), s"age-group-analyses-" + System.nanoTime())
 //      val schoolingAnalysesActor = injectedChild(schoolingFactory(), s"schooling-analyses-" + System.nanoTime())
 //      schoolingAnalysesActor ! SchoolingAnalysesActor.SchoolingMultiAnalyses(self, yearMonth, profilesWithCode)
-//      ageAnalysesActor ! AgeGroupAnalysesActor.AgeGroupMultiAnalyses2(self, yearMonth, profilesWithCode)
-//    }
-
+//      ageAnalysesActor ! AgeGroupAnalysesActor.AgeGroupMultiAnalyses(self, yearMonth, profilesWithCode)
+      ageGroupRouter.route(AgeGroupAnalysesActor.AgeGroupMultiAnalyses(self, yearMonth, profilesWithCode), self)
+      schoolingRouter.route(SchoolingAnalysesActor.SchoolingMultiAnalyses(self, yearMonth, profilesWithCode), self)
+    }
   }
 
 }

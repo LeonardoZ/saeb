@@ -31,4 +31,16 @@ class AgeGroupService @Inject()() {
         ProfilesByAgeGroup(group, totalsOfProfiles.toSeq)
       }.toSeq.filter(_.ageGroup != filterValue).sortBy(_.ageGroup)
   }
+
+  def getAgeGroupChartUnifiedData(profileCityGroup: Seq[ProfileCityGroup]): Seq[ProfilesByAgeGroupUnified] = {
+
+      profileCityGroup.groupBy {
+          case (_, _, ageGroup) => ageGroup.group
+      }.map {
+        case (group, values: Seq[(Profile, City, AgeGroup)]) =>
+          (group, values.map { case (profile, _, _) => profile.quantityOfPeoples }.sum)
+      }.map { case (group, peoples) =>
+        ProfilesByAgeGroupUnified(group, peoples)
+      }.toSeq.filter(_.ageGroup != filterValue).sortBy(_.ageGroup)
+  }
 }

@@ -67,6 +67,9 @@
                 // load simpler charts of city page
                 // those chart doens't need to know the selected year
                 loadInitialGeneralCharts(cityCode);
+
+                // load summary data
+                loadLastYearDataSummary(cityCode);
             }
 
              // unnecessary reload prevention
@@ -78,21 +81,99 @@
                       }
                   }
                   return false;
-              }
+             }
 
+            function loadLastYearDataSummary(cityCode) {
+                 $.ajax({ url: "/profiles/last/year",
+                    dataType: "html",
+                    cache: false,
+                    contentType: "application/json",
+                    type: "POST",
+                    data: JSON.stringify({ cityCode: cityCode }),
+                    success: function (data) {
+                      var $divCityData = $("#city-data")
+                      $divCityData.empty();
+                      $divCityData.append($(data));
+                      roundUtil();
+                  }
+                });
+            }
+
+
+            function roundUtil() {
+                var formatInt = "0,0";
+                var formatPct = "0,00.00";
+                var formatPct4 = "0,00.0000";
+                $.each($(".round-int"), function(key, value) {
+                    var $value = $(value);
+                    var numValue = $value.html();
+                    $value.text(numeral(numValue).format(formatInt));
+                });
+                $.each($(".round-pct"), function(key, value) {
+                    var $value = $(value);
+                    var numValue = $value.html();
+                    $value.text(numeral(numValue).format(formatPct));
+                });
+
+                $.each($(".round-pct4"), function(key, value) {
+                    var $value = $(value);
+                    var numValue = $value.html();
+                    $value.text(numeral(numValue).format(formatPct4));
+                });
+            }
 
             function loadInitialGeneralCharts(cityCode) {
+                baseAjaxRequest("/profiles/year/sex",
+                  { cityCode: cityCode },
+                  function (data) {
+                     // load chart
+                      var $canvas = $("#chart-peoples-by-year-sex").get(0).getContext("2d");
+                      loadPeopleByYearSexGeneralChart($canvas, data.profiles)
+                  }
+                );
+
                 baseAjaxRequest("/profiles/year",
                   { cityCode: cityCode },
                   function (data) {
                      // load chart
                       var $canvas = $("#chart-peoples-by-year").get(0).getContext("2d");
-                      loadPeopleByYearGeneralChart($canvas, data.profiles)
+
+                      var labels =  data.profiles.peoplesByYear.map(function(e) {
+                            return e.yearMonth;
+                      });
+
+                      var peoples = data.profiles.peoplesByYear.map(function(e) {
+                            return e.peoples;
+                      });
+
+                      loadSpecificChartSimple($canvas,
+                       "Evolução do número de eleitores ao longo dos últimos anos",
+                        "#075e89", "Eleitores" ,labels, peoples)
+                  }
+                );
+
+                baseAjaxRequest("/profiles/growth",
+                  { cityCode: cityCode },
+                  function (data) {
+                     // load chart
+                      var $canvas = $("#chart-growth-by-year").get(0).getContext("2d");
+
+                      var labels =  data.profiles.map(function(e) {
+                            return e.range;
+                      });
+
+                      var peoples = data.profiles.map(function(e) {
+                            return e.value;
+                      });
+
+                      loadSpecificChartSimple($canvas,
+                       "Taxa de crescimento de eleitores ao longo dos últimos anos",
+                        "#045e00", "Eleitores" ,labels, peoples)
                   }
                 );
             }
 
-            function loadPeopleByYearGeneralChart($canvas, profiles) {
+            function loadPeopleByYearSexGeneralChart($canvas, profiles) {
 
                 var labels =  profiles.map(function(e) {
                     return e.yearMonth;
@@ -133,7 +214,7 @@
                         },
                         title: {
                             display: true,
-                            text: "Evolução do número de eleitores ao longo dos últimos anos"
+                            text: "Evolução do número de eleitores por sexo ao longo dos últimos anos"
                         }
                     },
                     data: {
@@ -170,6 +251,8 @@
                var chart = new Chart($canvas, chartData);
             }
 
+
+
             function parseYear(year) {
                 var yearInt = Number.parseInt(year.replace("-", ""));
                 var forPostYear = year.length > 4 ? year.replace("-", "") : year;
@@ -180,15 +263,21 @@
                 var forPostYear = parseYear(year);
 
                 var chartAgeGroupId = "#chart-"+year;
+                var chartAgeGroupUniId = "#chart-uni-"+year;
                 var chartSchoolingId = "#chart-sch-"+year;
+                var chartSchoolingUniId = "#chart-sch-uni-"+year;
                 var chartSexId = "#chart-combined-"+year;
 
                 var $chartAgeGroupCanvas = $(chartAgeGroupId).get(0).getContext("2d");
+                var $chartAgeGroupUniCanvas = $(chartAgeGroupUniId).get(0).getContext("2d");
                 var $chartSchoolingCanvas = $(chartSchoolingId).get(0).getContext("2d");
+                var $chartSchoolingUniCanvas = $(chartSchoolingUniId).get(0).getContext("2d");
                 var $chartSexCanvas = $(chartSexId).get(0).getContext("2d");
 
                 var $legendsSex = $("#legend-combined-" + year);
                 var $legendsSchooling = $("#legend-sch-" + year);
+                var $legendsSchoolingUni = $("#legend-sch-uni-" + year);
+                var $legendsAgeUniGroup = $("#legend-age-uni-" + year);
                 var $legendsAgeGroup = $("#legend-age-" + year);
 
                 baseAjaxRequest("/profiles/ageandschooling",
@@ -205,22 +294,69 @@
                     { year: forPostYear, code: cityCode },
                     function (data) {
                         // make age group analyzes available
-                        createAvailableAnalyzesItem(year, "age", "Eleitores por Faixa etária", "users");
+                        createAvailableAnalyzesItem(year, "age", "Eleitores por Faixa etária e Sexo", "users");
                         // load chart
                         loadAgeGroupSpecificChart($chartAgeGroupCanvas, $legendsAgeGroup,data.profiles);
                     });
+
+                baseAjaxRequest("/profiles/agegroup/unified",
+                   { year: forPostYear, code: cityCode },
+                   function (data) {
+                       if (data.profiles.length > 1) {
+                           // make analyzes available
+                           createAvailableAnalyzesItem(year, "age-uni", "Eleitores por Faixa Etária", "users");
+                           var labels =  data.profiles.map(function(e) {
+                                return e.ageGroup;
+                           });
+
+                           var peoples = data.profiles.map(function(e) {
+                                return e.peoples;
+                           });
+
+                          loadSpecificChartSimple($chartAgeGroupUniCanvas,
+                           "Eleitores por Faixa Etária",
+                            "#ffb481", "Eleitores", labels, peoples)
+                       } else {
+                           var $divSchooling = $("#row-uni-"+year);
+                           $divSchooling.remove();
+                       }
+                });
+
 
                 baseAjaxRequest("/profiles/schooling",
                    { year: forPostYear, code: cityCode },
                    function (data) {
                        if (data.profiles.length > 1) {
                            // make analyzes available
-                           createAvailableAnalyzesItem(year, "sch", "Eleitores por Escolaridade", "graduation-cap");
+                           createAvailableAnalyzesItem(year, "sch", "Eleitores por Escolaridade e Sexo", "graduation-cap");
 
                            // load chart
                            loadSchoolingSpecificChart($chartSchoolingCanvas, $legendsSchooling, data.profiles);
                        } else {
                            var $divSchooling = $("#row-sch-"+year);
+                           $divSchooling.remove();
+                       }
+                });
+
+                baseAjaxRequest("/profiles/schooling/unified",
+                   { year: forPostYear, code: cityCode },
+                   function (data) {
+                       if (data.profiles.length > 1) {
+                           // make analyzes available
+                           createAvailableAnalyzesItem(year, "sch-uni", "Eleitores por Escolaridade", "graduation-cap");
+                           var labels =  data.profiles.map(function(e) {
+                                return e.schooling;
+                           });
+
+                           var peoples = data.profiles.map(function(e) {
+                                return e.peoples;
+                           });
+
+                          loadSpecificChartSimple($chartSchoolingUniCanvas,
+                           "Eleitores por Escolaridade",
+                            "#98dead", "Eleitores", labels, peoples)
+                       } else {
+                           var $divSchooling = $("#row-sch-uni-"+year);
                            $divSchooling.remove();
                        }
                 });
@@ -375,6 +511,57 @@
                     "height": 500
                 });
                 return chartData;
+            }
+
+
+            function loadSpecificChartSimple($canvas, title, color, labelDescription ,labels, datas) {
+                var chartData = {
+                    type: "bar",
+                    options: {
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItems, data) {
+                                    var pre = data.datasets[tooltipItems.datasetIndex].label;
+                                    return pre + ": " + numeral(tooltipItems.yLabel).format('0,0');
+                                }
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: false,
+                                    callback: function(value, index, values) {
+                                        return numeral(value).format('0,0');
+                                    }
+                                }
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: title
+                        }
+                    },
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                pointRadius: 10,
+                                spanGaps: true,
+                                lineTension: 0,
+                                fill: false,
+                                label: labelDescription,
+                                backgroundColor : color,
+                                data : datas
+                            }
+                        ]
+                    }
+                };
+
+               $($canvas).css({
+                   "width": 750,
+                   "height": 400
+               });
+               var chart = new Chart($canvas, chartData);
             }
 
             function loadAgeGroupSpecificChart($chartCanvas, $legend , profiles) {
