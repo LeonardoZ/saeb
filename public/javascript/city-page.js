@@ -120,6 +120,8 @@
                     var numValue = $value.html();
                     $value.text(numeral(numValue).format(formatPct4));
                 });
+
+
             }
 
             function loadInitialGeneralCharts(cityCode) {
@@ -139,7 +141,8 @@
                       var $canvas = $("#chart-peoples-by-year").get(0).getContext("2d");
 
                       var labels =  data.profiles.peoplesByYear.map(function(e) {
-                            return e.yearMonth;
+                            return e.yearMonth.length > 4 ? e.yearMonth.substring(0, 4)
+                                + " - " + e.yearMonth.substring(4) : e.yearMonth;
                       });
 
                       var peoples = data.profiles.peoplesByYear.map(function(e) {
@@ -148,7 +151,7 @@
 
                       loadSpecificChartSimple($canvas,
                        "Evolução do número de eleitores ao longo dos últimos anos",
-                        "#075e89", "Eleitores" ,labels, peoples)
+                        "#075e89", "Eleitores" ,labels, peoples, "0,0")
                   }
                 );
 
@@ -168,7 +171,7 @@
 
                       loadSpecificChartSimple($canvas,
                        "Taxa de crescimento de eleitores ao longo dos últimos anos",
-                        "#045e00", "Eleitores" ,labels, peoples)
+                        "#045e00", "Eleitores" ,labels, peoples, "0.0%")
                   }
                 );
             }
@@ -176,7 +179,8 @@
             function loadPeopleByYearSexGeneralChart($canvas, profiles) {
 
                 var labels =  profiles.map(function(e) {
-                    return e.yearMonth;
+                    return e.yearMonth.length > 4 ? e.yearMonth.substring(0, 4)
+                               + " - " + e.yearMonth.substring(4) : e.yearMonth;;
                 });
 
                var dataM = profiles.map(function(e) {
@@ -226,8 +230,8 @@
                                 lineTension: 0,
                                 fill: false,
                                 label: "Feminino",
-                                backgroundColor : "#e57575",
-                                strokeColor : "#e39292",
+                                backgroundColor : "#f25959",
+                                strokeColor : "#f25959",
                                 data : dataF
                             },{
                                 pointRadius: 10,
@@ -236,7 +240,7 @@
                                 fill: false,
                                 label: "Masculino",
                                 backgroundColor : "#6d8cc2",
-                                strokeColor : "#849bc2",
+                                strokeColor : "#6d8cc2",
                                 data : dataM
                             }
 
@@ -296,7 +300,7 @@
                         // make age group analyzes available
                         createAvailableAnalyzesItem(year, "age", "Eleitores por Faixa etária e Sexo", "users");
                         // load chart
-                        loadAgeGroupSpecificChart($chartAgeGroupCanvas, $legendsAgeGroup,data.profiles);
+                        loadAgeGroupSpecificChart($chartAgeGroupCanvas, $legendsAgeGroup, data.profiles);
                     });
 
                 baseAjaxRequest("/profiles/agegroup/unified",
@@ -315,7 +319,7 @@
 
                           loadSpecificChartSimple($chartAgeGroupUniCanvas,
                            "Eleitores por Faixa Etária",
-                            "#ffb481", "Eleitores", labels, peoples)
+                            "#ba3232", "Eleitores", labels, peoples)
                        } else {
                            var $divSchooling = $("#row-uni-"+year);
                            $divSchooling.remove();
@@ -354,7 +358,7 @@
 
                           loadSpecificChartSimple($chartSchoolingUniCanvas,
                            "Eleitores por Escolaridade",
-                            "#98dead", "Eleitores", labels, peoples)
+                            "#4e4781", "Eleitores", labels, peoples)
                        } else {
                            var $divSchooling = $("#row-sch-uni-"+year);
                            $divSchooling.remove();
@@ -481,25 +485,19 @@
                         datasets: [
                             {
                                 label: "Feminino",
-                                backgroundColor : "#e57575",
-                                strokeColor : "#e39292",
-                                pointColor : "#fff",
-                                pointStrokeColor : "#b86da6",
+                                backgroundColor : "#ee2929",
+                                strokeColor : "#e24d4d",
                                 data : dataF
                             },{
                                 label: "Masculino",
-                                backgroundColor : "#6d8cc2",
-                                strokeColor : "#849bc2",
-                                pointColor : "#fff",
-                                pointStrokeColor : "#6db2b8",
+                                backgroundColor : "#3572dd",
+                                strokeColor : "#4b76c1",
                                 data : dataM
                             },
                             {
                                 label: "Não informado",
-                                backgroundColor : "#ACC26D",
-                                strokeColor : "rgba(172,194,132,0.4)",
-                                pointColor : "#fff",
-                                pointStrokeColor : "#9DB86D",
+                                backgroundColor : "#c34fb5",
+                                strokeColor : "#a05697",
                                 data : dataN
                             }
                         ]
@@ -508,13 +506,13 @@
 
                 $($chartCanvas).css({
                     "width": 750,
-                    "height": 500
+                    "height": 400
                 });
                 return chartData;
             }
 
 
-            function loadSpecificChartSimple($canvas, title, color, labelDescription ,labels, datas) {
+            function loadSpecificChartSimple($canvas, title, color, labelDescription ,labels, datas, format) {
                 var chartData = {
                     type: "bar",
                     options: {
@@ -522,7 +520,7 @@
                             callbacks: {
                                 label: function(tooltipItems, data) {
                                     var pre = data.datasets[tooltipItems.datasetIndex].label;
-                                    return pre + ": " + numeral(tooltipItems.yLabel).format('0,0');
+                                    return pre + ": " + numeral(tooltipItems.yLabel).format(format);
                                 }
                             }
                         },
@@ -531,7 +529,7 @@
                                 ticks: {
                                     beginAtZero: false,
                                     callback: function(value, index, values) {
-                                        return numeral(value).format('0,0');
+                                        return numeral(value).format(format);
                                     }
                                 }
                             }]
@@ -613,9 +611,14 @@
                                 {
                                     data: [dataF, dataM, dataN],
                                     backgroundColor: [
-                                        "#e39292",
-                                        "#6d8cc2",
-                                        "#ACC26D"
+                                        "#ee2929",
+                                        "#3572dd",
+                                        "#c34fb5"
+                                    ],
+                                    strokeColor: [
+                                        "#e24d4d",
+                                        "#4b76c1",
+                                        "#a05697"
                                     ]
                                 }
                             ]
@@ -624,16 +627,27 @@
 
                     $($chartCanvas).css({
                         "width": 550,
-                        "height": 300
+                        "height": 200
                     });
 
 
                     var chart = new Chart($chartCanvas, chartData);
                     return chart;
-                }
+            }
 
+
+            function loadSmooth(){
+               $(document).on('click', 'a', function(event){
+                   event.preventDefault();
+
+                   $('html, body').animate({
+                       scrollTop: $( $.attr(this, 'href') ).offset().top
+                   }, 500);
+               });
+            }
 
             onLoad();
+            loadSmooth();
     }
     cityPageModule();
 

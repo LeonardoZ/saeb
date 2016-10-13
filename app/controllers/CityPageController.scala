@@ -46,7 +46,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     }
   }
 
-
+ // General Chart
   def getPopulationGrowthData = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[CityCode] = request.body.validate[CityCode](cityCodeReads)
     jsonResult.fold(
@@ -62,15 +62,19 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
 
   def loadPopulationGrowthData(cityCode: CityCode): Future[Result] = {
     profileRepository.countPeoplesByCityOnYears(cityCode.cityCode).flatMap { counts =>
-      val growties: Vector[Growth] = counts.zip(counts.tail).map {
+      val ys = filterLastYears(counts.map(_.yearMonth))
+      val rx = counts.filter(r => ys.contains(r.yearMonth))
+
+      val growths: Vector[Growth] = rx.zip(rx.tail).map {
         case (past, present) => {
-          val range = s"${past.yearMonth} - ${present.yearMonth}"
-          val value = ((present.peoples - past.peoples).toDouble / past.peoples) * 100
+          val range = s"${yearMonthFormat(past.yearMonth)} - ${yearMonthFormat(present.yearMonth)}"
+          val value = ((present.peoples - past.peoples).toDouble / past.peoples)
           Growth(range, value)
         }
       }
+
       Future {
-        Ok(Json.obj("profiles" -> growties))
+        Ok(Json.obj("profiles" -> growths))
       }
     }
   }
@@ -207,6 +211,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     }
   }
 
+  // General Chart
   def getPeoplesByYearAndSex = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[CityCode] = request.body.validate[CityCode](cityCodeReads)
     jsonResult.fold(
@@ -223,7 +228,11 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
               Ok(Json.obj("profiles" -> Map[String, Int]()))
             }
           else {
-            val peoplesCount: Seq[PeoplesByYearAndSexGrouped] = result.groupBy(_.yearMonth).map {
+            val resultBy = result.groupBy(_.yearMonth)
+            val ys = filterLastYears(resultBy.map(_._1).toSeq)
+            val rx = resultBy.filter(r => ys.contains(r._1))
+
+            val peoplesCount: Seq[PeoplesByYearAndSexGrouped] = rx.map {
               case (year, peoplesByYear) =>
                 PeoplesByYearAndSexGrouped(year, peoplesByYear.groupBy(_.sex).map {
                   case (sex, peoplesBySex) =>
@@ -240,7 +249,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     )
   }
 
-
+  // General Chart
   def getPeoplesByYear = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[CityCode] = request.body.validate[CityCode](cityCodeReads)
     jsonResult.fold(
@@ -251,14 +260,16 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
       },
       yearCityCode => {
         val profilesF = profileRepository.countPeoplesByCityOnYears(yearCityCode.cityCode)
-        profilesF flatMap { result =>
+        profilesF flatMap { (result: Vector[PeoplesByYear]) =>
           if (result.isEmpty)
             Future {
               Ok(Json.obj("profiles" -> Map[String, Int]()))
             }
           else {
+            val ys = filterLastYears(result.map(_.yearMonth))
+            val rx = result.filter(r => ys.contains(r.yearMonth))
             Future {
-              Ok(Json.obj("profiles" -> PeoplesByYearGrouped(result)))
+              Ok(Json.obj("profiles" -> PeoplesByYearGrouped(rx)))
             }
           }
         }
@@ -266,6 +277,14 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     )
   }
 
+  def filterLastYears(ys: Seq[String]) = {
+    val validYears = ys.map {
+      case y if y.length == 4 => ys.filter(_.startsWith(y)).last
+      case x if x.length == 6 =>
+        if (ys.filter(_.startsWith(x.substring(0, 4))).size == 1) x else ""
+    }.filter(!_.isEmpty)
+    validYears
+  }
   def getQuantityForSchoolingAndAgeGroup = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[YearCityCode] = request.body.validate[YearCityCode](yearCityCodeReads)
     jsonResult.fold(

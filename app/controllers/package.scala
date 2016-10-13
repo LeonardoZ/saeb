@@ -55,5 +55,7 @@ package object controllers {
       (valueId, newYear)
     }.sortBy(_._2).reverse
 
+  def yearMonthFormat(year: String) = if (year.length > 4) year.substring(0, 4) + "-" + year.substring(4) else year
+
 
 }

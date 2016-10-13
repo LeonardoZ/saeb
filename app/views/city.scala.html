@@ -100,52 +100,74 @@
                         <div class="page-header">
                             <h3>Análises gerais dos eleitores de <small>@city.name</small> </h3>
                         </div>
-                       <!-- Chart peoples by year and sex -->
-                        <div class="row">
-                            <div class="col-lg-10 col-lg-offset-1">
-                                <div class="panel-group">
-                                    <div class="panel panel-warning">
-                                        <div class="panel-heading">
-                                            <strong>Evolução do Número de Eleitores por sexo</strong>
-                                        </div>
-                                        <div class="panel-body">
-                                            <canvas id="chart-peoples-by-year-sex" width="750" height="400"></canvas>
-                                        </div>
-                                        <hr />
-                                    </div>
-                                </div>
-                            </div>
-                       </div>
-                       <!-- Chart peoples by year -->
-                       <div class="row">
-                            <div class="col-lg-10 col-lg-offset-1">
-                                <div class="panel-group">
-                                    <div class="panel panel-warning">
-                                        <div class="panel-heading">
-                                            <strong>Número de eleitores por ano registrado</strong>
-                                        </div>
-                                        <div class="panel-body">
-                                            <canvas id="chart-peoples-by-year" width="750" height="400"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                       </div>
-                        <!-- Chart population growth-->
-                       <div class="row">
-                            <div class="col-lg-10 col-lg-offset-1">
-                                <div class="panel-group">
-                                    <div class="panel panel-warning">
-                                        <div class="panel-heading">
-                                            <strong>Taxa de crescimento de eleitores por ano registrado</strong>
-                                        </div>
-                                        <div class="panel-body">
-                                            <canvas id="chart-growth-by-year" width="750" height="400"></canvas>
+                         <ul id="ul-general" class="nav nav-pills nav-justified">
+                                <li class="general-tab">
+                                    <a class="general-tab-anchor" data-toggle="pill" href="#tab-pane-bysex">
+                                       <strong>Evolução do número de eleitores por sexo</strong>
+                                    </a>
+                                </li>
+                                <li class="general-tab">
+                                    <a class="general-tab-anchor" data-toggle="pill" href="#tab-pane-byyear">
+                                       <strong>Número de eleitores por registros</strong>
+                                    </a>
+                                </li>
+                                <li class="general-tab">
+                                    <a class="general-tab-anchor" data-toggle="pill" href="#tab-pane-byrate">
+                                       <strong>Taxa de crescimento de eleitores</strong>
+                                    </a>
+                                </li>
+                         </ul>
+                         <hr />
+                         <div id="general-tab-content" class="tab-content">
+                           <div id="tab-pane-bysex" class="tab-pane fade in active">
+                               <div class="col-lg-12">
+                                    <div class="panel-group">
+                                        <div class="panel panel-warning">
+                                            <div class="panel-heading">
+                                                <strong>Evolução do Número de Eleitores por sexo</strong>
+                                            </div>
+                                            <div class="panel-body">
+                                                <canvas id="chart-peoples-by-year-sex" width="750" height="400"></canvas>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                       </div>
+                               </div>
+                           </div>
+
+                           <div id="tab-pane-byyear" class="tab-pane fade">
+                               <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="panel-group">
+                                            <div class="panel panel-warning">
+                                                <div class="panel-heading">
+                                                    <strong>Número de eleitores por registros</strong>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <canvas id="chart-peoples-by-year" width="750" height="400"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                               </div>
+                           </div>
+
+                           <div id="tab-pane-byrate" class="tab-pane fade">
+                               <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="panel-group">
+                                            <div class="panel panel-warning">
+                                                <div class="panel-heading">
+                                                    <strong>Taxa de crescimento dos eleitores por registros</strong>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <canvas id="chart-growth-by-year" width="750" height="400"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                               </div>
+                           </div>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -155,20 +177,19 @@
     <!-- Profile charts specific by year -->
     <div class="row">
         <div class="col-lg-12">
-
             <div class="panel with-nav-tabs panel-success">
                 <div class="panel-heading">
-                         <div class="page-header">
-                            <h3>Perfil dos eleitores de <small>@city.name</small></h3>
-                        </div>
+                    <div class="page-header">
+                        <h3>Perfil dos eleitores de <small>@city.name</small></h3>
+                    </div>
                     <ul id="ul-years" class="nav nav-tabs nav-justified">
-                        @result.yearMonths.reverse.map { year =>
-                            <li class="year-tab">
-                                <a class="year-tab-anchor" data-toggle="tab" data-year="@year" href="#tab-pane-@year">
-                                   <strong>@year</strong>
-                                </a>
-                            </li>
-                        }
+                         @result.yearMonths.reverse.map { year =>
+                             <li class="year-tab">
+                                 <a class="year-tab-anchor" data-toggle="tab" data-year="@year" href="#tab-pane-@year">
+                                    <strong>@year</strong>
+                                 </a>
+                             </li>
+                         }
                     </ul>
                 </div>
                 <div class="panel-body panel-content">
@@ -177,19 +198,21 @@
                         @result.yearMonths.reverse.map { year =>
                         <div id="tab-pane-@year" class="tab-pane fade">
                             <div class="row">
-                                <div class="col-lg-10 col-lg-offset-1">
+                                <div class="col-lg-12">
                                     <h3 id="adisp-@year">Análises disponíveis para @city.name (@year)</h3>
                                     <ul id="analyzes-@year" class="list-group">
                                     </ul>
                                 </div>
                             </div>
+
+                            <!-- Chart Scooling/Age Group -->
                             <div id="row-agesch-@year" class="row">
-                                <div class="col-lg-10 col-lg-offset-1">
-                                    <div class="panel with-nav-tabs panel-info">
-                                        <div class="panel-heading">
-                                            <h4><strong>Eleitores por Escolaridade e Faixa etária (@year)</strong></h4>
-                                        </div>
+                                <div class="col-lg-12">
+                                    <div class="panel with-nav-tabs panel-default">
                                         <div class="panel-body panel-content">
+                                               <div class="page-header">
+                                                    <h4>Eleitores por Escolaridade e Faixa etária (@year)</h4>
+                                                </div>
                                                <table id="schooling-age-group-table-@year" class="table table-bordered table-hover">
                                                    <thead>
                                                    <tr>
@@ -208,15 +231,16 @@
                                 </div>
                             </div>
                             <hr />
+                            <!-- Chart Age Group by Sex -->
                             <div id="row-age-@year" class="row">
-                                <div class="col-lg-10 col-lg-offset-1">
-                                    <div class="panel with-nav-tabs panel-info">
-                                        <div class="panel-heading">
-                                            <h4><strong>Eleitores por Faixa Etária e Sexo(@year)</strong></h4>
-                                        </div>
+                                <div class="col-lg-12">
+                                    <div class="panel with-nav-tabs panel-default">
                                         <div class="panel-body panel-content">
+                                            <div class="page-header">
+                                                <h4>Eleitores por Faixa Etária e Sexo (@year)</h4>
+                                            </div>
                                             <div id="legend-age-@year" class="chart-legend"></div>
-                                            <canvas id="chart-@year" width="750" height="500"></canvas>
+                                            <canvas id="chart-@year" width="750" height="400"></canvas>
                                         </div>
                                     </div>
                                     <br />
@@ -225,15 +249,16 @@
                             </div>
                             <hr />
 
+                            <!-- Chart Age Group -->
                             <div id="row-age-uni-@year" class="row">
-                                <div class="col-lg-10 col-lg-offset-1">
-                                    <div class="panel with-nav-tabs panel-info">
-                                        <div class="panel-heading">
-                                            <h4><strong>Eleitores por Faixa Etária (@year)</strong></h4>
-                                        </div>
+                                <div class="col-lg-12">
+                                    <div class="panel with-nav-tabs panel-default">
                                         <div class="panel-body panel-content">
+                                            <div class="page-header">
+                                                <h4>Eleitores por Faixa Etária (@year)</h4>
+                                            </div>
                                             <div id="legend-age-uni-@year" class="chart-legend"></div>
-                                            <canvas id="chart-uni-@year" width="750" height="500"></canvas>
+                                            <canvas id="chart-uni-@year" width="750" height="400"></canvas>
                                         </div>
                                     </div>
                                     <br />
@@ -242,14 +267,16 @@
                             </div>
                             <hr />
 
+                            <!-- Chart Schooling by Sex -->
                             <div id="row-sch-@year" class="row">
-                                    <div class="col-lg-10 col-lg-offset-1">
-                                        <div class="panel with-nav-tabs panel-info">
-                                            <div class="panel-heading"><h4><strong>Eleitores por nível de Escolaridade e sexo (@year)</strong></h4>
-                                                </div>
+                                    <div class="col-lg-12">
+                                        <div class="panel with-nav-tabs panel-default">
                                             <div class="panel-body panel-content">
+                                                <div class="page-header">
+                                                    <h4>Eleitores por nível de Escolaridade e sexo (@year)</h4>
+                                                </div>
                                                 <div id="legend-sch-@year"></div>
-                                                <canvas id="chart-sch-@year" width="750" height="500"></canvas>
+                                                <canvas id="chart-sch-@year" width="750" height="400"></canvas>
                                             </div>
                                         </div>
                                         <br />
@@ -259,14 +286,16 @@
                             </div>
                             <hr />
 
+                            <!-- Chart Schooling -->
                             <div id="row-sch-uni-@year" class="row">
-                                    <div class="col-lg-10 col-lg-offset-1">
-                                        <div class="panel with-nav-tabs panel-info">
-                                            <div class="panel-heading"><h4><strong>Eleitores por nível de Escolaridade (@year)</strong></h4>
-                                                </div>
+                                    <div class="col-lg-12">
+                                        <div class="panel with-nav-tabs panel-default">
                                             <div class="panel-body panel-content">
+                                                <div class="page-header">
+                                                    <h4>Eleitores por nível de Escolaridade (@year)</h4>
+                                                </div>
                                                 <div id="legend-sch-uni-@year"></div>
-                                                <canvas id="chart-sch-uni-@year" width="750" height="500"></canvas>
+                                                <canvas id="chart-sch-uni-@year" width="750" height="400"></canvas>
                                             </div>
                                         </div>
                                         <br />
@@ -276,14 +305,16 @@
                             </div>
                             <hr />
 
+                            <!-- Chart by sex -->
                             <div id="row-combined-@year" class="row">
-                                <div class="col-lg-10 col-lg-offset-1">
-                                    <div class="panel with-nav-tabs panel-info">
-                                        <div class="panel-heading"><h4><strong>Eleitores por sexo registrados (@year)</strong></h4>
-                                            </div>
+                                <div class="col-lg-12">
+                                    <div class="panel with-nav-tabs panel-default">
                                         <div class="panel-body panel-content">
+                                            <div class="page-header">
+                                                <h4>Eleitores por sexo registrados (@year)</h4>
+                                            </div>
                                             <div id="legend-combined-@year"></div>
-                                            <canvas id="chart-combined-@year" width="550" height="300"></canvas>
+                                            <canvas id="chart-combined-@year" width="550" height="200"></canvas>
                                         </div>
                                     </div>
                                     <br />
