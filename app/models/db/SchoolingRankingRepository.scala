@@ -3,10 +3,12 @@ package models.db
 import javax.inject.Inject
 
 import models.entity.{City, Schooling, SchoolingRanking}
+import models.query.YearOrMonth
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
+import slick.jdbc.GetResult
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,12 +24,24 @@ class SchoolingRankingRepository @Inject()(protected val tables: Tables,
   val Cities = TableQuery[tables.CityTable]
   val Schoolings = TableQuery[tables.SchoolingTable]
 
+
+  implicit val getYearOrMonth = GetResult(r => YearOrMonth(r.<<))
+
   def getById(schoolingId: Int): Future[Option[SchoolingRanking]] = db.run {
     SchoolingRankings.filter(_.id === schoolingId).result.headOption
   }
 
   def getAll(): Future[Seq[SchoolingRanking]] = db.run {
     SchoolingRankings.result
+  }
+
+  def getYears(): Future[Vector[YearOrMonth]] = {
+    val query =
+      sql"""
+        select year_or_month from schooling_ranking
+        group by year_or_month;
+      """.as[YearOrMonth]
+    db.run(query)
   }
 
   def getAllByYearMonth(yearMonth: String): Future[Seq[SchoolingRanking]] = db.run {

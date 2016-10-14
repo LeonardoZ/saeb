@@ -122,12 +122,12 @@
                            <div id="tab-pane-bysex" class="tab-pane fade in active">
                                <div class="col-lg-12">
                                     <div class="panel-group">
-                                        <div class="panel panel-warning">
-                                            <div class="panel-heading">
-                                                <strong>Evolução do Número de Eleitores por sexo</strong>
-                                            </div>
+                                        <div class="panel panel-default">
                                             <div class="panel-body">
-                                                <canvas id="chart-peoples-by-year-sex" width="750" height="400"></canvas>
+                                                <div class="page-header">
+                                                    <h4>Evolução do Número de Eleitores por sexo</h4>
+                                                </div>
+                                                <canvas id="chart-peoples-by-year-sex" width="750" height="350"></canvas>
                                             </div>
                                         </div>
                                     </div>
@@ -138,12 +138,12 @@
                                <div class="row">
                                     <div class="col-lg-12">
                                         <div class="panel-group">
-                                            <div class="panel panel-warning">
-                                                <div class="panel-heading">
-                                                    <strong>Número de eleitores por registros</strong>
-                                                </div>
+                                            <div class="panel panel-default">
                                                 <div class="panel-body">
-                                                    <canvas id="chart-peoples-by-year" width="750" height="400"></canvas>
+                                                    <div class="page-header">
+                                                        <h4>Número de eleitores por registros</h4>
+                                                    </div>
+                                                    <canvas id="chart-peoples-by-year" width="750" height="350"></canvas>
                                                 </div>
                                             </div>
                                         </div>
@@ -155,11 +155,11 @@
                                <div class="row">
                                     <div class="col-lg-12">
                                         <div class="panel-group">
-                                            <div class="panel panel-warning">
-                                                <div class="panel-heading">
-                                                    <strong>Taxa de crescimento dos eleitores por registros</strong>
-                                                </div>
+                                            <div class="panel panel-default">
                                                 <div class="panel-body">
+                                                    <div class="page-header">
+                                                        <h4>Taxa de crescimento dos eleitores por registros</h4>
+                                                    </div>
                                                     <canvas id="chart-growth-by-year" width="750" height="400"></canvas>
                                                 </div>
                                             </div>
@@ -176,13 +176,13 @@
     <hr />
     <!-- Profile charts specific by year -->
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-sm-12">
             <div class="panel with-nav-tabs panel-success">
                 <div class="panel-heading">
                     <div class="page-header">
                         <h3>Perfil dos eleitores de <small>@city.name</small></h3>
                     </div>
-                    <ul id="ul-years" class="nav nav-tabs nav-justified">
+                    <ul id="ul-years" class="nav nav-tabs responsive">
                          @result.yearMonths.reverse.map { year =>
                              <li class="year-tab">
                                  <a class="year-tab-anchor" data-toggle="tab" data-year="@year" href="#tab-pane-@year">
@@ -193,7 +193,7 @@
                     </ul>
                 </div>
                 <div class="panel-body panel-content">
-                    <div id="year-tab-content" class="tab-content">
+                    <div id="year-tab-content" class="tab-content responsive">
                         <br />
                         @result.yearMonths.reverse.map { year =>
                         <div id="tab-pane-@year" class="tab-pane fade">
@@ -227,7 +227,7 @@
                                         </div>
                                     </div>
                                     <br />
-                                    <a href="#adisp-@year">Voltar ao topo</a>
+                                    <a class="smooth" href="#adisp-@year">Voltar ao topo</a>
                                 </div>
                             </div>
                             <hr />

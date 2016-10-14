@@ -45,8 +45,8 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
           Redirect(routes.RankingController.schoolingAnalysesPage)
         }
       },
-      analyses => dataImportRepository.getAll flatMap { imports =>
-        val years = importsToYearsForView(imports)
+      analyses => dataImportRepository.getAll flatMap { yearMonths =>
+        val years = importsToYearsForView(yearMonths)
         (for {
           transformed <- schoolingTransformation(analyses.yearMonth)
           rankings <- schoolingViewParser(transformed)
@@ -62,9 +62,9 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
   }
 
   def schoolingAnalysesPage = Action.async { implicit request =>
-    dataImportRepository.getAll flatMap { imports =>
-      val years = importsToYearsForView(imports)
-      val lastYear = imports.last.fileYear+imports.last.fileMonth
+    schoolingRankingRepository.getYears flatMap { yearMonths =>
+      val years = formatYears(yearMonths)
+      val lastYear = years.last._2
       (for {
         transformed <- schoolingTransformation(lastYear)
         rankings <- schoolingViewParser(transformed)
@@ -131,12 +131,6 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
     }
   }
 
-
-
-
-
-
-
   def ageGroupViewRequest = Action.async { implicit request =>
     analysesForm.bindFromRequest.fold(
       error => {
@@ -161,9 +155,9 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
   }
 
   def ageGroupAnalysesPage = Action.async { implicit request =>
-    dataImportRepository.getAll flatMap { imports =>
-      val years = importsToYearsForView(imports)
-      val lastYear = imports.last.fileYear+imports.last.fileMonth
+    schoolingRankingRepository.getYears flatMap { yearMonths =>
+      val years = formatYears(yearMonths)
+      val lastYear = years.last._2
       (for {
         transformed <- ageGroupTransformation(lastYear)
         rankings <- ageGroupViewParser(transformed)

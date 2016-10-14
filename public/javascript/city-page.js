@@ -99,7 +99,6 @@
                 });
             }
 
-
             function roundUtil() {
                 var formatInt = "0,0";
                 var formatPct = "0,00.00";
@@ -120,8 +119,6 @@
                     var numValue = $value.html();
                     $value.text(numeral(numValue).format(formatPct4));
                 });
-
-
             }
 
             function loadInitialGeneralCharts(cityCode) {
@@ -220,6 +217,7 @@
                             display: true,
                             text: "Evolução do número de eleitores por sexo ao longo dos últimos anos"
                         }
+
                     },
                     data: {
                         labels: labels,
@@ -288,7 +286,7 @@
                     { year: forPostYear, code: cityCode },
                     function (data) {
                         // make age group analyzes available
-                        createAvailableAnalyzesItem(year, "agesch", "Eleitores por Escolaridade e Faixa etária",
+                        createAvailableAnalyzesItem(year, "agesch", "Escolaridade e Faixa etária",
                             "sort-numeric-asc");
                         // load chart
                         loadAgeSchoolingSpecificTable(year, data.profiles);
@@ -298,7 +296,7 @@
                     { year: forPostYear, code: cityCode },
                     function (data) {
                         // make age group analyzes available
-                        createAvailableAnalyzesItem(year, "age", "Eleitores por Faixa etária e Sexo", "users");
+                        createAvailableAnalyzesItem(year, "age", "Faixa Etária e Sexo", "users");
                         // load chart
                         loadAgeGroupSpecificChart($chartAgeGroupCanvas, $legendsAgeGroup, data.profiles);
                     });
@@ -308,7 +306,7 @@
                    function (data) {
                        if (data.profiles.length > 1) {
                            // make analyzes available
-                           createAvailableAnalyzesItem(year, "age-uni", "Eleitores por Faixa Etária", "users");
+                           createAvailableAnalyzesItem(year, "age-uni", "Faixa Etária", "users");
                            var labels =  data.profiles.map(function(e) {
                                 return e.ageGroup;
                            });
@@ -332,7 +330,7 @@
                    function (data) {
                        if (data.profiles.length > 1) {
                            // make analyzes available
-                           createAvailableAnalyzesItem(year, "sch", "Eleitores por Escolaridade e Sexo", "graduation-cap");
+                           createAvailableAnalyzesItem(year, "sch", "Escolaridade e Sexo", "graduation-cap");
 
                            // load chart
                            loadSchoolingSpecificChart($chartSchoolingCanvas, $legendsSchooling, data.profiles);
@@ -347,7 +345,7 @@
                    function (data) {
                        if (data.profiles.length > 1) {
                            // make analyzes available
-                           createAvailableAnalyzesItem(year, "sch-uni", "Eleitores por Escolaridade", "graduation-cap");
+                           createAvailableAnalyzesItem(year, "sch-uni", "Escolaridade", "graduation-cap");
                            var labels =  data.profiles.map(function(e) {
                                 return e.schooling;
                            });
@@ -370,7 +368,7 @@
                        function (data) {
                            if (data.profiles.length > 1) {
                                // make analyzes available
-                               createAvailableAnalyzesItem(year, "combined", "Proporção de Eleitores por Sexo", "venus-mars");
+                               createAvailableAnalyzesItem(year, "combined", "Proporção dos sexos", "venus-mars");
                                // load chart
                                loadSexSpecificChart($chartSexCanvas, $legendsSex, data.profiles);
                            } else {
@@ -410,7 +408,14 @@
 
                 $li.append($i);
                 $li.append($a);
-                $("#analyzes-" + year).append($li)
+                var $ul = $("#analyzes-" + year);
+                $ul .append($li)
+
+                var items = $ul.children("li").get();
+                items.sort(function(a, b) {
+                   return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
+                })
+                $.each(items, function(idx, itm) { $ul.append(itm); });
             }
 
             function loadAgeSchoolingSpecificTable(year, profiles) {
@@ -437,7 +442,8 @@
                    $tbody.append(row);
                });
                var $table = $("#schooling-age-group-table-" + year).DataTable({
-                    "language": dataTableLanguage
+                    "language": dataTableLanguage,
+                    "responsive": true
               });
             }
 
@@ -537,7 +543,7 @@
                         title: {
                             display: true,
                             text: title
-                        }
+                        },
                     },
                     data: {
                         labels: labels,
@@ -557,7 +563,7 @@
 
                $($canvas).css({
                    "width": 750,
-                   "height": 400
+                   "height": 350
                });
                var chart = new Chart($canvas, chartData);
             }
@@ -637,7 +643,7 @@
 
 
             function loadSmooth(){
-               $(document).on('click', 'a', function(event){
+               $(document).on('click', '#ul-years a, .smooth', function(event){
                    event.preventDefault();
 
                    $('html, body').animate({

@@ -20,7 +20,7 @@
                         <div class="form-inline block-form ">
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label class="sr-only">Primeira cidade: </label>
+                                        <label>Primeira cidade: </label>
                                         <select id="firstCity-input" name="cityCode" required="true"
                                                 class="form-control input-search" tabindex="1" aria-hidden="true">
                                         </select>
@@ -28,7 +28,7 @@
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label class="sr-only">Segunda cidade: </label>
+                                        <label>Segunda cidade: </label>
                                         <select id="secondCity-input" name="cityCode" required="true"
                                                 class="form-control input-lg input-search" tabindex="2" aria-hidden="true" >
                                         </select>
@@ -36,14 +36,14 @@
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label class="sr-only">Ano: </label>
+                                        <label>Ano de comparação: </label>
                                         <select id="year-select" class="form-control" tabindex="3">
                                             @years.map { case (year, yearMonth) =>
                                                 <option value=@yearMonth>@year</option>
                                             }
                                         </select>
-                                        <button id="btn-compare" disabled="disabled" tabindex="4" class="btn btn-default">Comparar</button>
                                     </div>
+                                    <!--<button id="btn-compare" disabled="disabled" tabindex="4" class="btn btn-default">Comparar</button>-->
                                 </div>
                         </div>
                     </div>

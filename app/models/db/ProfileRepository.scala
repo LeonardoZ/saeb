@@ -17,8 +17,6 @@ import scala.util.Try
 class ProfileRepository @Inject()(protected val tables: Tables,
                                   protected val dbConfigProvider: DatabaseConfigProvider) {
 
-
-
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
