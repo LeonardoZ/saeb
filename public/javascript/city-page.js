@@ -216,7 +216,9 @@
                         title: {
                             display: true,
                             text: "Evolução do número de eleitores por sexo ao longo dos últimos anos"
-                        }
+                        },
+                        animation: true,
+                        maintainAspectRatio: false
 
                     },
                     data: {
@@ -484,7 +486,10 @@
                         title: {
                             display: true,
                             text: title
-                        }
+                        },
+                        animation: true,
+                        maintainAspectRatio: false
+
                     },
                     data: {
                         labels: labels,
@@ -544,6 +549,8 @@
                             display: true,
                             text: title
                         },
+                        animation: true,
+                        maintainAspectRatio: false
                     },
                     data: {
                         labels: labels,
@@ -609,7 +616,9 @@
                             title: {
                                 display: true,
                                 text: "Proporção entre eleitores dos sexos registrados"
-                            }
+                            },
+                            animation: true,
+                            maintainAspectRatio: false
                         },
                         data: {
                             labels: ["Feminino", "Masculino", "Não Informado"],
@@ -650,6 +659,7 @@
                        scrollTop: $( $.attr(this, 'href') ).offset().top
                    }, 500);
                });
+               Chart.defaults.global.maintainAspectRatio = true;
             }
 
             onLoad();

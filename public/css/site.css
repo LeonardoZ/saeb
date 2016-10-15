@@ -55,7 +55,6 @@ footer {
   border-top: 1px solid #d2d6de;
 }
 
-
 .login-box {
      padding: 20px;
      -webkit-box-shadow: 0px 4px 14px 1px rgba(0,0,0,0.55);
@@ -88,15 +87,26 @@ footer {
     border-color: #fff1c4;
 }
 
+.input-search {
+     min-width: 300px;
+}
+
+canvas {
+    max-height: 600px;
+    display: block;
+}
 
 
 @media screen and (max-width: 767px) {
     .select2 {
         width: 100% !important;
     }
+}
 
-    .input-search {
-        min-width: 300px;
+@media only screen and (max-device-width: 480px) {
+    #svg-map {
+        height: 280px;
+        width: 270px;
     }
 }
 

@@ -36,32 +36,37 @@
 </head>
 <body class="gray-body">
 <div class="container">
-    <nav id="custom-bootstrap-menu" class="navbar navbar-default navbar-fixed-top">
+    <header class="navbar navbar-inverse navbar-fixed-top bs-docs-nav" role="banner">
         <div class="container">
-            <div class="navbar-header center-block"><a class="navbar-brand" href="#">
-                <strong>SAEB</strong></a></div>
-            <div class="collapse navbar-collapse custom-bootstrap-menu">
-                <ul class="nav navbar-nav navbar-left">
-                    <li><a href="/">Principal</a>
-                    </li>
-                    <li><a href="/states">Estados</a>
-                    </li>
-                    <li><a href="/comparison">Comparações</a>
-                    </li>
-                    <li class="dropdown notifications-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ranking</a>
+            <div class="navbar-header">
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="/" class="navbar-brand"><strong>SAEB</strong></a>
+            </div>
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Principal</a></li>
+                    <li><a href="/states">Estados</a></li>
+                    <li><a href="/comparison">Comparações</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ranking <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="/ranking/agegroup">Faixa etária</a></li>
                             <li><a href="/ranking/schooling">Escolaridade</a></li>
                         </ul>
                     </li>
-                    <li><a href="/contact">Contato</a>
+                    <li>
+                        <a href="#">Sobre</a>
                     </li>
-                </ul>
-            </div>
-        </div>
 
-    </nav>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
     @content
 
@@ -73,6 +78,6 @@
         </div>
         <!-- Default to the left -->
         <strong>SAEB 2016.</strong> Uso consciente.<span class="pull-right">Fonte dos dados:<a href="http://www.dados.gov.br"> dados.gov.br</a><span>
-    </footer>
+</footer>
 </body>
 </html>
