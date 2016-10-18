@@ -44,6 +44,14 @@ package object controllers {
   implicit val profilesByAgeGroupUnifiedFormat = Json.format[ProfilesByAgeGroupUnified]
   implicit val growthReads = Json.reads[Growth]
   implicit val growthFormat = Json.format[Growth]
+  implicit val cityComparisonSchoolingReads = Json.reads[ComparedCitySchooling]
+  implicit val cityComparisonSchoolingFormat = Json.format[ComparedCitySchooling]
+  implicit val schoolingComparisonReads = Json.reads[SchoolingComparison]
+  implicit val schoolingComparisonFormat = Json.format[SchoolingComparison]
+  implicit val cityComparisonAgeGroupReads = Json.reads[ComparedCityAgeGroup]
+  implicit val cityComparisonAgeGroupFormat = Json.format[ComparedCityAgeGroup]
+  implicit val ageGroupComparisonReads = Json.reads[AgeGroupComparison]
+  implicit val ageGroupComparisonFormat = Json.format[AgeGroupComparison]
 
   def importsToYearsForView(dataImports: Seq[DataImport]) = dataImports
     .map { data =>

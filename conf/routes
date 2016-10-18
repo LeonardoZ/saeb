@@ -41,10 +41,13 @@ POST   /profiles/sex                               controllers.CityPageControlle
 POST   /profiles/year/sex                          controllers.CityPageController.getPeoplesByYearAndSex()
 POST   /profiles/year                              controllers.CityPageController.getPeoplesByYear()
 POST   /profiles/growth                            controllers.CityPageController.getPopulationGrowthData()
+POST   /profiles/growth                            controllers.CityPageController.getPopulationGrowthData()
 POST   /profiles/ageandschooling                   controllers.CityPageController.getQuantityForSchoolingAndAgeGroup()
 POST   /profiles/last/year                         controllers.CityPageController.getProfilesSummaryForLastYear()
 POST   /comparison                                 controllers.CityComparisonController.getComparisonForYearAndCodes()
 GET    /comparison                                 controllers.CityComparisonController.comparisonPage()
+POST   /comparison/of/schooling                    controllers.CityComparisonController.getComparisonForSchooling()
+POST   /comparison/of/agegroup                     controllers.CityComparisonController.getComparisonForAgeGroup()
 GET    /states                                     controllers.StatesController.statesPage()
 GET    /states/:fu                                 controllers.StatesController.statePage(fu: String)
 GET    /ranking/schooling                          controllers.RankingController.schoolingAnalysesPage

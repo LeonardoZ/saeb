@@ -4,54 +4,44 @@
 
 @site("Comparação de cidades") {
 <div class="row">
-    <div class="col-lg-12">
-        <div class="input-group">
-
-        </div>
-    </div>
     <div class="row">
-        <div class="content-box panel-group ">
+        <div class="content-box panel-group">
             <div class="panel panel-site-green">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <strong><span><i class="fa fa-arrow-right"></i></span>&nbsp;Comparação de cidades</strong>
                     </h3>
-                    <div class="row">
-                        <div class="form-inline block-form ">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label>Primeira cidade: </label>
-                                        <select id="firstCity-input" name="cityCode" required="true"
-                                                class="form-control input-search" tabindex="1" aria-hidden="true">
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label>Segunda cidade: </label>
-                                        <select id="secondCity-input" name="cityCode" required="true"
-                                                class="form-control input-lg input-search" tabindex="2" aria-hidden="true" >
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label>Ano de comparação: </label>
-                                        <select id="year-select" class="form-control" tabindex="3">
-                                            @years.map { case (year, yearMonth) =>
-                                                <option value=@yearMonth>@year</option>
-                                            }
-                                        </select>
-                                    </div>
-                                    <!--<button id="btn-compare" disabled="disabled" tabindex="4" class="btn btn-default">Comparar</button>-->
-                                </div>
+                    <div class="form-inline block-form">
+                        <div class="form-group">
+                            <label>Primeira cidade: </label>
+                            <select id="firstCity-input" name="cityCode" required="true"
+                                class="form-control input-search" tabindex="1" aria-hidden="true">
+                            </select>
                         </div>
+                        <div class="form-group">
+                            <label>Segunda cidade: </label>
+                            <select id="secondCity-input" name="cityCode" required="true"
+                                class="form-control input-lg input-search" tabindex="2" aria-hidden="true">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ano de comparação: </label>
+                            <select id="year-select" class="form-control" tabindex="3">
+                                @years.map { case (year, yearMonth) =>
+                                    <option value=@yearMonth>@year</option>
+                                }
+                            </select>
+                        </div>
+                        <button id="btn-compare" disabled="disabled" tabindex="4" class="btn btn-default">Comparar</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="comparisons-row" class="row">
+    <div class="row">
+        <div id="comparisons-row" class="col-lg-12">
+
+        </div>
     </div>
 </div>
 

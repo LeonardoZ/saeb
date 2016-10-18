@@ -43,4 +43,13 @@ class AgeGroupService @Inject()() {
         ProfilesByAgeGroupUnified(group, peoples)
       }.toSeq.filter(_.ageGroup != filterValue).sortBy(_.ageGroup)
   }
+
+  def getAgeGroupChartUnifiedDataPercent(profileCityGroup: Seq[ProfileCityGroup]): (String, Seq[ComparedCityAgeGroup]) = {
+    val cities = profileCityGroup.map(_._2)
+    val city = cities.head
+
+    val profiles = getAgeGroupChartUnifiedData(profileCityGroup)
+    val total = profiles.map(_.peoples).sum
+    (city.name, profiles.map(x => ComparedCityAgeGroup(x.ageGroup, x.peoples, percentageOf(x.peoples, total))))
+  }
 }

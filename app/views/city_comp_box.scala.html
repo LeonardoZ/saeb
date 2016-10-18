@@ -1,4 +1,8 @@
-@(comparisons: Seq[models.query.ComparedCityFull])(implicit messages: Messages)
+@(yearCityCodes: models.query.YearCityCodes, comparisons: Seq[models.query.ComparedCityFull])(implicit messages: Messages)
+
+<input type="hidden" name="meta_year", value="@yearCityCodes.year" />
+<input type="hidden" name="meta_city_one", value="@yearCityCodes.codeOfCityOne" />
+<input type="hidden" name="meta_city_two", value="@yearCityCodes.codeOfCityTwo" />
 
 @comparisons.map { city =>
 <div class="col-lg-6">
@@ -39,7 +43,6 @@
                         </div>
                     </div>
                 </dd>
-
                 <dd>
                     <div class="panel-group ">
                         <div class="panel panel-heading">
@@ -102,3 +105,28 @@
     </div>
 </div>
 }
+<div id="row-schooling" class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body panel-content">
+                <div class="page-header">
+                    <h4><strong>Eleitores por Escolaridade</strong></h4>
+                </div>
+                <canvas id="chart-schooling" width="750" height="450"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="row-age-group" class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body panel-content">
+                <div class="page-header">
+                    <h4><strong>Eleitores por Faixa Etária</strong></h4>
+                </div>
+                <canvas id="chart-age-group" width="750" height="450"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

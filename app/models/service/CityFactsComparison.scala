@@ -7,7 +7,6 @@ import models.entity.{AgeGroup, City, Profile, Schooling}
 import models.query.{ComparedCity, ComparedCityAgeGroup, ComparedCityFull, ComparedCitySchooling}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.math.BigDecimal.RoundingMode
 
 class CityFactsComparison @Inject()(cityRepository: CityRepository)(implicit ec: ExecutionContext) {
 
@@ -107,10 +106,6 @@ class CityFactsComparison @Inject()(cityRepository: CityRepository)(implicit ec:
   private def mapToPeoples(xs: (Profile, Schooling, AgeGroup)) =
     xs._1.quantityOfPeoples
 
-  private def percentageOf(aValue: Int, ofTotal: Int) = {
-    val value = BigDecimal(aValue)
-    val total = BigDecimal(ofTotal)
-    ((value / total) * 100).bigDecimal.setScale(2, RoundingMode.CEILING).toDouble
-  }
+
 
 }

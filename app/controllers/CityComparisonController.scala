@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models.db._
 import models.query._
-import models.service.CityFactsComparison
+import models.service.{AgeGroupService, CityFactsComparison, SchoolingService}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsError, JsResult, Json}
 import play.api.mvc.{Action, BodyParsers, Controller}
@@ -13,6 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 class CityComparisonController @Inject()(val cityRepository: CityRepository,
+                                         val schoolingService: SchoolingService,
+                                         val ageGroupService: AgeGroupService,
                                          val cityFactsComparison: CityFactsComparison,
                                          val dataImportRepository: DataImportRepository,
                                          val profileRepository: ProfileRepository,
@@ -63,9 +65,88 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
       for {
         comparedCityOne <- comparedCityOneF
         comparedCityTwo <- comparedCityTwoF
-      } yield (Ok(views.html.city_comp_box(Seq(comparedCityOne, comparedCityTwo))))
+      } yield (Ok(views.html.city_comp_box(yearCityCodes, Seq(comparedCityOne, comparedCityTwo))))
     }
   }
+
+  def getComparisonForSchooling = Action.async(BodyParsers.parse.json) { implicit request =>
+    val jsonResult: JsResult[YearCityCodes] = request.body.validate[YearCityCodes](yearCityCodesReads)
+    jsonResult.fold(
+      error => {
+        Future {
+          BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
+        }
+      },
+      yearCityCodes => processComparisonForSchooling(yearCityCodes)
+    )
+  }
+
+  def processComparisonForSchooling(yearCityCodes: YearCityCodes) = {
+    val profilesCityOne = profileRepository.getProfilesForSchoolings(yearCityCodes.year, yearCityCodes.codeOfCityOne)
+    val profilesCityTwo = profileRepository.getProfilesForSchoolings(yearCityCodes.year, yearCityCodes.codeOfCityTwo)
+
+    val profilesCityOneAndTwo = for {
+      profilesOne <- profilesCityOne
+      profilesTwo <- profilesCityTwo
+    } yield (profilesOne, profilesTwo)
+
+    profilesCityOneAndTwo.map { case (profilesOne, profilesTwo) =>
+      val comparedCityOneF = schoolingService.getSchoolingChartDataUnifiedPercent(profilesOne)
+      val comparedCityTwoF = schoolingService.getSchoolingChartDataUnifiedPercent(profilesTwo)
+      (comparedCityOneF, comparedCityTwoF)
+    }.flatMap {
+      case (comparedCityOne, comparedCityTwo) =>
+        Future {
+          Ok(Json.obj("comparisons" -> SchoolingComparison(
+                        comparedCityOne._1,
+                        comparedCityOne._2,
+                        comparedCityTwo._1,
+                        comparedCityTwo._2)
+          ))
+        }
+    }
+
+  }
+
+  def getComparisonForAgeGroup = Action.async(BodyParsers.parse.json) { implicit request =>
+    val jsonResult: JsResult[YearCityCodes] = request.body.validate[YearCityCodes](yearCityCodesReads)
+    jsonResult.fold(
+      error => {
+        Future {
+          BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
+        }
+      },
+      yearCityCodes => processComparisonForAgeGroup(yearCityCodes)
+    )
+  }
+
+  def processComparisonForAgeGroup(yearCityCodes: YearCityCodes) = {
+    val profilesCityOne = profileRepository.getProfilesForAgeGroups(yearCityCodes.year, yearCityCodes.codeOfCityOne)
+    val profilesCityTwo = profileRepository.getProfilesForAgeGroups(yearCityCodes.year, yearCityCodes.codeOfCityTwo)
+
+    val profilesCityOneAndTwo = for {
+      profilesOne <- profilesCityOne
+      profilesTwo <- profilesCityTwo
+    } yield (profilesOne, profilesTwo)
+
+    profilesCityOneAndTwo.map { case (profilesOne, profilesTwo) =>
+      val comparedCityOneF = ageGroupService.getAgeGroupChartUnifiedDataPercent(profilesOne)
+      val comparedCityTwoF = ageGroupService.getAgeGroupChartUnifiedDataPercent(profilesTwo)
+      (comparedCityOneF, comparedCityTwoF)
+    }.flatMap {
+      case (comparedCityOne, comparedCityTwo) =>
+        Future {
+          Ok(Json.obj("comparisons" -> AgeGroupComparison(
+                        comparedCityOne._1,
+                        comparedCityOne._2,
+                        comparedCityTwo._1,
+                        comparedCityTwo._2)
+          ))
+        }
+    }
+
+  }
+
 
 
 }

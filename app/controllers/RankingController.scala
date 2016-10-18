@@ -45,14 +45,15 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
           Redirect(routes.RankingController.schoolingAnalysesPage)
         }
       },
-      analyses => dataImportRepository.getAll flatMap { yearMonths =>
-        val years = importsToYearsForView(yearMonths)
+      analyses => schoolingRankingRepository.getYears flatMap { yearMonths =>
+        val years = formatYears(yearMonths)
+        val selectedYear: (String, String) = years.filter(_._1 == analyses.yearMonth).head
         (for {
           transformed <- schoolingTransformation(analyses.yearMonth)
           rankings <- schoolingViewParser(transformed)
         } yield (rankings)) flatMap { rankings =>
           Future (Ok(views.html.schooling_ranking(
-            years.filter(_._1 == analyses.yearMonth).head._2,
+            selectedYear._2,
             analysesForm,
             years,
             rankings))
@@ -64,7 +65,7 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
   def schoolingAnalysesPage = Action.async { implicit request =>
     schoolingRankingRepository.getYears flatMap { yearMonths =>
       val years = formatYears(yearMonths)
-      val lastYear = years.last._2
+      val lastYear = years.head._2
       (for {
         transformed <- schoolingTransformation(lastYear)
         rankings <- schoolingViewParser(transformed)
@@ -138,14 +139,15 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
           Redirect(routes.RankingController.ageGroupAnalysesPage)
         }
       },
-      analyses => dataImportRepository.getAll flatMap { imports =>
-        val years = importsToYearsForView(imports)
+      analyses => ageGroupRankingRepository.getYears flatMap { imports =>
+        val years = formatYears(imports)
+        val selectedYear = years.filter(_._1 == analyses.yearMonth).head
         (for {
           transformed <- ageGroupTransformation(analyses.yearMonth)
           rankings <- ageGroupViewParser(transformed)
         } yield (rankings)) flatMap { rankings =>
           Future (Ok(views.html.age_group_ranking(
-            years.filter(_._1 == analyses.yearMonth).head._2,
+            selectedYear._2,
             analysesForm,
             years,
             rankings))
@@ -155,9 +157,9 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
   }
 
   def ageGroupAnalysesPage = Action.async { implicit request =>
-    schoolingRankingRepository.getYears flatMap { yearMonths =>
+    ageGroupRankingRepository.getYears flatMap { yearMonths =>
       val years = formatYears(yearMonths)
-      val lastYear = years.last._2
+      val lastYear = years.head._2
       (for {
         transformed <- ageGroupTransformation(lastYear)
         rankings <- ageGroupViewParser(transformed)

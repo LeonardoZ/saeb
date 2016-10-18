@@ -35,8 +35,17 @@ $(function(){
     }
 
     function baseAjaxRequest(endpoint, postData, successCallback) {
+        baseAjax("html", endpoint, postData, successCallback);
+    }
+
+
+    function baseAjaxRequestJson(endpoint, postData, successCallback) {
+        baseAjax("json", endpoint, postData, successCallback);
+    }
+
+    function baseAjax(dataType, endpoint, postData, successCallback) {
             $.ajax({ url: endpoint,
-                dataType: "html",
+                dataType: dataType,
                 cache: false,
                 contentType: "application/json",
                 type: "POST",
@@ -44,6 +53,7 @@ $(function(){
                 success: successCallback
             });
     }
+
 
     function load($searchSelect) {
         // configure front page select
@@ -132,6 +142,7 @@ $(function(){
             $comparisonsRow.append($(data));
 
             roundUtil();
+            loadCharts();
         }
 
         function cityOneSelected(e) {
@@ -162,6 +173,117 @@ $(function(){
             }
         }
 
+        function loadCharts(){
+            var $inputs = $("input[type='hidden']");
+            var $inputYear = $($inputs[0]);
+            var $inputCityOne = $($inputs[1]);
+            var $inputCityTwo = $($inputs[2]);
+
+            baseAjaxRequestJson("/comparison/of/schooling", {
+                "year": $inputYear.val(),
+                "codeOfCityOne": $inputCityOne.val(),
+                "codeOfCityTwo": $inputCityTwo.val()
+            }, schoolingChartCallback);
+
+            baseAjaxRequestJson("/comparison/of/agegroup", {
+                "year": $inputYear.val(),
+                "codeOfCityOne": $inputCityOne.val(),
+                "codeOfCityTwo": $inputCityTwo.val()
+            }, ageGroupChartCallback);
+        }
+
+        function schoolingChartCallback(data) {
+            var labels = data.comparisons.cityOne.map(function(e) {
+                return e.level;
+            });
+            var nameOne = data.comparisons.cityNameOne;
+            var nameTwo = data.comparisons.cityNameTwo;
+             data.comparisons.cityNameTwo
+            createChart(
+             $("#chart-schooling"),
+             data.comparisons,
+             "Escolaridade: " + nameOne + " - " + nameTwo,
+             labels,
+             nameOne,
+             nameTwo)
+        }
+
+        function ageGroupChartCallback(data) {
+            var labels = data.comparisons.cityOne.map(function(e) {
+                return e.group;
+            });
+            var nameOne = data.comparisons.cityNameOne;
+            var nameTwo = data.comparisons.cityNameTwo;
+             data.comparisons.cityNameTwo
+            createChart(
+             $("#chart-age-group"),
+             data.comparisons,
+             "Faixa Etária: " + nameOne + " - " + nameTwo,
+             labels,
+             nameOne,
+             nameTwo)
+        }
+
+        function createChart($chartCanvas, comparisons, title, labels, name1, name2) {
+                var dataOne = comparisons.cityOne.map(function(e) {
+                    return e.percentOfTotal;
+                });
+
+                var dataTwo = comparisons.cityTwo.map(function(e) {
+                    return e.percentOfTotal;
+                });
+
+                var chartData = {
+                    type: "bar",
+                    options: {
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItems, data) {
+                                    var pre = data.datasets[tooltipItems.datasetIndex].label;
+                                    return pre + ": " + numeral(tooltipItems.yLabel).format("0,00.00") + "%";
+                                }
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    callback: function(value, index, values) {
+                                        return numeral(value).format("0.0") + "%";
+                                    }
+                                }
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: title
+                        },
+                        maintainAspectRatio: false
+
+                    },
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: name1,
+                                backgroundColor : "#00a6ed",
+                                data : dataOne
+                            },{
+                                label: name2,
+                                backgroundColor : "#7fb800",
+                                data : dataTwo
+                            }
+                        ]
+                    }
+                };
+
+                $($chartCanvas).css({
+                    "width": 750,
+                    "height": 400
+                });
+                return new Chart($chartCanvas, chartData);
+            }
+
         $firstCityName.on("select2:select", cityOneSelected);
         $secondCityName.on("select2:select", cityTwoSelected);
         $firstCityName.on("select2:unselect", cityOneUnselected);
@@ -169,6 +291,7 @@ $(function(){
 
         load($firstCityName);
         load($secondCityName);
+
         $btnCompare.on("click", function(evt) {
             compare();
         });

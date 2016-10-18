@@ -88,14 +88,13 @@ footer {
 }
 
 .input-search {
-     min-width: 300px;
+     min-width: 250px;
 }
 
 canvas {
     max-height: 600px;
     display: block;
 }
-
 
 @media screen and (max-width: 767px) {
     .select2 {

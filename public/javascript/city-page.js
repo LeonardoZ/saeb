@@ -217,7 +217,7 @@
                             display: true,
                             text: "Evolução do número de eleitores por sexo ao longo dos últimos anos"
                         },
-                        animation: true,
+//                        animation: true,
                         maintainAspectRatio: false
 
                     },
@@ -411,7 +411,7 @@
                 $li.append($i);
                 $li.append($a);
                 var $ul = $("#analyzes-" + year);
-                $ul .append($li)
+                $ul.append($li)
 
                 var items = $ul.children("li").get();
                 items.sort(function(a, b) {
@@ -487,7 +487,6 @@
                             display: true,
                             text: title
                         },
-                        animation: true,
                         maintainAspectRatio: false
 
                     },
@@ -522,7 +521,6 @@
                 return chartData;
             }
 
-
             function loadSpecificChartSimple($canvas, title, color, labelDescription ,labels, datas, format) {
                 var chartData = {
                     type: "bar",
@@ -548,9 +546,7 @@
                         title: {
                             display: true,
                             text: title
-                        },
-                        animation: true,
-                        maintainAspectRatio: false
+                        }
                     },
                     data: {
                         labels: labels,
@@ -570,7 +566,9 @@
 
                $($canvas).css({
                    "width": 750,
-                   "height": 350
+                   "height": 450,
+                   "min-height": 450,
+                   "max-height": 550
                });
                var chart = new Chart($canvas, chartData);
             }
@@ -617,7 +615,7 @@
                                 display: true,
                                 text: "Proporção entre eleitores dos sexos registrados"
                             },
-                            animation: true,
+//                            animation: false,
                             maintainAspectRatio: false
                         },
                         data: {
@@ -652,14 +650,13 @@
 
 
             function loadSmooth(){
-               $(document).on('click', '#ul-years a, .smooth', function(event){
+               $(document).on('click', "#ul-years a, .smooth", function(event){
                    event.preventDefault();
 
-                   $('html, body').animate({
-                       scrollTop: $( $.attr(this, 'href') ).offset().top
+                   $("html, body").animate({
+                       scrollTop: $( $.attr(this, "href") ).offset().top
                    }, 500);
                });
-               Chart.defaults.global.maintainAspectRatio = true;
             }
 
             onLoad();

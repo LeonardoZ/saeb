@@ -26,19 +26,21 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   def getProfilesSummaryForLastYear = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[CityCode] = request.body.validate[CityCode](cityCodeReads)
     jsonResult.fold(
-    error => {
-      Future {
-        BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
-      }
-    },
-    cityCode => loadComparisonValues(cityCode)
+      error => {
+        Future {
+          BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
+        }
+      },
+      cityCode => loadComparisonValues(cityCode)
     )
   }
 
   def loadComparisonValues(cityCode: CityCode): Future[Result] = {
     (for {
       years <- dataImportRepository.getAll()
-      lastYear <- Future { importsToYearsForView(years).head }
+      lastYear <- Future {
+        importsToYearsForView(years).head
+      }
       profileData <- profileRepository.getProfilesFullByCityAndYear(lastYear._1, cityCode.cityCode)
       result <- cityFactsComparison.calculateValues(cityCode.cityCode, profileData)
     } yield (result)) map { cityCompFull =>
@@ -46,16 +48,16 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     }
   }
 
- // General Chart
+  // General Chart
   def getPopulationGrowthData = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[CityCode] = request.body.validate[CityCode](cityCodeReads)
     jsonResult.fold(
-    error => {
-      Future {
-        BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
-      }
-    },
-    cityCode => loadPopulationGrowthData(cityCode)
+      error => {
+        Future {
+          BadRequest(Json.obj("status" -> 400, "messages" -> JsError.toJson(error)))
+        }
+      },
+      cityCode => loadPopulationGrowthData(cityCode)
     )
   }
 
@@ -285,6 +287,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
     }.filter(!_.isEmpty)
     validYears
   }
+
   def getQuantityForSchoolingAndAgeGroup = Action.async(BodyParsers.parse.json) { implicit request =>
     val jsonResult: JsResult[YearCityCode] = request.body.validate[YearCityCode](yearCityCodeReads)
     jsonResult.fold(
@@ -299,19 +302,20 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def processQuantityForSchoolingAndAgeGroup(yearCityCode: YearCityCode) = {
-    val profileSchoolingAge: Future[Seq[(Profile, Schooling, AgeGroup)]] =
-      profileRepository.getProfilesFullByCityAndYear(yearCityCode.year, yearCityCode.code)
+    val profileSchoolingAge = profileRepository.getProfilesFullByCityAndYear(yearCityCode.year, yearCityCode.code)
 
     profileSchoolingAge.flatMap { vs =>
-      val result: Seq[PeoplesInAgeGroupSchooling] = vs.groupBy {case (_, schooling, age) =>
+      val result = vs.groupBy { case (_, schooling, age) =>
         (schooling.level, age.group)
       }.map { case (levelGroup, profileSchoolingAge) =>
-        (levelGroup, (profileSchoolingAge.map {case (profile, _, _)=> profile.quantityOfPeoples}.sum))
-      }.map {case ((level, group), peoples) =>
+        (levelGroup, (profileSchoolingAge.map { case (profile, _, _) => profile.quantityOfPeoples }.sum))
+      }.map { case ((level, group), peoples) =>
         PeoplesInAgeGroupSchooling(level, group, peoples)
       }.toSeq
 
-      Future(Ok(Json.obj("profiles" -> result)))
+      Future {
+        Ok(Json.obj("profiles" -> result))
+      }
     }
   }
 
