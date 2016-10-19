@@ -33,7 +33,8 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
     ((0, 10000), "Até 10.000 eleitores apenas"),
     ((10001, 50000), "Entre 10.001 e 50.000 eleitores"),
     ((50001, 100000), "Entre 50.001 e 100.000 eleitores"),
-    ((100001, 500000), "Entre 100.001 e 500.000 eleitores"),
+    ((100001, 200000), "Entre 100.001 e 200.000 eleitores"),
+    ((200001, 500000), "Entre 200.001 e 500.000 eleitores"),
     ((500001, 1000000), "Entre 500.001 até 1.000.000 eleitores"),
     ((1000000, 9999999), "Acima de 1.000.000 de eleitores")
   )
