@@ -9,7 +9,7 @@
 .navbar-inverse { font-size: 14px;
                       background-color: #00a65a;
                       border-color:  #ffc60c;
-                      border-bottom-width: 2px;
+                      border-bottom-width: 4px;
                       border-radius: 0px; }
 .navbar-inverse .navbar-brand { color: #FFFFFF}
 .navbar-inverse .navbar-brand:hover { color: #FFFFFF}

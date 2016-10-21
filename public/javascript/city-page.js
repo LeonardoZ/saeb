@@ -250,12 +250,10 @@
 
                $($canvas).css({
                    "width": 750,
-                   "height": 400
+                   "height": 350
                });
                var chart = new Chart($canvas, chartData);
             }
-
-
 
             function parseYear(year) {
                 var yearInt = Number.parseInt(year.replace("-", ""));
@@ -433,6 +431,7 @@
                    });
 
                    var tdPeoples = $("<td />", {
+                      class: "text-center",
                       text: numeral(element.peoples).format(format)
                    });
 
@@ -566,9 +565,9 @@
 
                $($canvas).css({
                    "width": 750,
-                   "height": 450,
-                   "min-height": 450,
-                   "max-height": 550
+                   "height": 350,
+                   "min-height": 350,
+                   "max-height": 400
                });
                var chart = new Chart($canvas, chartData);
             }

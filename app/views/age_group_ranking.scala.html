@@ -7,101 +7,115 @@
 
 @site("Ranking de Faixa Etária") {
 <div class="row">
-    <div class="content-box panel-group ">
-        <div class="panel panel-site-green">
-            <div class="panel panel-heading">
-                <h3 class="panel-title">
-                    <strong><span><i class="fa fa-arrow-right"></i></span>&nbsp;Ranking de Faixa Etária</strong>
-                </h3>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="content-box panel-group">
+                <div class="panel panel-site-green">
+                    <div class="panel-heading">
+                        <div class="jumbotron" style="background-color:transparent !important;">
+                            <h1><i class="fa fa-users">&nbsp;</i>Ranking de Faixa Etária</h1>
+                            <p>Ranking dos municípios com maior faixa da população em cada grupo de idade.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="panel panel-body">
-
-                <div class="row">
-                    <div class="col-lg-8 col-lg-offset-2">
-                        @b3.form(routes.RankingController.ageGroupViewRequest) {
-                            @b3.select(analysesForm("yearMonth"), options = years, '_label -> "Seleciona um ano para para exibição do ranking de Faixa Etária" )
-                            @b3.submit('class -> "btn btn-default"){ Exibir }
-                        }
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-lg-8 col-lg-offset-2">
-                        <h3 class="page-title">Ranking de Faixa Etária no Brasil - @selectedYear</h3>
-                        <p class="help-block">Cada Faixa Etária está classificada
-                            entre um grupo numérico de eleitores, para exibição mais justas.</p>
-                        <div id="schooling-list" class="list-group">
-                            @rankings.map { byGroup =>
-                                <a class="list-group-item" href="#@byGroup.group.hashCode">@byGroup.group</a>
-                            }
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-lg-10 col-lg-offset-1">
-                    @rankings.map { byGroup =>
-                        <hr />
-                        <div id="@byGroup.group.hashCode">
-                            <h3>@byGroup.group</h3>
-                        </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel-group ">
+                <div class="panel panel-default">
+                    <div class="panel panel-body">
                         <div class="row">
-                            <div class="col-lg-12">
-                                <ul class="nav nav-tabs nav-justified">
-                                    @byGroup.rankingsByLimit.map { byLimit =>
-                                        <li>
-                                            <a  data-toggle="tab" href="#@byGroup.group.hashCode()-@byLimit.base-@byLimit.limit">
-                                                @byLimit.message
-                                            </a>
-                                        </li>
+                            <div class="col-lg-10 col-lg-offset-1">
+                                @b3.form(routes.RankingController.ageGroupViewRequest) {
+                                    @b3.select(analysesForm("yearMonth"), options = years, '_label -> "Seleciona um ano para para exibição do ranking de Faixa Etária" )
+                                    @b3.submit('class -> "btn btn-default"){ Exibir }
+                                }
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-lg-10 col-lg-offset-1">
+                                <h3 class="page-title">Ranking de Faixa Etária no Brasil - @selectedYear</h3>
+                                <p class="help-block">Cada Faixa Etária está classificada
+                                    entre um grupo numérico de eleitores, para exibição mais justas.</p>
+                                <div id="age-group-list" class="list-group">
+                                    @rankings.map { byGroup =>
+                                        <a class="list-group-item" href="#@byGroup.group.hashCode">@byGroup.group</a>
                                     }
-                                </ul>
-                                <div class="ranking-content" class="tab-content">
-                                    @byGroup.rankingsByLimit.map { byLimit =>
-                                        <div id="@byGroup.group.hashCode()-@byLimit.base-@byLimit.limit"
-                                             class="tab-pane fade">
-                                            <div class="col-lg-8 col-lg-offset-2">
-                                                <br />
-                                                <p class="help-block">Municípios com maior porcentagem de eleitores com @byGroup.group</p>
-                                                <br />
-                                                <table class="table table-bordered table-striped">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Código</th>
-                                                        <th>UF</th>
-                                                        <th>Cidade</th>
-                                                        <th>% de eleitores</th>
-                                                        <th>Nº de eleitores</th>
-                                                        <th>Eleitores totais</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @byLimit.details.map { detail =>
-                                                        <tr>
-                                                            <td>@detail.cityCode</td>
-                                                            <td>@detail.state</td>
-                                                            <td>
-                                                                <a target="_blank"
-                                                                    href="@routes.SearchController.cityPageWithCode(detail.cityCode)">
-                                                                    @detail.name
-                                                                </a>
-                                                            </td>
-                                                            <td><span class="round-pct4">@detail.percentFormatted()</span> %</td>
-                                                            <td class="round-int">@detail.peoples</td>
-                                                            <td class="round-int">@detail.total</td>
-                                                        </tr>
-                                                    }
-                                                    </tbody>
-                                                </table>
-                                                <a href="#schooling-list" class="btn btn-default">Voltar ao topo</a>
-                                            </div>
-                                        </div>
-                                    }
-
                                 </div>
                             </div>
                         </div>
-                    }
+                        <hr />
+                        <div class="row">
+                            <div class="col-lg-10 col-lg-offset-1">
+                            @rankings.map { byGroup =>
+                                <hr />
+                                <div id="@byGroup.group.hashCode">
+                                    <h3>@byGroup.group</h3>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <ul class="nav nav-tabs nav-justified">
+                                            @byGroup.rankingsByLimit.map { byLimit =>
+                                                <li>
+                                                    <a  data-toggle="tab" href="#@byGroup.group.hashCode()-@byLimit.base-@byLimit.limit">
+                                                        @byLimit.message
+                                                    </a>
+                                                </li>
+                                            }
+                                        </ul>
+                                        <div class="ranking-content" class="tab-content">
+                                            @byGroup.rankingsByLimit.map { byLimit =>
+                                                <div id="@byGroup.group.hashCode()-@byLimit.base-@byLimit.limit"
+                                                     class="tab-pane fade">
+                                                    <div class="col-lg-10 col-lg-offset-1">
+                                                        <br />
+                                                        <p class="help-block">Municípios com maior porcentagem de eleitores com @byGroup.group</p>
+                                                        <br />
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="text-center">Ranking</th>
+                                                                    <th class="text-center">Código</th>
+                                                                    <th class="text-center">UF</th>
+                                                                    <th class="text-center">Cidade</th>
+                                                                    <th class="text-center">% de eleitores</th>
+                                                                    <th class="text-center">Nº de eleitores</th>
+                                                                    <th class="text-center">Eleitores totais</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                @byLimit.details.zip(1 to byLimit.details.size).map { case (detail, order) =>
+                                                                <tr>
+                                                                    <td class="text-center">@order</td>
+                                                                    <td class="text-center">@detail.cityCode</td>
+                                                                    <td class="text-center">@detail.state</td>
+                                                                    <td>
+                                                                        <a target="_blank"
+                                                                           href="@routes.SearchController.cityPageWithCode(detail.cityCode)">
+                                                                            @detail.name
+                                                                        </a>
+                                                                    </td>
+                                                                    <td class="text-center"><span class="round-pct4">@detail.percentFormatted()</span> %</td>
+                                                                    <td class="round-int text-center">@detail.peoples</td>
+                                                                    <td class="round-int text-center">@detail.total</td>
+                                                                </tr>
+                                                            }
+                                                            </tbody>
+                                                        </table>
+                                                        <a href="#age-group-list" class="btn btn-default">Voltar ao topo</a>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
