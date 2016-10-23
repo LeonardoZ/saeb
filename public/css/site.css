@@ -88,7 +88,7 @@ footer {
 }
 
 .input-search {
-     min-width: 250px;
+     max-width: 100% !important;
 }
 
 canvas {
@@ -96,10 +96,18 @@ canvas {
     display: block;
 }
 
-@media screen and (max-width: 767px) {
-    .select2 {
-        width: 100% !important;
-    }
+
+/*Make select2 responsive*/
+[class*="col-"] .select2-container {
+    width:100%!important;
+}
+[class*="col-"] .select2-container .select2-search input[type="text"] {
+    padding:2px 4%!important;
+    width:90%!important;
+    margin:5px 2%;
+}
+[class*="col-"] .select2-container .select2-drop {
+    width: 100%!important;
 }
 
 @media only screen and (max-device-width: 480px) {

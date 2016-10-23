@@ -217,7 +217,6 @@
                             display: true,
                             text: "Evolução do número de eleitores por sexo ao longo dos últimos anos"
                         },
-//                        animation: true,
                         maintainAspectRatio: false
 
                     },
@@ -250,7 +249,7 @@
 
                $($canvas).css({
                    "width": 750,
-                   "height": 350
+                   "height": 300
                });
                var chart = new Chart($canvas, chartData);
             }
@@ -567,7 +566,7 @@
                    "width": 750,
                    "height": 350,
                    "min-height": 350,
-                   "max-height": 400
+                   "max-height": 350
                });
                var chart = new Chart($canvas, chartData);
             }
