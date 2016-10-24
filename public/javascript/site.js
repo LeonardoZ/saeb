@@ -317,6 +317,29 @@ $(function(){
         numeral.language('pt-br');
         console.log(numeral.language);
     }
+
+
+     function loadSmooth(){
+         $(document).on('click', "#category-list a, .smooth", function(event){
+         event.preventDefault();
+
+         $("html, body").animate({
+                scrollTop: $($.attr(this, "href")).offset().top
+             },
+             500);
+         });
+     }
+
+     function cleanUrl(){
+         var hash = location.hash.replace("#", "");
+         if(hash != ""){
+            location.hash = "";
+         }
+     }
+
+     loadSmooth();
+     cleanUrl();
+
     // Load modules
     numeralConfig();
     frontPageModule();

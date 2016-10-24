@@ -100,6 +100,12 @@ class SearchController @Inject()(val cityRepository: CityRepository,
       )
   }
 
+  def about() = Action.async  {
+    Future {
+      Ok(views.html.about())
+    }
+  }
+
   def main() = Action.async {
     Future {
       Ok(views.html.saeb(searchForm))

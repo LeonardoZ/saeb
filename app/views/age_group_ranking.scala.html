@@ -40,7 +40,7 @@
                                 <h3 class="page-title">Ranking de Faixa Etária no Brasil - @selectedYear</h3>
                                 <p class="help-block">Cada Faixa Etária está classificada
                                     entre um grupo numérico de eleitores, para exibição mais justas.</p>
-                                <div id="age-group-list" class="list-group">
+                                <div id="category-list" class="list-group">
                                     @rankings.map { byGroup =>
                                         <a class="list-group-item" href="#@byGroup.group.hashCode">@byGroup.group</a>
                                     }
@@ -105,7 +105,7 @@
                                                             }
                                                             </tbody>
                                                         </table>
-                                                        <a href="#age-group-list" class="btn btn-default">Voltar ao topo</a>
+                                                        <a class="smooth" href="#category-list">Voltar ao topo</a>
                                                     </div>
                                                 </div>
                                             }

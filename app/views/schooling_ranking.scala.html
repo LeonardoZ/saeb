@@ -44,7 +44,7 @@
                                 <h3 class="page-title">Ranking de escolaridade no Brasil - @selectedYear</h3>
                                 <p class="help-block">Cada nível de escolaridade está classificado
                                     entre uma faixa específica de eleitores, para exibição mais justas.</p>
-                                <div id="schooling-list" class="list-group">
+                                <div id="category-list" class="list-group">
                                     @rankings.map { byLevel =>
                                         <a class="list-group-item" href="#@byLevel.level.hashCode">@byLevel.level</a>
                                     }
@@ -109,7 +109,7 @@
                                                             }
                                                             </tbody>
                                                         </table>
-                                                        <a href="#schooling-list" class="btn btn-default">Voltar ao topo</a>
+                                                        <a class="smooth" href="#category-list">Voltar ao topo</a>
                                                     </div>
                                                 </div>
                                             }

@@ -30,6 +30,7 @@ POST    /admin/analyses/                           controllers.AnalysesControlle
 
 # Public
 GET    /                                           controllers.SearchController.main
+GET    /about                                      controllers.SearchController.about
 POST   /search/cities                              controllers.SearchController.searchContent()
 GET    /search                                     controllers.SearchController.cityPage()
 GET    /search/:cityCode                           controllers.SearchController.cityPageWithCode(cityCode: String)

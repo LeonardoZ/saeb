@@ -13,7 +13,7 @@ class AgeGroupService @Inject()() {
   val filterValue = "INVÁLIDA"
 
   def getAgeGroupChartData(profileCityGroup: Seq[ProfileCityGroup]): Seq[ProfilesByAgeGroup] = {
-
+      val total = profileCityGroup.map(_._1.quantityOfPeoples).sum
       profileCityGroup.groupBy {
           case (_, _, ageGroup) => ageGroup.group
       }.map {
@@ -26,21 +26,22 @@ class AgeGroupService @Inject()() {
           )
       }.map { case (group, sexWithSum) =>
           val totalsOfProfiles: Iterable[TotalProfilesBySexUnderGroup] = sexWithSum.map { (valuesBySex: (String, Int)) =>
-            TotalProfilesBySexUnderGroup(valuesBySex._1, valuesBySex._2)
+            TotalProfilesBySexUnderGroup(valuesBySex._1, valuesBySex._2, percentageOf(valuesBySex._2, total))
           }
         ProfilesByAgeGroup(group, totalsOfProfiles.toSeq)
       }.toSeq.filter(_.ageGroup != filterValue).sortBy(_.ageGroup)
   }
 
   def getAgeGroupChartUnifiedData(profileCityGroup: Seq[ProfileCityGroup]): Seq[ProfilesByAgeGroupUnified] = {
+    val total = profileCityGroup.map(_._1.quantityOfPeoples).sum
 
-      profileCityGroup.groupBy {
+    profileCityGroup.groupBy {
           case (_, _, ageGroup) => ageGroup.group
       }.map {
         case (group, values: Seq[(Profile, City, AgeGroup)]) =>
           (group, values.map { case (profile, _, _) => profile.quantityOfPeoples }.sum)
       }.map { case (group, peoples) =>
-        ProfilesByAgeGroupUnified(group, peoples)
+        ProfilesByAgeGroupUnified(group, peoples, percentageOf(peoples, total))
       }.toSeq.filter(_.ageGroup != filterValue).sortBy(_.ageGroup)
   }
 

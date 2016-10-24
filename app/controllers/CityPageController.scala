@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models._
 import models.db._
-import models.entity.{City, Profile, Schooling, _}
+import models.entity.{City, Profile, Schooling}
 import models.query._
 import models.service.{AgeGroupService, CityFactsComparison, SchoolingService}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -201,9 +201,12 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
           Ok(Json.obj("profiles" -> Map[String, Order]()))
         }
       else {
+        val total = profiles.map(_.quantityOfPeoples).sum
         val profilesBySex: Seq[ProfileBySex] = profiles.groupBy(_.sex).map {
-          case (sex, profiles) =>
-            ProfileBySex(sex, profiles.map(_.quantityOfPeoples).sum)
+          case (sex, profiles) => {
+            val partialTotal = profiles.map(_.quantityOfPeoples).sum
+            ProfileBySex(sex, partialTotal)
+          }
         }.toSeq
 
         Future {

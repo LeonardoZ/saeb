@@ -12,6 +12,7 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
   val filterValue = "NÃO INFORMADO"
 
   def getSchoolingChartData(profilesCitiesSchoolings: Seq[ProfileCitySchooling]): Seq[ProfilesBySchooling] = {
+    val total = profilesCitiesSchoolings.map(_._1.quantityOfPeoples).sum
     // group by schooling
     profilesCitiesSchoolings.groupBy {
       case (_, _, schooling) => (schooling.position, schooling.level)
@@ -25,8 +26,8 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
         })
     }.map { case (level, sexProfilesCount) =>
       val totalsOfProfiles = sexProfilesCount.map {
-        case (sex, total) =>
-          TotalProfilesBySexUnderSchooling(sex, total)
+        case (sex, totalBy) =>
+          TotalProfilesBySexUnderSchooling(sex, totalBy, percentageOf(totalBy, total))
       }
 
       ProfilesBySchoolingAndPosition(level, totalsOfProfiles.toSeq)
@@ -37,6 +38,8 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
   }
 
   def getSchoolingChartDataUnified(profilesCitiesSchoolings: Seq[ProfileCitySchooling]) = {
+    val total = profilesCitiesSchoolings.map(_._1.quantityOfPeoples).sum
+
     // group by schooling
     profilesCitiesSchoolings.groupBy {
       case (_, _, schooling) => (schooling.position, schooling.level)
@@ -46,7 +49,7 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
     }.toSeq.filter(_._1._2 != filterValue).sortBy(_._1._1).map {
       ps => ProfilesBySchoolingPositionUnified(ps._1, ps._2)
     }.map {
-      p => ProfilesBySchoolingUnified(p.positionAndSchooling._2, p.peoples)
+      p => ProfilesBySchoolingUnified(p.positionAndSchooling._2, p.peoples, percentageOf(p.peoples, total))
     }
   }
 

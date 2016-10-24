@@ -1,4 +1,4 @@
 package models.query
 
 
-case class ProfileBySex(val sex: String, val peoples: Int)
+case class ProfileBySex(sex: String, peoples: Int)

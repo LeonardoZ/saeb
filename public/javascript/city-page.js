@@ -146,9 +146,10 @@
                             return e.peoples;
                       });
 
+
                       loadSpecificChartSimple($canvas,
                        "Evolução do número de eleitores ao longo dos últimos anos",
-                        "#075e89", "Eleitores" ,labels, peoples, "0,0")
+                        "#075e89", "Eleitores", labels, peoples, null, "0,0", true)
                   }
                 );
 
@@ -168,7 +169,7 @@
 
                       loadSpecificChartSimple($canvas,
                        "Taxa de crescimento de eleitores ao longo dos últimos anos",
-                        "#045e00", "Eleitores" ,labels, peoples, "0.0%")
+                        "#045e00", "Eleitores" ,labels, peoples, null, "0.0%", true)
                   }
                 );
             }
@@ -184,13 +185,19 @@
                     return e.peoplesBySex[0].peoples;
                 });
 
+
+
                 var dataF = profiles.map(function(e) {
                     return e.peoplesBySex[1].peoples;
                 });
 
+
+
                 var dataN = profiles.map(function(e) {
                     return (e.peoplesBySex.length > 2) ? e.peoplesBySex[2].peoples : 0;
                 });
+
+
 
                 var chartData = {
                     type: "line",
@@ -248,8 +255,8 @@
                 };
 
                $($canvas).css({
-                   "width": 750,
-                   "height": 300
+                   "width": 550,
+                   "min-height": 350
                });
                var chart = new Chart($canvas, chartData);
             }
@@ -314,9 +321,13 @@
                                 return e.peoples;
                            });
 
+                           var percentOf = data.profiles.map(function(e) {
+                                return e.percentOf;
+                           });
+
                           loadSpecificChartSimple($chartAgeGroupUniCanvas,
                            "Eleitores por Faixa Etária",
-                            "#ba3232", "Eleitores", labels, peoples)
+                            "#ba3232", "Eleitores", labels, peoples, percentOf, null, false)
                        } else {
                            var $divSchooling = $("#row-uni-"+year);
                            $divSchooling.remove();
@@ -353,9 +364,13 @@
                                 return e.peoples;
                            });
 
+                           var percentOf = data.profiles.map(function(e) {
+                                return e.percentOf;
+                           });
+
                           loadSpecificChartSimple($chartSchoolingUniCanvas,
                            "Eleitores por Escolaridade",
-                            "#4e4781", "Eleitores", labels, peoples)
+                            "#4e4781", "Eleitores", labels, peoples, percentOf, null, false)
                        } else {
                            var $divSchooling = $("#row-sch-uni-"+year);
                            $divSchooling.remove();
@@ -402,12 +417,13 @@
                 var $a = $("<a />", {
                     id : "#row-" + typeId + "-" + year,
                     href : "#row-" + typeId + "-" + year,
+                    class : "smooth",
                     html : "<strong>" + displayName + "</strong>"
                 });
 
+                var $ul = $("#analyzes-" + year);
                 $li.append($i);
                 $li.append($a);
-                var $ul = $("#analyzes-" + year);
                 $ul.append($li)
 
                 var items = $ul.children("li").get();
@@ -460,15 +476,36 @@
                     return (e.profilesBySex.length > 2) ? e.profilesBySex[2].peoples : 0;
                 });
 
+                var dataMP = profiles.map(function(e) {
+                    return e.profilesBySex[0].percentOf;
+                });
+
+                var dataFP = profiles.map(function(e) {
+                    return e.profilesBySex[1].percentOf;
+                });
+
+                var dataNP = profiles.map(function(e) {
+                    return (e.profilesBySex.length > 2) ? e.profilesBySex[2].percentOf : 0;
+                });
+                var f  = function(tooltipItems, data) {
+                    var pre = data.datasets[tooltipItems.datasetIndex].label;
+                    var value = 0.0;
+                    if (pre === "Masculino") {
+                        value = dataMP[tooltipItems.index];
+                    } else if (pre === "Feminino") {
+                        value = dataFP[tooltipItems.index];
+                    } else {
+                        value = dataNP[tooltipItems.index]
+                    }
+                    return pre + ": " + numeral(tooltipItems.yLabel).format('0,0')+" - "+numeral(value).format("0,00.00") + "%";
+                }
+
                 var chartData = {
                     type: "bar",
                     options: {
                         tooltips: {
                             callbacks: {
-                                label: function(tooltipItems, data) {
-                                    var pre = data.datasets[tooltipItems.datasetIndex].label;
-                                    return pre + ": " + numeral(tooltipItems.yLabel).format('0,0');
-                                }
+                                label: f
                             }
                         },
                         scales: {
@@ -513,21 +550,29 @@
                 };
 
                 $($chartCanvas).css({
-                    "width": 750,
-                    "height": 400
+                    "width": "550px",
+                    "height": "250px"
                 });
                 return chartData;
             }
 
-            function loadSpecificChartSimple($canvas, title, color, labelDescription ,labels, datas, format) {
+            function loadSpecificChartSimple($canvas, title, color, labelDescription, labels, datas, percentOf, format, maintainAspectRatio) {
                 var chartData = {
                     type: "bar",
                     options: {
                         tooltips: {
                             callbacks: {
                                 label: function(tooltipItems, data) {
+                                console.log(tooltipItems)
+                                console.log(data)
                                     var pre = data.datasets[tooltipItems.datasetIndex].label;
-                                    return pre + ": " + numeral(tooltipItems.yLabel).format(format);
+                                    if (percentOf !== null){
+                                        return pre + ": " + numeral(tooltipItems.yLabel).format(format) + " - " +
+                                            numeral(percentOf[tooltipItems.index]).format("0,00.00") + "%";
+                                    } else {
+                                        return pre + ": " + numeral(tooltipItems.yLabel).format(format);
+
+                                    }
                                 }
                             }
                         },
@@ -544,7 +589,8 @@
                         title: {
                             display: true,
                             text: title
-                        }
+                        },
+                        maintainAspectRatio: maintainAspectRatio
                     },
                     data: {
                         labels: labels,
@@ -563,10 +609,8 @@
                 };
 
                $($canvas).css({
-                   "width": 750,
-                   "height": 350,
-                   "min-height": 350,
-                   "max-height": 350
+                   "width": "350px",
+                   "min-height": "300px"
                });
                var chart = new Chart($canvas, chartData);
             }
@@ -613,7 +657,17 @@
                                 display: true,
                                 text: "Proporção entre eleitores dos sexos registrados"
                             },
-//                            animation: false,
+                            tooltips: {
+                                callbacks: {
+                                    label: function(tooltipItems, data) {
+                                        console.log(tooltipItems);
+                                        console.log(data);
+                                        var pre = data.labels[tooltipItems.index]
+                                        var value = data.datasets[0].data[tooltipItems.index];
+                                        return pre + ": " + numeral(value).format("0,0");
+                                    }
+                                }
+                            },
                             maintainAspectRatio: false
                         },
                         data: {
@@ -637,8 +691,8 @@
                     };
 
                     $($chartCanvas).css({
-                        "width": 550,
-                        "height": 200
+                        "width": "550px",
+                        "height": "200px"
                     });
 
 
@@ -657,8 +711,16 @@
                });
             }
 
+            function cleanUrl(){
+                    var hash = location.hash.replace('#','');
+                    if(hash != ''){
+                        location.hash = '';
+                    }
+            }
+
             onLoad();
             loadSmooth();
+            cleanUrl();
     }
     cityPageModule();
 
