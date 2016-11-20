@@ -33,10 +33,10 @@ class SchoolingAnalysesActor @Inject()(val rankingRepository: SchoolingRankingRe
 
   override def receive: Receive = LoggingReceive {
     case SchoolingMultiAnalyses(cityAnalysesActor, yearMonth, profiles: Vector[ProfileWithCode]) => {
-      val allProfilesInChunk: Seq[SchoolingRanking] = profiles.groupBy(_.cityCode).flatMap {
+      val allSchoolingAnalysesInChunk: Seq[SchoolingRanking] = profiles.groupBy(_.cityCode).flatMap {
         case (code, profiles) => profilesAnalyze(code, yearMonth, profiles)
       }.toSeq
-      rankingRepository.insertAll(allProfilesInChunk)
+      rankingRepository.insertAll(allSchoolingAnalysesInChunk)
     }
   }
 

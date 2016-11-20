@@ -60,12 +60,7 @@ class CityAnalysesActor @Inject()(val schoolingFactory: SchoolingAnalysesActor.F
 
 
   def receive: Receive = LoggingReceive {
-
     case CheckCities(father, yearMonth, profilesWithCode: Vector[ProfileWithCode]) => {
-//      val ageAnalysesActor = injectedChild(ageGroupFactory(), s"age-group-analyses-" + System.nanoTime())
-//      val schoolingAnalysesActor = injectedChild(schoolingFactory(), s"schooling-analyses-" + System.nanoTime())
-//      schoolingAnalysesActor ! SchoolingAnalysesActor.SchoolingMultiAnalyses(self, yearMonth, profilesWithCode)
-//      ageAnalysesActor ! AgeGroupAnalysesActor.AgeGroupMultiAnalyses(self, yearMonth, profilesWithCode)
       ageGroupRouter.route(AgeGroupAnalysesActor.AgeGroupMultiAnalyses(self, yearMonth, profilesWithCode), self)
       schoolingRouter.route(SchoolingAnalysesActor.SchoolingMultiAnalyses(self, yearMonth, profilesWithCode), self)
     }

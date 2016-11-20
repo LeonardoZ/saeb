@@ -37,10 +37,10 @@ class AgeGroupAnalysesActor @Inject()(val rankingRepository: AgeGroupRankingRepo
 
   override def receive: Receive = LoggingReceive {
     case AgeGroupMultiAnalyses(cityAnalysesActor, yearMonth, profiles: Vector[ProfileWithCode]) => {
-      val allProfilesInChunk: Seq[AgeGroupRanking] = profiles.groupBy(p => p.cityCode).flatMap {
+      val allAgeGroupAnalysesInChunk: Seq[AgeGroupRanking] = profiles.groupBy(p => p.cityCode).flatMap {
         case (code, profiles) => profilesAnalyze(code, yearMonth, profiles)
       }.toSeq
-      rankingRepository.insertAll(allProfilesInChunk)
+      rankingRepository.insertAll(allAgeGroupAnalysesInChunk)
     }
   }
 
