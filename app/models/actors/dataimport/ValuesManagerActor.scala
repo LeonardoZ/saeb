@@ -10,7 +10,6 @@ import models.actors.dataimport.AgeGroupPersistActor.AgeGroupPersistence
 import models.actors.dataimport.SchoolingsPersistActor.SchoolingsPersistence
 import models.entity.Task
 import models.service.ProfileFileParser
-import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.duration._
@@ -36,7 +35,7 @@ object ValuesManagerActor {
 
 }
 
-class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factory,
+class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Factory,
                                    val cityFactory: CitiesPersistActor.Factory,
                                    val ageFactory: AgeGroupPersistActor.Factory,
                                    val schoolingFactory: SchoolingsPersistActor.Factory,
@@ -98,7 +97,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProfileWorkerActor.Factor
 
     case StartProfileExtraction(file) => {
       val persistActor = injectedChild(profileFactory(), "profile-worker-actor$" + System.nanoTime())
-      persistActor ! ProfileWorkerActor.StartFileReading(self, file)
+      persistActor ! ProcessProfileActor.StartFileReading(self, file)
     }
 
     case ProfilePesistenceDone => {

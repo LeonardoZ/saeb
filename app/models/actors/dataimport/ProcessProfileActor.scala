@@ -11,7 +11,7 @@ import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-object ProfileWorkerActor {
+object ProcessProfileActor {
 
   trait Factory {
     def apply(): Actor
@@ -19,25 +19,24 @@ object ProfileWorkerActor {
 
   case class StartFileReading(valuesManagerActor: ActorRef, path: String)
 
-  case class LoadValues(profiles: Stream[FullProfile])
+  case class ValuesLoaded(profiles: Stream[FullProfile])
 
   case class LoadValuesWithDb(profiles: Stream[FullProfile])
 
   case class ProfilePersisted()
 
-
   case class DataPersistComplete()
 
 }
 
-class ProfileWorkerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
-                                   val profileRepository: ProfileRepository,
-                                   val profileFileParser: ProfileFileParser,
-                                   val cityRepository: CityRepository,
-                                   val schoolingRepository: SchoolingRepository,
-                                   val ageGroupRepository: AgeGroupRepository) extends Actor with InjectedActorSupport {
+class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Factory,
+                                    val profileRepository: ProfileRepository,
+                                    val profileFileParser: ProfileFileParser,
+                                    val cityRepository: CityRepository,
+                                    val schoolingRepository: SchoolingRepository,
+                                    val ageGroupRepository: AgeGroupRepository) extends Actor with InjectedActorSupport {
 
-  import ProfileWorkerActor._
+  import ProcessProfileActor._
 
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.duration._
@@ -77,11 +76,11 @@ class ProfileWorkerActor @Inject()(val dataImportFactory: DataImportActor.Factor
         cities = cities ++ (vals._1.map(c => ((c.code, c.name, c.country), c)))
         ages = ages ++ (vals._2.map(age => (age.group, age)))
         schoolings = schoolings ++ (vals._3.map(sc => (sc.level, sc)))
-        self ! LoadValues(profiles)
+        self ! ValuesLoaded(profiles)
       }
     }
 
-    case LoadValues(profiles) => {
+    case ValuesLoaded(profiles) => {
 
       implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
