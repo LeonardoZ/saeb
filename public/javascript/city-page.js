@@ -113,7 +113,6 @@
                     var numValue = $value.html();
                     $value.text(numeral(numValue).format(formatPct));
                 });
-
                 $.each($(".round-pct4"), function(key, value) {
                     var $value = $(value);
                     var numValue = $value.html();
@@ -185,19 +184,13 @@
                     return e.peoplesBySex[0].peoples;
                 });
 
-
-
                 var dataF = profiles.map(function(e) {
                     return e.peoplesBySex[1].peoples;
                 });
 
-
-
                 var dataN = profiles.map(function(e) {
                     return (e.peoplesBySex.length > 2) ? e.peoplesBySex[2].peoples : 0;
                 });
-
-
 
                 var chartData = {
                     type: "line",
