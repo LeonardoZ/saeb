@@ -1,1 +1,4 @@
 public/plugins/* linguist-vendored
+public/bootstrap/* linguist-vendored
+public/fonts/* linguist-vendored
+public/css/* linguist-vendored
