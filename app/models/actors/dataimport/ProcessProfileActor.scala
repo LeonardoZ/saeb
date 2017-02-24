@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorRef}
 import akka.util.Timeout
 import models.db.{AgeGroupRepository, CityRepository, ProfileRepository, SchoolingRepository}
 import models.entity._
+import models.query.YearMonth
 import models.service.ProfileFileParser
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -44,7 +45,7 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
   implicit val timeout: Timeout = 2 minutes
 
   // for db item cache
-  var cities = Map[(String, String, String), City]()
+  var cities = Map[String, City]()
   var ages = Map[String, AgeGroup]()
   var schoolings = Map[String, Schooling]()
 
@@ -73,9 +74,9 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
       } yield (cs, as, sc)
 
       values.map { vals =>
-        cities = cities ++ (vals._1.map(c => ((c.code, c.name, c.country), c)))
-        ages = ages ++ (vals._2.map(age => (age.group, age)))
-        schoolings = schoolings ++ (vals._3.map(sc => (sc.level, sc)))
+        cities = cities ++ vals._1.map(city => (city.code, city))
+        ages = ages ++ vals._2.map(age => (age.group, age))
+        schoolings = schoolings ++ vals._3.map(sc => (sc.level, sc))
         self ! ValuesLoaded(profiles)
       }
     }
@@ -108,7 +109,7 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
     val values: Option[(FullProfile, AgeGroup, Schooling, City)] = for {
       ageF <- ages.get(profile.ageGroup.group)
       schoolingF <- schoolings.get(profile.schooling.level)
-      cityF <- cities.get((profile.city.code, profile.city.name, profile.city.country))
+      cityF <- cities.get(profile.city.id)
     } yield (profile, ageF, schoolingF, cityF)
 
     // map those values
@@ -120,7 +121,10 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
   }
 
   def convertToProfile(p: FullProfile, ageGroup: AgeGroup, schooling: Schooling, city: City): Profile = {
-    Profile(yearOrMonth = p.yearOrMonth,
+    val yearAndMonth = YearMonth.split(p.yearOrMonth)
+
+    Profile(year = yearAndMonth.year,
+      month = yearAndMonth.month,
       electoralDistrict = p.electoralDistrict,
       sex = SexParser.convert(p.sex),
       quantityOfPeoples = p.quantityOfPeoples,

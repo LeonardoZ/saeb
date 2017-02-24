@@ -60,8 +60,8 @@ class Application @Inject()(val userRepo: UserRepository,
 
 
   def signin(emailValue: String = "") = Action.async { implicit request =>
-    println(System.getenv("PLAY_MAIL_HOST"))
-      println(System.getenv("PLAY_MAIL_USER"))
+      println(System.getenv("SAEB_DB_USER"))
+      println(System.getenv("SAEB_DB_NAME"))
     loginForm.fill(LoginForm(login = emailValue, password = ""))
     userRepo.countUsers flatMap { users =>
       Future {

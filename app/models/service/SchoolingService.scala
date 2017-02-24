@@ -59,6 +59,6 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
 
     val profiles = getSchoolingChartDataUnified(profilesCitiesSchoolings)
     val total = profiles.map(_.peoples).sum
-    (city.name, profiles.map(x => ComparedCitySchooling(0, x.schooling, x.peoples, percentageOf(x.peoples, total))))
+    (city.names(0), profiles.map(x => ComparedCitySchooling(0, x.schooling, x.peoples, percentageOf(x.peoples, total))))
   }
 }

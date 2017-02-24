@@ -50,8 +50,11 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   }
 
   def processComparison(yearCityCodes: YearCityCodes) = {
-    val profilesCityOne = profileRepository.getProfilesFullByCityAndYear(yearCityCodes.year, yearCityCodes.codeOfCityOne)
-    val profilesCityTwo = profileRepository.getProfilesFullByCityAndYear(yearCityCodes.year, yearCityCodes.codeOfCityTwo)
+    val yearAndMonth = YearMonth.split(yearCityCodes.yearMonth)
+    val profilesCityOne = profileRepository
+      .getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)
+    val profilesCityTwo = profileRepository
+      .getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityTwo)
 
     val profilesCityOneAndTwo = for {
       profilesOne <- profilesCityOne
@@ -82,8 +85,11 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   }
 
   def processComparisonForSchooling(yearCityCodes: YearCityCodes) = {
-    val profilesCityOne = profileRepository.getProfilesForSchoolings(yearCityCodes.year, yearCityCodes.codeOfCityOne)
-    val profilesCityTwo = profileRepository.getProfilesForSchoolings(yearCityCodes.year, yearCityCodes.codeOfCityTwo)
+    val yearAndMonth = YearMonth.split(yearCityCodes.yearMonth)
+    val profilesCityOne =
+      profileRepository.getProfilesForSchoolings(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)
+    val profilesCityTwo =
+      profileRepository.getProfilesForSchoolings(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityTwo)
 
     val profilesCityOneAndTwo = for {
       profilesOne <- profilesCityOne
@@ -121,8 +127,12 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   }
 
   def processComparisonForAgeGroup(yearCityCodes: YearCityCodes) = {
-    val profilesCityOne = profileRepository.getProfilesForAgeGroups(yearCityCodes.year, yearCityCodes.codeOfCityOne)
-    val profilesCityTwo = profileRepository.getProfilesForAgeGroups(yearCityCodes.year, yearCityCodes.codeOfCityTwo)
+    val yearAndMonth = YearMonth.split(yearCityCodes.yearMonth)
+
+    val profilesCityOne =
+      profileRepository.getProfilesForAgeGroups(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)
+    val profilesCityTwo =
+      profileRepository.getProfilesForAgeGroups(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)
 
     val profilesCityOneAndTwo = for {
       profilesOne <- profilesCityOne

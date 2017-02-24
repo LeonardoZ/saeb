@@ -1,16 +1,25 @@
 package models.entity
 
+import models.query.YearOrMonth
+
 case class Profile(id: Option[Int] = None,
-                   yearOrMonth: String = "",
+                   year: String = "",
+                   month: String = "0",
                    electoralDistrict: String = "",
                    sex: String = "",
                    cityId: Int = 0,
                    ageGroupId: Int = 0,
                    schoolingId: Int = 0,
-                   quantityOfPeoples: Int = 0)
+                   quantityOfPeoples: Int = 0) {
+
+  def yearMonth(): String =
+    if (month == 0) year else year + "-" + month
+
+}
+
 
 case class FullProfile(yearOrMonth: String,
-                       city: City,
+                       city: SimpleCity,
                        electoralDistrict: String,
                        sex: Sex,
                        ageGroup: AgeGroup, schooling: Schooling,

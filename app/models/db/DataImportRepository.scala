@@ -2,7 +2,7 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.{DataImport, Schooling}
+import models.entity.DataImport
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -12,7 +12,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DataImportRepository @Inject()(protected val tables: Tables,
                                      protected val dbConfigProvider: DatabaseConfigProvider)(implicit ex: ExecutionContext) {
-
 
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db

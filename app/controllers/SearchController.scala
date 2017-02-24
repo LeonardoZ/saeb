@@ -63,11 +63,7 @@ class SearchController @Inject()(val cityRepository: CityRepository,
 
   def cityToAggregatedResults(city: City): Future[ProfileResult] = {
     profileRepository.getProfilesForCity(city.code).map { ps =>
-      val years: Seq[String] = ps.map(_._1.yearOrMonth).distinct
-        .map { y =>
-          if (y.length > 4) y.substring(0, 4) + "-" + y.substring(4)
-          else y
-        }.sorted
+      val years: Seq[String] = ps.map(_._1.yearMonth.distinct.sorted)
       val districtsCodes: Seq[Int] = ps.map(_._1.electoralDistrict).distinct.map(_.toInt).sorted
 
       ProfileResult(years, districtsCodes, 0)
