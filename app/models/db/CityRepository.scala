@@ -49,9 +49,19 @@ class CityRepository @Inject()(protected val tables: Tables,
     Cities.result
   }
 
+
+  def paginated(page: Int, size: Int) = db.run {
+    Cities.drop((page - 1) * size).take(size).result
+  }
+
+  def count(): Future[Int] = db.run {
+    Cities.countDistinct.result
+  }
+
   def searchByName(content: String): Future[Vector[City]] = {
     val contentQuoted = s"%${content.toUpperCase}%"
-    val q = sql""" SELECT id, names, code, state, country FROM cities
+    val q = sql""" SELECT id, names, code, state, country
+               FROM cities
          WHERE array_to_string(names, ', ') LIKE $contentQuoted; """.as[City]
     db.run(q)
   }

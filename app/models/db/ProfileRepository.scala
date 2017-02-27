@@ -57,7 +57,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     db.run(query.result)
   }
 
-  def getProfilesByCitiesAndYear2(year: String, month: String, citiesIds: Seq[Int]): Future[Seq[(Profile, City)]] = {
+  def getProfilesByCitiesAndYear(year: String, month: String, citiesIds: Seq[Int]): Future[Seq[(Profile, City)]] = {
     val query = for {
       profileCity <- (Profiles.join(Cities).on(_.cityId === _.id))
         .filter { case (profile, _) => profile.year === year }

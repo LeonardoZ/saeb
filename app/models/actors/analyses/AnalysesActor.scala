@@ -67,14 +67,14 @@ class AnalysesActor @Inject()(val taskService: TaskService,
     case Ready(cities , yearMonth, task) => {
       implicit val timeout = Timeout(10, TimeUnit.MINUTES)
 
-      cities.groupBy(_.id).keySet.grouped(100) foreach { citiesIdBlock =>
+      cities.groupBy(_.id).keySet.grouped(25) foreach { citiesIdBlock =>
         val cityAnalysesActor =
           injectedChild(cityAnalysesActorFactory(), s"city-analyses-${UUID.randomUUID().toString}")
         val ids = citiesIdBlock.map(_.get).toSeq
         val yearAndMonth = YearMonth.split(yearMonth)
 
-        profileRepository.getProfilesByCitiesAndYear2(yearAndMonth.year, yearAndMonth.month, ids) map { profiles =>
-          val np: Vector[ProfileWithCode] = profiles.map{
+        profileRepository.getProfilesByCitiesAndYear(yearAndMonth.year, yearAndMonth.month, ids) map { profiles =>
+          val np = profiles.map {
             case (profile, city) =>
               ProfileWithCode(
                 id = profile.id.get,
@@ -93,8 +93,6 @@ class AnalysesActor @Inject()(val taskService: TaskService,
       }
       taskService.updateTaskSuccess(task, s"Análises de ${yearMonth} realizadas com sucesso.")
     }
-
-
   }
 
 

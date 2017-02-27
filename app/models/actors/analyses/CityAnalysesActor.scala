@@ -8,7 +8,6 @@ import akka.event.LoggingReceive
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.util.Timeout
 import models.db.ProfileRepository
-import models.entity.Profile
 import models.query.ProfileWithCode
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -23,8 +22,6 @@ object CityAnalysesActor {
   }
 
   case class CheckCities(father: ActorRef, yearMonth: String, profilesWithCode: Vector[ProfileWithCode])
-
-  case class CheckCities2(father: ActorRef, yearMonth: String, profilesWithCode: Seq[Profile])
 
 }
 
@@ -42,22 +39,21 @@ class CityAnalysesActor @Inject()(val schoolingFactory: SchoolingAnalysesActor.F
 
   var ageGroupRouter = {
     val routees = Vector.fill(Runtime.getRuntime.availableProcessors()) {
-      val r = injectedChild(ageGroupFactory(), s"age-group-analyses-" + System.nanoTime())
-      context watch r
-      ActorRefRoutee(r)
+      val ageGroupActor = injectedChild(ageGroupFactory(), s"age-group-analyses-" + System.nanoTime())
+      context watch ageGroupActor
+      ActorRefRoutee(ageGroupActor)
     }
     Router(RoundRobinRoutingLogic(), routees)
   }
 
   var schoolingRouter = {
     val routees = Vector.fill(Runtime.getRuntime.availableProcessors()) {
-      val r =  injectedChild(schoolingFactory(), s"schooling-analyses-" + System.nanoTime())
-      context watch r
-      ActorRefRoutee(r)
+      val schoolingActor =  injectedChild(schoolingFactory(), s"schooling-analyses-" + System.nanoTime())
+      context watch schoolingActor
+      ActorRefRoutee(schoolingActor)
     }
     Router(RoundRobinRoutingLogic(), routees)
   }
-
 
   def receive: Receive = LoggingReceive {
     case CheckCities(father, yearMonth, profilesWithCode: Vector[ProfileWithCode]) => {

@@ -158,7 +158,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def yearMonth = column[String]("year_or_month", O.Length(7))
 
-    def schoolingId = column[Int]("schooling_id")
+    def schoolingId = column[Int]("schooling_level_id")
 
     def peoples = column[Int]("peoples")
 
