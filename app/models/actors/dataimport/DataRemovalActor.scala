@@ -2,7 +2,6 @@ package models.actors.dataimport
 
 import akka.actor.{Actor, ActorRef}
 import com.google.inject.Inject
-import models.actors.dataimport.DataRemovalActor.RemoveData
 import models.db._
 import models.entity.Task
 import models.service.TaskService
@@ -25,8 +24,9 @@ class DataRemovalActor @Inject()(val taskService: TaskService,
                                  val dataRemovalRepository: DataRemovalRepository)
   extends Actor with InjectedActorSupport {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   import DataRemovalActor._
+
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   override def receive: Receive = {
     case RemoveData(managerActor, yearMonth, task) => {
@@ -35,6 +35,7 @@ class DataRemovalActor @Inject()(val taskService: TaskService,
        case Failure(ex) => completeFailedTask(yearMonth, managerActor, task)
       }
     }
+      context.stop(self)
   }
 
   def completeTask(yearMonth: String, managerActor: ActorRef, task: Task): Future[Int] = {

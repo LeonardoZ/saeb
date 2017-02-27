@@ -53,6 +53,11 @@ class DataImportRepository @Inject()(protected val tables: Tables,
     (DataImports ++= dataImports).transactionally.asTry
   }.recover { case ex => Logger.debug("Error occurred while inserting dataImports", ex) }
 
+  def insert(dataImport: DataImport) = db.run {
+    (DataImports += dataImport).transactionally
+  }.recover { case ex => Logger.debug("Error occurred while inserting dataImports", ex) }
+
+
   def insertReturningId(dataImport: DataImport) = db.run {
     ((DataImports returning DataImports.map(_.id) into ((di, genId) => di.copy(id = genId))) += dataImport)
       .map(_.id.getOrElse(0)).asTry

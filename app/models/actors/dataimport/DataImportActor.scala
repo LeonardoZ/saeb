@@ -16,7 +16,7 @@ object DataImportActor {
 
   case class CheckFileAlreadyImported(ref: ActorRef, task: Task, path: String)
 
-  case class SaveNewImport(path: String)
+  case class SaveNewImport(path: String, userId: Int)
 
 }
 
@@ -30,7 +30,7 @@ class DataImportActor @Inject()(val dataImportRepository: DataImportRepository,
 
   def receive: Receive = {
     case CheckFileAlreadyImported(ref, task, path) => {
-      val dataImport = profileFileParser.parseFileData(path)
+      val dataImport = profileFileParser.parseFileData(path, task.userId)
       dataImportRepository.getByYearMonth(dataImport) map {
         case Some(dataImport) => {
           Logger.debug("Found: "+dataImport)
@@ -38,14 +38,16 @@ class DataImportActor @Inject()(val dataImportRepository: DataImportRepository,
         }
         case None => {
           Logger.debug("File not imported yet: "+path)
-          ref ! ManagerActor.StartDataImport(task, path)
+          ref ! ManagerActor.FileNotImported(task, path)
         }
       }
+      context.stop(self)
     }
 
-    case SaveNewImport(path) => {
-      val dataImport = profileFileParser.parseFileData(path)
-      dataImportRepository.insertReturningId(dataImport)
+    case SaveNewImport(path, userId) => {
+      val dataImport = profileFileParser.parseFileData(path, userId)
+      dataImportRepository.insert(dataImport)
+      context.stop(self)
     }
   }
 }

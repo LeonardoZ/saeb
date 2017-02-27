@@ -87,7 +87,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def ageGroupId = column[Int]("age_group_id")
 
-    def schoolingId = column[Int]("schooling_id")
+    def schoolingId = column[Int]("schooling_level_id")
 
     def quantityOfPeoples = column[Int]("quantity_peoples")
 
@@ -100,7 +100,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
-    def importDateTime = column[java.sql.Date]("import_date_time")
+    def importDateTime = column[java.sql.Timestamp]("import_date_time")
 
     def fileName = column[String]("file_name", O.Length(150))
 
@@ -108,7 +108,9 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def fileMonth = column[String]("file_month", O.Length(2))
 
-    def * = (id, importDateTime, fileName, fileYear, fileMonth) <> (DataImport.tupled, DataImport.unapply)
+    def userId = column[Int]("user_id")
+
+    def * = (id, importDateTime, fileName, fileYear, fileMonth, userId) <> (DataImport.tupled, DataImport.unapply)
   }
 
   class TaskTable(tag: Tag) extends Table[Task](tag, "tasks") {

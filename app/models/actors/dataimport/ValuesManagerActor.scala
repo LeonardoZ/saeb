@@ -25,11 +25,11 @@ object ValuesManagerActor {
 
   case class ReadValuesFromFile(managerActor: ActorRef, task: Task, file: String)
 
-  case class CitiesPersistenceDone()
+  case class CitiesPersistenceDone(actorRef: ActorRef)
 
-  case class AgeGroupPersistenceDone()
+  case class AgeGroupPersistenceDone(actorRef: ActorRef)
 
-  case class SchoolingsPersistenceDone()
+  case class SchoolingsPersistenceDone(actorRef: ActorRef)
 
   object ProfilePesistenceDone
 
@@ -43,6 +43,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Facto
 
   import ValuesManagerActor._
 
+
   var citiesReady: Boolean = false
   var agesReady: Boolean = false
   var schoolingsReady: Boolean = false
@@ -50,27 +51,30 @@ class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Facto
   var managerActor: ActorRef = null
   var task: Task = null
 
-  def checkIfEveryoneIsReady = {
 
+  def checkIfEveryoneIsReady = {
     if (citiesReady && agesReady && schoolingsReady) {
       self ! StartProfileExtraction(filePath)
     }
   }
 
   def receive: Receive = LoggingReceive {
-    case CitiesPersistenceDone => {
+    case CitiesPersistenceDone(actorRef) => {
       citiesReady = true
       checkIfEveryoneIsReady
+      context.stop(actorRef)
     }
 
-    case SchoolingsPersistenceDone => {
+    case SchoolingsPersistenceDone(actorRef) => {
       schoolingsReady = true
       checkIfEveryoneIsReady
+      context.stop(actorRef)
     }
 
-    case AgeGroupPersistenceDone => {
+    case AgeGroupPersistenceDone(actorRef) => {
       agesReady = true
       checkIfEveryoneIsReady
+      context.stop(actorRef)
     }
 
     case ReadValuesFromFile(managerActor, task, file) => {
@@ -83,25 +87,27 @@ class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Facto
       this.managerActor = managerActor
       this.task = task
       val values = profileFileParser.parseValues(file)
-      val citiesActor = injectedChild(cityFactory(), "cities-persist-actor$"+System.nanoTime())
-      val agesActor = injectedChild(ageFactory(), "ages-persist-actor$"+System.nanoTime())
-      val schoolingsActor = injectedChild(schoolingFactory(), "schoolings-persist-actor$"+System.nanoTime())
+      val citiesActor = injectedChild(cityFactory(), "cities-persist-actor$" + task.userId)
+      val agesActor = injectedChild(ageFactory(), "ages-persist-actor$" + task.userId)
+      val schoolingsActor = injectedChild(schoolingFactory(), "schoolings-persist-actor$" + task.userId)
 
       (citiesActor ? CitiesPersistActor.CitiesPersistence(self, values._1))
-          .mapTo[CitiesPersistenceDone] pipeTo sender
+          .mapTo[CitiesPersistenceDone] pipeTo self
       (agesActor ? AgeGroupPersistence(self, values._2))
-          .mapTo[AgeGroupPersistenceDone] pipeTo sender
+          .mapTo[AgeGroupPersistenceDone] pipeTo self
       (schoolingsActor ? SchoolingsPersistence(self, values._3))
-          .mapTo[SchoolingsPersistenceDone] pipeTo sender
+          .mapTo[SchoolingsPersistenceDone] pipeTo self
     }
 
     case StartProfileExtraction(file) => {
-      val persistActor = injectedChild(profileFactory(), "profile-worker-actor$" + System.nanoTime())
-      persistActor ! ProcessProfileActor.StartFileReading(self, file)
+      val persistActor = injectedChild(profileFactory(), "profile-worker-actor$")
+      persistActor ! ProcessProfileActor.StartFileReading(self, file, task.userId)
     }
 
     case ProfilePesistenceDone => {
       managerActor ! ManagerActor.DataImportDone(task)
+      context.stop(self)
+
     }
   }
 

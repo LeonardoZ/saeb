@@ -25,7 +25,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   val Profiles = TableQuery[tables.ProfileTable]
   val Cities = TableQuery[tables.CityTable]
   val AgeGroups = TableQuery[tables.AgeGroupTable]
-  val Schoolings = TableQuery[tables.SchoolingTable]
+  val SchoolingLevels = TableQuery[tables.SchoolingTable]
 
   implicit val getPeoplesByYearAndSex = GetResult(r => PeoplesByYearAndSex(r.<<, r.<<, r.<<))
   implicit val getPeoplesByYear = GetResult(r => PeoplesByYear(r.<<, r.<<))
@@ -39,7 +39,8 @@ class ProfileRepository @Inject()(protected val tables: Tables,
 
   def getProfilesForCity(cityCode: String): Future[Seq[(Profile, City)]] = {
     val query = for {
-      (profile, city) <- (Profiles join Cities on (_.cityId === _.id)).filter(_._2.code === cityCode)
+      (profile, city) <- (Profiles join Cities on (_.cityId === _.id))
+        .filter(_._2.code === cityCode)
     } yield (profile, city)
     db.run(query.result)
   }
@@ -67,41 +68,49 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     db.run(query.result)
   }
 
-  def getProfilesByCitiesAndYear(yearMonth: String, citiesIdsFormatted: String): Future[Try[Vector[ProfileWithCode]]] = {
+  def getProfilesByCitiesAndYear(year: String, month: String, citiesIdsFormatted: String):
+  Future[Try[Vector[ProfileWithCode]]] = {
     val query =
       sql"""
-           SELECT p.id, concat(p.year, p.month) as yearOrMonth, p.electoral_district as electoralDistrict, p.sex,
-           p.quantity_peoples as quantityOfPeoples, p.city_id as cityId, p.age_group_id as ageGroupId,
-           p.schooling_id as schoolingId, c.city_code as cityCode from profiles p
-           INNER JOIN cities c ON c.id = p.city_id
-           WHERE p.year_or_month = $yearMonth AND p.city_id in ($citiesIdsFormatted)
-           ORDER BY p.city_id
+           SELECT
+             p.id,
+             concat(p.year, p.month) as yearOrMonth,
+             p.electoral_district as electoralDistrict, p.sex,
+             p.quantity_peoples as quantityOfPeoples,
+             p.city_id as cityId,
+             p.age_group_id as ageGroupId,
+             p.schooling_id as schoolingId,
+             c.city_code as cityCode
+           FROM
+             profiles p
+           INNER JOIN
+              cities c ON c.id = p.city_id
+           WHERE
+              p.year = $year AND p.month = $month AND p.city_id in ($citiesIdsFormatted)
+           ORDER BY
+              p.city_id;
         """.as[ProfileWithCode]
     db.run(query.asTry)
   }
 
   def getProfilesFullByCityAndYear(year: String, month: String, cityCode: String)
-    : Future[Seq[(Profile, Schooling, AgeGroup)]] = {
+  : Future[Seq[(Profile, Schooling, AgeGroup)]] = {
     val query = for {
       (((profile, city), schooling), ageGroup) <-
       Profiles
         .join(Cities).on(_.cityId === _.id)
-        .join(Schoolings).on {
+        .join(SchoolingLevels).on {
         case ((profile, city), schooling) =>
           profile.schoolingId === schooling.id
-      }
-        .join(AgeGroups).on {
+      }.join(AgeGroups).on {
         case (((profile, city), schooling), ageGroup) => profile.ageGroupId === ageGroup.id
+      }.filter {
+        case (((profile, _), _), _) => profile.year === year
+      }.filter {
+        case (((profile, _), _), _) => profile.month === month
+      }.filter {
+        case (((_, city), _), _) => city.code === cityCode
       }
-        .filter {
-          case (((profile, _), _), _) => profile.year === year
-        }
-        .filter {
-          case (((profile, _), _), _) => profile.month === month
-        }
-        .filter {
-          case (((_, city), _), _) => city.code === cityCode
-        }
     } yield (profile, schooling, ageGroup)
     db.run(query.result)
   }
@@ -109,22 +118,23 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   def countPeoplesByCityOnYearsAndSex(cityCode: String): Future[Vector[PeoplesByYearAndSex]] = {
     val query = sql"""
       SELECT
-        concat(profile.year, profile.month) as yearOrMonth,
-        profile.sex,
-        sum(profile.quantity_peoples) as total
+        concat(p.year, p.month) as yearOrMonth,
+        p.sex,
+        sum(p.quantity_peoples) as total
       FROM
-        profiles
+        profiles p
       INNER JOIN
-        cities
+        cities city
       ON
-        city.id = profiles.city_id
+        city.id = p.city_id
       WHERE
-        city_code = $cityCode
+        city.code = $cityCode
       GROUP BY
-        profile.year_or_month,
-        profile.sex
+        p.year,
+        p.month,
+        p.sex
       ORDER BY
-        profile.year_or_month;
+         p.year, p.month;
     """.as[PeoplesByYearAndSex]
     db.run(query)
   }
@@ -133,41 +143,41 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     val query = sql"""
       SELECT
         concat(p.year, p.month) as yearOrMonth,
-        sum(profile.quantity_peoples) as total
+        sum(p.quantity_peoples) as total
       FROM
-        profiles
+        profiles p
       INNER JOIN
-        city
+        cities city
       ON
-        city.id = profile.city_id
+        city.id = p.city_id
       WHERE
-        city_code = $cityCode
+        city.code = $cityCode
       GROUP BY
-        profile.year_or_month
+        p.year, p.month
       ORDER BY
-        profile.year_or_month;
+        concat(p.year, p.month) ;
     """.as[PeoplesByYear]
     db.run(query)
   }
 
 
-  def getProfilesForAgeGroups(year: String,month: String, cityCode: String): Future[Seq[(Profile, City, AgeGroup)]] = {
+  def getProfilesForAgeGroups(year: String, month: String, cityCode: String): Future[Seq[(Profile, City, AgeGroup)]] = {
     val query = for {
       ((profile, city), ageGroup) <-
         (Profiles.join(Cities).on(_.cityId === _.id))
           .join(AgeGroups).on {
-            case ((profile, city), ageGroup) => profile.ageGroupId === ageGroup.id
-          }
-          .filter { case ((profile, _), _) =>
-            profile.year === year
-          }
-          .filter { case ((profile, _), _) =>
-            profile.month === month
-          }
-          .filter { case ((_, city), _) =>
-            city.code === cityCode
-          }
+          case ((profile, city), ageGroup) => profile.ageGroupId === ageGroup.id
+        }.filter { case ((profile, _), _) =>
+          profile.year === year
+        }.filter { case ((profile, _), _) =>
+          profile.month === month
+        }.filter { case ((_, city), _) =>
+          city.code === cityCode
+        }.sortBy { case ((profile, city), group) =>
+          profile.sex
+        }
     } yield (profile, city, ageGroup)
+
     db.run(query.result)
   }
 
@@ -175,7 +185,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     val query = for {
       ((profile, city), schooling) <-
       (Profiles.join(Cities).on(_.cityId === _.id))
-        .join(Schoolings).on {
+        .join(SchoolingLevels).on {
         case ((profile, city), schooling) => profile.schoolingId === schooling.id
       }
         .filter { case ((profile, _), _) =>

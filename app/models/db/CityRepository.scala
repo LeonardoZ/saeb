@@ -7,7 +7,7 @@ import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
-import slick.jdbc.{GetResult, PositionedResult}
+import slick.jdbc.GetResult
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,8 +21,7 @@ class CityRepository @Inject()(protected val tables: Tables,
 
   val Cities = TableQuery[tables.CityTable]
 
-  implicit val getByName: AnyRef with GetResult[City] =
-    GetResult((r: PositionedResult) => r.<<)
+  implicit val getByName = GetResult(r => City(r.<<, r.nextArray().toList, r.<<, r.<<, r.<<))
 
   def getById(cityId: Int): Future[Option[City]] = db.run {
     Cities.filter(_.id === cityId).result.headOption
@@ -36,11 +35,6 @@ class CityRepository @Inject()(protected val tables: Tables,
     Cities.filter(_.code === code).result.headOption
   }
 
-  def getByName(cityName: String): Future[Vector[City]] = {
-    val q = sql""" SELECT id, names, code, state, country FROM cities
-         WHERE $cityName = ANY(names) """.as[City]
-    db.run(q)
-  }
 
   def getByCountry(country: String): Future[Option[City]] = db.run {
     Cities.filter(_.country === country).result.headOption
@@ -56,8 +50,9 @@ class CityRepository @Inject()(protected val tables: Tables,
   }
 
   def searchByName(content: String): Future[Vector[City]] = {
+    val contentQuoted = s"%${content.toUpperCase}%"
     val q = sql""" SELECT id, names, code, state, country FROM cities
-         WHERE array_to_string(names, ', ') like %$content% """.as[City]
+         WHERE array_to_string(names, ', ') LIKE $contentQuoted; """.as[City]
     db.run(q)
   }
 
@@ -82,22 +77,13 @@ class CityRepository @Inject()(protected val tables: Tables,
   }.recover { case ex => Logger.debug(s"Error occurred while inserting cities. \n $ex") }
 
   def update(city: City) = {
-    println(s"Im being called \t $city")
     val names = Cities.filter(_.id === city.id).map(x => (x.names))
-    println(s"Im was called \t $city")
-    try {
-      val update = names.update(city.names).transactionally
-      db.run(update)
-    } catch {
-      case e: Exception => {
-        println("Got some other kind of exception "+e)
-        Future.failed(e)
-      }
-    }
+    val update = names.update(city.names).transactionally
+    db.run(update)
+
   }
 
   def updateAll(cities: Set[City]) = {
-    println("nada ")
     val qs = cities.map { city =>
       val names = for {c <- Cities if c.id === city.id} yield city.names
       ((names.update(city.names)).flatMap { updatedRows =>

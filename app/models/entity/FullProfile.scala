@@ -1,7 +1,5 @@
 package models.entity
 
-import models.query.YearOrMonth
-
 case class Profile(id: Option[Int] = None,
                    year: String = "",
                    month: String = "0",
@@ -13,7 +11,7 @@ case class Profile(id: Option[Int] = None,
                    quantityOfPeoples: Int = 0) {
 
   def yearMonth(): String =
-    if (month == 0) year else year + "-" + month
+    if (month == null || month.isEmpty ||this.month == "0") year else year + "-" + month
 
 }
 

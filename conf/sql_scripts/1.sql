@@ -114,7 +114,7 @@ CREATE TABLE data_imports (
     user_id INTEGER NOT NULL,
     CONSTRAINT data_import_user_fk
     	FOREIGN KEY(user_id)
-    	REFERENCES data_imports(id)
+    	REFERENCES users(id)
     	ON DELETE NO ACTION ON UPDATE NO ACTION
 
 );

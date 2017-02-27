@@ -1,7 +1,8 @@
 package models.service
 
 import java.nio.file.Paths
-import java.util.Date
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 import models.entity._
@@ -57,7 +58,7 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
     (cities, ages, schoolings)
   }
 
-  def parseFileData(path: String): DataImport = {
+  def parseFileData(path: String, userId: Int): DataImport = {
     val yearCol = Source.fromFile(path, "latin1")
       .getLines
       .map { line =>
@@ -72,9 +73,10 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
 
     val fileNameExtracted = Paths.get(path).getFileName.toString
     DataImport(fileName = fileNameExtracted,
-      importDateTime = new java.sql.Date(new Date().getTime),
+      importDateTime = Timestamp.valueOf(LocalDateTime.now()),
       fileYear = yearMonth._1,
-      fileMonth = yearMonth._2)
+      fileMonth = yearMonth._2,
+      userId = userId)
   }
 
   private def fullLineParser(arr: Array[String]) =

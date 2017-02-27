@@ -42,8 +42,8 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
         val lastYear = importsToYearsForView(years).head
         YearMonth.split(lastYear._1)
       }
-      profileData <-
-      profileRepository.getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, cityCode.cityCode)
+      profileData <- profileRepository.
+          getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, cityCode.cityCode)
       result <- cityFactsComparison.calculateValues(cityCode.cityCode, profileData)
     } yield (result)) map { cityCompFull =>
       Ok(views.html.city_data_box(cityCompFull))
@@ -222,7 +222,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
             val partialTotal = profiles.map(_.quantityOfPeoples).sum
             ProfileBySex(sex, partialTotal)
           }
-        }.toSeq
+        }.toSeq.sortBy(_.sex)
 
         Future {
           Ok(Json.obj("profiles" -> profilesBySex))
@@ -257,7 +257,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
                 PeoplesByYearAndSexGrouped(year, peoplesByYear.groupBy(_.sex).map {
                   case (sex, peoplesBySex) =>
                     PeoplesBySex(sex, peoplesBySex.map(_.peoples).sum)
-                }.toSeq)
+                }.toSeq.sortBy(_.sex))
             }.toSeq.sortBy(_.yearMonth)
 
             Future {

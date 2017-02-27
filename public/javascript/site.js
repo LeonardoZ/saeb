@@ -131,7 +131,7 @@ $(function(){
             year = $yearSelect.val();
 
             baseAjaxRequest("/comparison", {
-                "year": year,
+                "yearMonth": year,
                 "codeOfCityOne": cityOneCode,
                 "codeOfCityTwo": cityTwoCode
             }, compareCallback);
@@ -180,13 +180,13 @@ $(function(){
             var $inputCityTwo = $($inputs[2]);
 
             baseAjaxRequestJson("/comparison/of/schooling", {
-                "year": $inputYear.val(),
+                "yearMonth": $inputYear.val(),
                 "codeOfCityOne": $inputCityOne.val(),
                 "codeOfCityTwo": $inputCityTwo.val()
             }, schoolingChartCallback);
 
             baseAjaxRequestJson("/comparison/of/agegroup", {
-                "year": $inputYear.val(),
+                "yearMonth": $inputYear.val(),
                 "codeOfCityOne": $inputCityOne.val(),
                 "codeOfCityTwo": $inputCityTwo.val()
             }, ageGroupChartCallback);

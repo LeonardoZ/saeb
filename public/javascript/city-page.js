@@ -180,17 +180,18 @@
                                + " - " + e.yearMonth.substring(4) : e.yearMonth;;
                 });
 
-               var dataM = profiles.map(function(e) {
+                var dataF = profiles.map(function(e) {
                     return e.peoplesBySex[0].peoples;
                 });
 
-                var dataF = profiles.map(function(e) {
+                 var dataM = profiles.map(function(e) {
                     return e.peoplesBySex[1].peoples;
                 });
 
                 var dataN = profiles.map(function(e) {
                     return (e.peoplesBySex.length > 2) ? e.peoplesBySex[2].peoples : 0;
                 });
+
 
                 var chartData = {
                     type: "line",
@@ -457,11 +458,11 @@
             }
 
             function createSpecificDividedBySexChartData($chartCanvas, $legend, profiles, title, labels) {
-                var dataM = profiles.map(function(e) {
+                var dataF = profiles.map(function(e) {
                     return e.profilesBySex[0].peoples;
                 });
 
-                var dataF = profiles.map(function(e) {
+                var dataM = profiles.map(function(e) {
                     return e.profilesBySex[1].peoples;
                 });
 
@@ -469,11 +470,11 @@
                     return (e.profilesBySex.length > 2) ? e.profilesBySex[2].peoples : 0;
                 });
 
-                var dataMP = profiles.map(function(e) {
+                var dataFP = profiles.map(function(e) {
                     return e.profilesBySex[0].percentOf;
                 });
 
-                var dataFP = profiles.map(function(e) {
+                var dataMP = profiles.map(function(e) {
                     return e.profilesBySex[1].percentOf;
                 });
 
@@ -556,15 +557,12 @@
                         tooltips: {
                             callbacks: {
                                 label: function(tooltipItems, data) {
-                                console.log(tooltipItems)
-                                console.log(data)
                                     var pre = data.datasets[tooltipItems.datasetIndex].label;
                                     if (percentOf !== null){
                                         return pre + ": " + numeral(tooltipItems.yLabel).format(format) + " - " +
                                             numeral(percentOf[tooltipItems.index]).format("0,00.00") + "%";
                                     } else {
                                         return pre + ": " + numeral(tooltipItems.yLabel).format(format);
-
                                     }
                                 }
                             }
@@ -572,7 +570,7 @@
                         scales: {
                             yAxes: [{
                                 ticks: {
-                                    beginAtZero: false,
+                                    beginAtZero: true,
                                     callback: function(value, index, values) {
                                         return numeral(value).format(format);
                                     }
@@ -637,9 +635,9 @@
                         return e.sex;
                     });
 
-                    var dataM = profiles[0].peoples;
+                    var dataF = profiles[0].peoples;
 
-                    var dataF = profiles[1].peoples;
+                    var dataM = profiles[1].peoples;
 
                     var dataN = (profiles.length > 2) ? profiles[2].peoples : 0;
 

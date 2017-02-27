@@ -60,6 +60,7 @@ package object controllers {
       val newMonth = if (month.length == 1) "0" + month else month
       val newYear = if (!month.isEmpty) (year + "-" + newMonth) else year
       val valueId = if (!month.isEmpty) year + newMonth else year
+      println((valueId, newYear))
       (valueId, newYear)
     }.sortBy(_._2).reverse
 

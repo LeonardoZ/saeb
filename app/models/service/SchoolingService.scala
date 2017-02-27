@@ -30,7 +30,7 @@ class SchoolingService @Inject()()(implicit ec: ExecutionContext) {
           TotalProfilesBySexUnderSchooling(sex, totalBy, percentageOf(totalBy, total))
       }
 
-      ProfilesBySchoolingAndPosition(level, totalsOfProfiles.toSeq)
+      ProfilesBySchoolingAndPosition(level, totalsOfProfiles.toSeq.sortBy(_.sex))
 
     }.toSeq.filter(_.positionAndSchooling._2 != filterValue).sortBy(_.positionAndSchooling._1).map {
       ps => ProfilesBySchooling(ps.positionAndSchooling._2, ps.profilesBySex)
