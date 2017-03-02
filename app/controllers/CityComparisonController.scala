@@ -50,7 +50,7 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   }
 
   def processComparison(yearCityCodes: YearCityCodes) = {
-    val yearAndMonth = YearMonth.split(yearCityCodes.yearMonth)
+    val yearAndMonth = YearMonth.split(yearCityCodes.year)
     val profilesCityOne = profileRepository
       .getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)
     val profilesCityTwo = profileRepository
@@ -85,7 +85,7 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   }
 
   def processComparisonForSchooling(yearCityCodes: YearCityCodes) = {
-    val yearAndMonth = YearMonth.split(yearCityCodes.yearMonth)
+    val yearAndMonth = YearMonth.split(yearCityCodes.year)
     val profilesCityOne =
       profileRepository.getProfilesForSchoolings(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)
     val profilesCityTwo =
@@ -127,7 +127,7 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
   }
 
   def processComparisonForAgeGroup(yearCityCodes: YearCityCodes) = {
-    val yearAndMonth = YearMonth.split(yearCityCodes.yearMonth)
+    val yearAndMonth = YearMonth.split(yearCityCodes.year)
 
     val profilesCityOne =
       profileRepository.getProfilesForAgeGroups(yearAndMonth.year, yearAndMonth.month, yearCityCodes.codeOfCityOne)

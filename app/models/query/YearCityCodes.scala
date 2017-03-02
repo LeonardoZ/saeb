@@ -1,3 +1,3 @@
 package models.query
 
-case class YearCityCodes(yearMonth: String, codeOfCityOne: String, codeOfCityTwo: String)
+case class YearCityCodes(year: String, codeOfCityOne: String, codeOfCityTwo: String)
