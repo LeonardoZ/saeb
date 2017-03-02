@@ -37,10 +37,8 @@ class AgeGroupPersistActor @Inject()(val ageGroupRepository: AgeGroupRepository)
         else
           ageGroupRepository.insertAll(cs)
       }
-      f.map { futureProcess => {
-        ref ! ValuesManagerActor.AgeGroupPersistenceDone
-        context.stop(self)
-      }
+      f.map { futureProcess =>
+        ref ! ValuesManagerActor.AgeGroupPersistenceDone(self)
       }
 
     }

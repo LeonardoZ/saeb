@@ -19,6 +19,10 @@ object CitiesRetrieveActor {
 
   case class RetrieveCities(analysesActorRef: ActorRef, yearMonth: String, task: Task)
 
+  case class CountCities(analysesActorRef: ActorRef, yearMonth: String, task: Task)
+
+  case class RetrieveCitiesPaginated(analysesActorRef: ActorRef, yearMonth: String, task: Task, limit: Int, offset: Int)
+
 }
 
 class CitiesRetrieveActor @Inject()(val cityRepository: CityRepository) extends Actor with InjectedActorSupport {
@@ -29,7 +33,7 @@ class CitiesRetrieveActor @Inject()(val cityRepository: CityRepository) extends 
     case RetrieveCities(analysesActorRef, yearMonth, task) =>
       cityRepository.getAll().map { cities =>
         analysesActorRef ! AnalysesActor.OnCitiesRetrieval(cities, yearMonth, task)
+        context.stop(self)
       }
-
   }
 }

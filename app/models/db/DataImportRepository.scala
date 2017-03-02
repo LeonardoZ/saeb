@@ -2,7 +2,7 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.{DataImport, Schooling}
+import models.entity.DataImport
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
@@ -12,7 +12,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DataImportRepository @Inject()(protected val tables: Tables,
                                      protected val dbConfigProvider: DatabaseConfigProvider)(implicit ex: ExecutionContext) {
-
 
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
@@ -53,6 +52,11 @@ class DataImportRepository @Inject()(protected val tables: Tables,
   def insertAll(dataImports: Set[DataImport]) = db.run {
     (DataImports ++= dataImports).transactionally.asTry
   }.recover { case ex => Logger.debug("Error occurred while inserting dataImports", ex) }
+
+  def insert(dataImport: DataImport) = db.run {
+    (DataImports += dataImport).transactionally
+  }.recover { case ex => Logger.debug("Error occurred while inserting dataImports", ex) }
+
 
   def insertReturningId(dataImport: DataImport) = db.run {
     ((DataImports returning DataImports.map(_.id) into ((di, genId) => di.copy(id = genId))) += dataImport)

@@ -38,8 +38,12 @@ class SchoolingRankingRepository @Inject()(protected val tables: Tables,
   def getYears(): Future[Vector[YearOrMonth]] = {
     val query =
       sql"""
-        select year_or_month from schooling_ranking
-        group by year_or_month;
+        SELECT
+          year_or_month
+        FROM
+          schooling_level_rankings
+        GROUP BY
+          year_or_month;
       """.as[YearOrMonth]
     db.run(query)
   }

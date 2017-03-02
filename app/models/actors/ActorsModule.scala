@@ -21,7 +21,6 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActorFactory[DataImportActor, DataImportActor.Factory]
     bindActorFactory[DataRemovalActor, DataRemovalActor.Factory]
 
-
     // analyses actors
     bindActorFactory[AgeGroupAnalysesActor, AgeGroupAnalysesActor.Factory]
     bindActorFactory[CitiesRetrieveActor, CitiesRetrieveActor.Factory]

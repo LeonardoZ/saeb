@@ -10,12 +10,10 @@ import akka.event.LoggingReceive
 import akka.util.Timeout
 import models.db.{AgeGroupRankingRepository, ProfileRepository, SchoolingRankingRepository}
 import models.entity.{City, Task}
-import models.query.ProfileWithCode
+import models.query.{ProfileWithCode, YearMonth}
 import models.service.TaskService
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
-
-import scala.concurrent.ExecutionContext
 
 object AnalysesActor {
 
@@ -36,6 +34,7 @@ class AnalysesActor @Inject()(val taskService: TaskService,
   extends Actor with InjectedActorSupport {
 
   import AnalysesActor._
+
   import scala.concurrent.ExecutionContext.Implicits.global
   var counter = new AtomicInteger(0)
 
@@ -68,29 +67,32 @@ class AnalysesActor @Inject()(val taskService: TaskService,
     case Ready(cities , yearMonth, task) => {
       implicit val timeout = Timeout(10, TimeUnit.MINUTES)
 
-      cities.groupBy(_.id).keySet.grouped(100) foreach { citiesIdBlock =>
-        val cityAnalysesActor = injectedChild(cityAnalysesActorFactory(), s"city-analyses-${UUID.randomUUID().toString}")
+      cities.groupBy(_.id).keySet.grouped(25) foreach { citiesIdBlock =>
+        val cityAnalysesActor =
+          injectedChild(cityAnalysesActorFactory(), s"city-analyses-${UUID.randomUUID().toString}")
         val ids = citiesIdBlock.map(_.get).toSeq
+        val yearAndMonth = YearMonth.split(yearMonth)
 
-        profileRepository.getProfilesByCitiesAndYear2(yearMonth, ids) map { profiles =>
-          val np: Vector[ProfileWithCode] = profiles.map((profileCity) => ProfileWithCode(
-            id = profileCity._1.id.get,
-            yearOrMonth = profileCity._1.yearOrMonth,
-            electoralDistrict = profileCity._1.electoralDistrict,
-            sex = profileCity._1.sex,
-            quantityOfPeoples = profileCity._1.quantityOfPeoples,
-            cityId = profileCity._1.cityId,
-            ageGroupId = profileCity._1.ageGroupId,
-            schoolingId = profileCity._1.schoolingId,
-            cityCode = profileCity._2.code)).toVector
+        profileRepository.getProfilesByCitiesAndYear(yearAndMonth.year, yearAndMonth.month, ids) map { profiles =>
+          val np = profiles.map {
+            case (profile, city) =>
+              ProfileWithCode(
+                id = profile.id.get,
+                yearOrMonth = profile.yearMonth,
+                electoralDistrict = profile.electoralDistrict,
+                sex = profile.sex,
+                quantityOfPeoples = profile.quantityOfPeoples,
+                cityId = profile.cityId,
+                ageGroupId = profile.ageGroupId,
+                schoolingId = profile.schoolingId,
+                cityCode = city.code)
+          }.toVector
 
           cityAnalysesActor ! CityAnalysesActor.CheckCities(self, yearMonth, np)
         }
       }
       taskService.updateTaskSuccess(task, s"Análises de ${yearMonth} realizadas com sucesso.")
     }
-
-
   }
 
 

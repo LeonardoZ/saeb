@@ -4,7 +4,6 @@ import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
 import akka.event.LoggingReceive
-import models.actors.dataimport.ManagerActor._
 import models.entity.{DataImport, Task}
 import models.service.TaskService
 import play.api.Logger
@@ -30,6 +29,8 @@ object ManagerActor {
 
   case class DataImportDone(task: Task)
 
+  case class FileNotImported(task: Task, path: String)
+
 }
 
 class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
@@ -37,17 +38,16 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
                              val dataRemovalFactory: DataRemovalActor.Factory,
                              val taskService: TaskService) extends Actor with InjectedActorSupport {
   import ManagerActor._
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def preStart(): Unit = {
-    Logger.debug("Starting SAEP Data Import...")
+    Logger.debug("Starting SAEB Data Import...")
   }
 
-  override def receive = LoggingReceive {
+  val receivingOrdersState: Receive = LoggingReceive {
     case DataImportOrder(path, userEmail) => {
-
-      val dataImportActor = injectedChild(dataImportFactory(), "data-import-actor$" + System.nanoTime())
-
+      val dataImportActor = injectedChild(dataImportFactory(), "data-import-actor$" + userEmail)
       generateTask(userEmail,"Importar aquivo", "Importação sendo analisada") map {
         case Some(task) => dataImportActor ! DataImportActor.CheckFileAlreadyImported(self, task, path)
         case None => None
@@ -55,25 +55,11 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
     }
 
     case DataRemovalOrder(yearMonth, userEmail) => {
-      val dataRemovalActor = injectedChild(dataRemovalFactory(), "data-removal-actor$" + System.nanoTime())
-
+      val dataRemovalActor = injectedChild(dataRemovalFactory(), "data-removal-actor$" + userEmail)
       generateTask(userEmail,"Deletar dados", s"Iniciada remoção dos dados de $yearMonth") map {
         case Some(task) => dataRemovalActor ! DataRemovalActor.RemoveData(self, yearMonth, task)
         case None => None
       }
-    }
-
-    case DataRemoved => {
-
-    }
-
-    case DataNotRemoved => {
-
-    }
-
-    case StartDataImport(task, path) => {
-      val valuesManagerActor = injectedChild(valuesFactory(), "values-manager-actor-$" + System.nanoTime())
-      valuesManagerActor ! ValuesManagerActor.ReadValuesFromFile(self, task, path)
     }
 
     case FileAlreadyImported(task, dataImport) => {
@@ -81,10 +67,26 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
       Logger.debug("Nothing to do.")
     }
 
-    case DataImportDone(task) => {
-      taskService.updateTaskSuccess(task, "Arquivo importado com sucesso")
+    case FileNotImported(task, path) => {
+      context.become(importingDataState)
+      self ! StartDataImport(task, path)
     }
   }
+
+  val importingDataState: Receive = LoggingReceive {
+    case StartDataImport(task, path) => {
+      val valuesManagerActor = injectedChild(valuesFactory(), s"values-manager-actor")
+      valuesManagerActor ! ValuesManagerActor.ReadValuesFromFile(self, task, path)
+    }
+
+    case DataImportDone(task) => {
+      taskService.updateTaskSuccess(task, "Arquivo importado com sucesso")
+      context.become(receivingOrdersState)
+    }
+  }
+
+  // Initial State
+  override def receive = receivingOrdersState
 
   def generateTask(userEmail: String, description: String, message: String): Future[Option[Task]] = {
     taskService.createTask(description, message, userEmail)

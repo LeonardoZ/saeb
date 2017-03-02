@@ -5,7 +5,6 @@ import javax.inject.Inject
 import akka.actor.{Actor, ActorRef}
 import models.db.SchoolingRepository
 import models.entity.Schooling
-import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,17 +30,16 @@ class SchoolingsPersistActor @Inject()(val schoolingRepository: SchoolingReposit
         newSchoolings.filter(ns => oldSchoolings.filter(ns.level == _.level).isEmpty)
       }
 
-      val f = schoolingsToPersist.map (cs => {
+      val f = schoolingsToPersist.map(cs => {
         if (cs.isEmpty)
           Future.successful()
         else
           schoolingRepository.insertAll(cs)
       })
 
-      f.map { futureProcess => {
-        ref ! ValuesManagerActor.SchoolingsPersistenceDone
-        context.stop(self)
-      }}
+      f.map { futureProcess =>
+        ref ! ValuesManagerActor.SchoolingsPersistenceDone(self)
+      }
     }
   }
 }

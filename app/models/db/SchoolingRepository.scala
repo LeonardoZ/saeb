@@ -8,6 +8,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class SchoolingRepository @Inject()(protected val tables: Tables,

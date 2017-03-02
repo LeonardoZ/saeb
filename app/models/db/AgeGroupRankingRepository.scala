@@ -2,13 +2,13 @@ package models.db
 
 import javax.inject.Inject
 
-import models.entity.{AgeGroup, AgeGroupRanking, Cities, City}
+import models.entity.{AgeGroup, AgeGroupRanking, City}
 import models.query.YearOrMonth
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
-import slick.jdbc.GetResult
+import slick.jdbc.{GetResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -39,8 +39,12 @@ class AgeGroupRankingRepository @Inject()(protected val tables: Tables,
   def getYears(): Future[Vector[YearOrMonth]] = {
     val query =
       sql"""
-        select year_or_month from age_group_ranking
-        group by year_or_month;
+        SELECT
+          year_or_month
+        FROM
+          age_group_rankings
+        GROUP BY
+          year_or_month;
       """.as[YearOrMonth]
     db.run(query)
   }

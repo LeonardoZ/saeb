@@ -6,11 +6,11 @@ import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 import akka.util.Timeout
 import models.db.CityRepository
-import models.entity.City
+import models.entity.{City, SimpleCity}
 import play.api.libs.concurrent.InjectedActorSupport
 
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 object CitiesPersistActor {
 
@@ -18,7 +18,7 @@ object CitiesPersistActor {
     def apply(): Actor
   }
 
-  case class CitiesPersistence(actorRef: ActorRef, cities: Set[City])
+  case class CitiesPersistence(actorRef: ActorRef, cities: Set[SimpleCity])
 
   case object BatchInsertDone
 
@@ -37,19 +37,25 @@ class CitiesPersistActor @Inject()(val cityRepository: CityRepository) extends A
 
     case CitiesPersistence(actorRef, newCities) =>
       implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-      val citiesToPersist: Future[Set[City]] = cityRepository.getAll map { oldCities =>
-        newCities.filter(nc => oldCities.filter(nc.contentEqual(_)).isEmpty)
-      }
-      val f = citiesToPersist.flatMap { cs =>
-        if (cs.isEmpty)
-          Future.successful()
-        else
-          cityRepository.insertAll(cs)
-      }
-      f.map { futureProcess => {
-        actorRef ! ValuesManagerActor.CitiesPersistenceDone
-        context.stop(self)
-      }}
-  }
+      val citiesToPersist = cityRepository.getAll map { oldCities =>
+        val checkedCities: Set[Option[City]] = newCities.map { city =>
+          oldCities.find(nc => nc.code.equals(city.id)) match {
+            case Some(cityInBD) =>
+              if (!cityInBD.names.contains(city.name))
+                Some(cityInBD.copy(names = (cityInBD.names :+ city.name)))
+              else
+                None
+            case None =>
+              Some(City(code = city.id, state = city.state, country = city.country, names = List() :+ city.name))
+          }
+        }
+        val partitioned: (Set[City], Set[City]) = checkedCities.filter(_.isDefined).map(_.get).partition(_.id.isDefined)
 
+        Future.sequence(partitioned._1.map(cityRepository.update(_))).onComplete { c1 =>
+          cityRepository.insertAll(partitioned._2).onComplete { c2 =>
+            actorRef ! ValuesManagerActor.CitiesPersistenceDone(self)
+          }
+        }
+      }
+  }
 }

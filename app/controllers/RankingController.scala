@@ -48,30 +48,37 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
       },
       analyses => schoolingRankingRepository.getYears flatMap { yearMonths =>
         val years = formatYears(yearMonths)
-        val selectedYear: (String, String) = years.filter(_._1 == analyses.yearMonth).head
+
+        val selectedYear: Option[(String, String)] = years.filter(_._1 == analyses.yearMonth).headOption
         (for {
           transformed <- schoolingTransformation(analyses.yearMonth)
           rankings <- schoolingViewParser(transformed)
         } yield (rankings)) flatMap { rankings =>
-          Future (Ok(views.html.schooling_ranking(
-            selectedYear._2,
-            analysesForm,
-            years,
-            rankings))
-          )
+
+          Future(
+            Ok(views.html.schooling_ranking(
+              selectedYear.getOrElse(("N/A", "N/A"))._2,
+              analysesForm,
+              years,
+              rankings)))
+
         }
-    })
+      })
   }
 
   def schoolingAnalysesPage = Action.async { implicit request =>
     schoolingRankingRepository.getYears flatMap { yearMonths =>
       val years = formatYears(yearMonths)
-      val lastYear = years.head._2
-      (for {
-        transformed <- schoolingTransformation(lastYear)
-        rankings <- schoolingViewParser(transformed)
-      } yield (rankings)) map { rankings =>
-        Ok(views.html.schooling_ranking(lastYear,analysesForm, years, rankings))
+      if (years.isEmpty)
+        Future(Ok(views.html.no_ranking()))
+      else {
+        val lastYear = years.headOption.getOrElse(("N/A", "N/A"))._2
+        (for {
+          transformed <- schoolingTransformation(lastYear)
+          rankings <- schoolingViewParser(transformed)
+        } yield (rankings)) map { rankings =>
+          Ok(views.html.schooling_ranking(lastYear, analysesForm, years, rankings))
+        }
       }
     }
   }
@@ -142,12 +149,13 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
       },
       analyses => ageGroupRankingRepository.getYears flatMap { imports =>
         val years = formatYears(imports)
+
         val selectedYear = years.filter(_._1 == analyses.yearMonth).head
         (for {
           transformed <- ageGroupTransformation(analyses.yearMonth)
           rankings <- ageGroupViewParser(transformed)
         } yield (rankings)) flatMap { rankings =>
-          Future (Ok(views.html.age_group_ranking(
+          Future(Ok(views.html.age_group_ranking(
             selectedYear._2,
             analysesForm,
             years,
@@ -160,12 +168,16 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
   def ageGroupAnalysesPage = Action.async { implicit request =>
     ageGroupRankingRepository.getYears flatMap { yearMonths =>
       val years = formatYears(yearMonths)
-      val lastYear = years.head._2
-      (for {
-        transformed <- ageGroupTransformation(lastYear)
-        rankings <- ageGroupViewParser(transformed)
-      } yield (rankings)) map { rankings =>
-        Ok(views.html.age_group_ranking(lastYear,analysesForm, years, rankings))
+      if (years.isEmpty)
+        Future(Ok(views.html.no_ranking()))
+      else {
+        val lastYear = years.head._2
+        (for {
+          transformed <- ageGroupTransformation(lastYear)
+          rankings <- ageGroupViewParser(transformed)
+        } yield (rankings)) map { rankings =>
+          Ok(views.html.age_group_ranking(lastYear, analysesForm, years, rankings))
+        }
       }
     }
   }
@@ -226,7 +238,6 @@ class RankingController @Inject()(val schoolingRankingRepository: SchoolingRanki
       }
     }
   }
-
 
 
 }

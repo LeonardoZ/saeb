@@ -38,10 +38,12 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   def loadComparisonValues(cityCode: CityCode): Future[Result] = {
     (for {
       years <- dataImportRepository.getAll()
-      lastYear <- Future {
-        importsToYearsForView(years).head
+      yearAndMonth <- Future {
+        val lastYear = importsToYearsForView(years).head
+        YearMonth.split(lastYear._1)
       }
-      profileData <- profileRepository.getProfilesFullByCityAndYear(lastYear._1, cityCode.cityCode)
+      profileData <- profileRepository.
+          getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, cityCode.cityCode)
       result <- cityFactsComparison.calculateValues(cityCode.cityCode, profileData)
     } yield (result)) map { cityCompFull =>
       Ok(views.html.city_data_box(cityCompFull))
@@ -94,7 +96,9 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def getAgeGroupChartData(yearCityCode: YearCityCode) = {
-    val profileCityGroupF = profileRepository.getProfilesForAgeGroups(yearCityCode.year, yearCityCode.code)
+    val yearAndMonth = yearCityCode.splitYear()
+    val profileCityGroupF =
+      profileRepository.getProfilesForAgeGroups(yearAndMonth.year, yearAndMonth.month, yearCityCode.code)
 
     profileCityGroupF.flatMap { (profileCityGroup: Seq[ProfileCityGroup]) =>
       Future {
@@ -116,7 +120,10 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def getAgeGroupUnifiedChartData(yearCityCode: YearCityCode) = {
-    val profileCityGroupF = profileRepository.getProfilesForAgeGroups(yearCityCode.year, yearCityCode.code)
+    val yearAndMonth = yearCityCode.splitYear()
+
+    val profileCityGroupF =
+      profileRepository.getProfilesForAgeGroups(yearAndMonth.year, yearAndMonth.month, yearCityCode.code)
 
     profileCityGroupF.flatMap { (profileCityGroup: Seq[ProfileCityGroup]) =>
       Future {
@@ -138,7 +145,9 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def getSchoolingChartData(yearCityCode: YearCityCode) = {
-    val profileCitySchoolingF = profileRepository.getProfilesForSchoolings(yearCityCode.year, yearCityCode.code)
+    val yearAndMonth = yearCityCode.splitYear()
+    val profileCitySchoolingF =
+      profileRepository.getProfilesForSchoolings(yearAndMonth.year, yearAndMonth.month, yearCityCode.code)
 
     profileCitySchoolingF.flatMap { (profileCitySchooling: Seq[(Profile, City, Schooling)]) =>
       if (profileCitySchooling.isEmpty)
@@ -166,7 +175,10 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def getSchoolingUnifiedChartData(yearCityCode: YearCityCode) = {
-    val profileCitySchoolingF = profileRepository.getProfilesForSchoolings(yearCityCode.year, yearCityCode.code)
+    val yearAndMonth = yearCityCode.splitYear()
+
+    val profileCitySchoolingF =
+      profileRepository.getProfilesForSchoolings(yearAndMonth.year, yearAndMonth.month, yearCityCode.code)
 
     profileCitySchoolingF.flatMap { (profileCitySchooling: Seq[(Profile, City, Schooling)]) =>
       if (profileCitySchooling.isEmpty)
@@ -194,7 +206,10 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def getProfileBySexData(yearCityCode: YearCityCode) = {
-    val profilesF = profileRepository.getProfilesByCityAndYear(yearCityCode.year, yearCityCode.code)
+    val yearAndMonth = yearCityCode.splitYear()
+
+    val profilesF =
+      profileRepository.getProfilesByCityAndYear(yearAndMonth.year, yearAndMonth.month, yearCityCode.code)
     profilesF flatMap { profiles =>
       if (profiles.isEmpty)
         Future {
@@ -207,7 +222,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
             val partialTotal = profiles.map(_.quantityOfPeoples).sum
             ProfileBySex(sex, partialTotal)
           }
-        }.toSeq
+        }.toSeq.sortBy(_.sex)
 
         Future {
           Ok(Json.obj("profiles" -> profilesBySex))
@@ -242,7 +257,7 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
                 PeoplesByYearAndSexGrouped(year, peoplesByYear.groupBy(_.sex).map {
                   case (sex, peoplesBySex) =>
                     PeoplesBySex(sex, peoplesBySex.map(_.peoples).sum)
-                }.toSeq)
+                }.toSeq.sortBy(_.sex))
             }.toSeq.sortBy(_.yearMonth)
 
             Future {
@@ -305,7 +320,10 @@ class CityPageController @Inject()(val cityRepository: CityRepository,
   }
 
   def processQuantityForSchoolingAndAgeGroup(yearCityCode: YearCityCode) = {
-    val profileSchoolingAge = profileRepository.getProfilesFullByCityAndYear(yearCityCode.year, yearCityCode.code)
+    val yearAndMonth = yearCityCode.splitYear()
+
+    val profileSchoolingAge =
+      profileRepository.getProfilesFullByCityAndYear(yearAndMonth.year, yearAndMonth.month, yearCityCode.code)
 
     profileSchoolingAge.flatMap { vs =>
       val result = vs.groupBy { case (_, schooling, age) =>

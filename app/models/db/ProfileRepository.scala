@@ -25,7 +25,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   val Profiles = TableQuery[tables.ProfileTable]
   val Cities = TableQuery[tables.CityTable]
   val AgeGroups = TableQuery[tables.AgeGroupTable]
-  val Schoolings = TableQuery[tables.SchoolingTable]
+  val SchoolingLevels = TableQuery[tables.SchoolingTable]
 
   implicit val getPeoplesByYearAndSex = GetResult(r => PeoplesByYearAndSex(r.<<, r.<<, r.<<))
   implicit val getPeoplesByYear = GetResult(r => PeoplesByYear(r.<<, r.<<))
@@ -39,118 +39,165 @@ class ProfileRepository @Inject()(protected val tables: Tables,
 
   def getProfilesForCity(cityCode: String): Future[Seq[(Profile, City)]] = {
     val query = for {
-      (profile, city) <- (Profiles join Cities on (_.cityId === _.id)).filter(_._2.code === cityCode)
+      (profile, city) <- (Profiles join Cities on (_.cityId === _.id))
+        .filter(_._2.code === cityCode)
     } yield (profile, city)
     db.run(query.result)
   }
 
 
-  def getProfilesByCityAndYear(year: String, cityCode: String): Future[Seq[Profile]] = {
+  def getProfilesByCityAndYear(year: String, month: String, cityCode: String): Future[Seq[Profile]] = {
     val query = for {
       profileCity <- (Profiles.join(Cities).on(_.cityId === _.id))
-        .filter(_._1.yearOrMonth === year)
-        .filter(_._2.code === cityCode)
+        .filter { case (profile, _) => profile.year === year }
+        .filter { case (profile, _) => profile.month === month }
+        .filter { case (_, city) => city.code === cityCode }
     } yield (profileCity._1)
 
     db.run(query.result)
   }
 
-  def getProfilesByCitiesAndYear2(yearMonth: String, citiesIds: Seq[Int]): Future[Seq[(Profile, City)]] = {
+  def getProfilesByCitiesAndYear(year: String, month: String, citiesIds: Seq[Int]): Future[Seq[(Profile, City)]] = {
     val query = for {
       profileCity <- (Profiles.join(Cities).on(_.cityId === _.id))
-        .filter(_._1.yearOrMonth === yearMonth)
-        .filter(_._1.cityId inSet citiesIds)
+        .filter { case (profile, _) => profile.year === year }
+        .filter { case (profile, _) => profile.month === month }
+        .filter { case (profile, _) => profile.cityId inSet citiesIds }
     } yield (profileCity)
 
     db.run(query.result)
   }
 
-  def getProfilesByCitiesAndYear(yearMonth: String, citiesIdsFormatted: String): Future[Try[Vector[ProfileWithCode]]] = {
+  def getProfilesByCitiesAndYear(year: String, month: String, citiesIdsFormatted: String):
+  Future[Try[Vector[ProfileWithCode]]] = {
     val query =
       sql"""
-           select p.id, p.year_or_month as yearOrMonth, p.electoral_district as electoralDistrict, p.sex,
-           p.quantity_of_peoples as quantityOfPeoples, p.city_id as cityId, p.age_group_id as ageGroupId,
-           p.schooling_id as schoolingId, c.city_code as cityCode from profile p
-           inner join city c on c.id = p.city_id
-           where p.year_or_month = $yearMonth and p.city_id in ($citiesIdsFormatted)
-           order by p.city_id
+           SELECT
+             p.id,
+             concat(p.year, p.month) as yearOrMonth,
+             p.electoral_district as electoralDistrict, p.sex,
+             p.quantity_peoples as quantityOfPeoples,
+             p.city_id as cityId,
+             p.age_group_id as ageGroupId,
+             p.schooling_id as schoolingId,
+             c.city_code as cityCode
+           FROM
+             profiles p
+           INNER JOIN
+              cities c ON c.id = p.city_id
+           WHERE
+              p.year = $year AND p.month = $month AND p.city_id in ($citiesIdsFormatted)
+           ORDER BY
+              p.city_id;
         """.as[ProfileWithCode]
     db.run(query.asTry)
   }
 
-  def getProfilesFullByCityAndYear(year: String, cityCode: String): Future[Seq[(Profile, Schooling, AgeGroup)]] = {
+  def getProfilesFullByCityAndYear(year: String, month: String, cityCode: String)
+  : Future[Seq[(Profile, Schooling, AgeGroup)]] = {
     val query = for {
-      profileWithValues: (((tables.ProfileTable, tables.CityTable), tables.SchoolingTable), tables.AgeGroupTable) <-
-      ((Profiles.join(Cities).on(_.cityId === _.id)
-          .join(Schoolings).on(_._1.schoolingId === _.id)
-          .join(AgeGroups).on(_._1._1.ageGroupId === _.id)))
-        .filter(v => v._1._1._1.yearOrMonth === year)
-        .filter(v => v._1._1._2.code === cityCode)
-      } yield (profileWithValues._1._1._1, profileWithValues._1._2, profileWithValues._2)
+      (((profile, city), schooling), ageGroup) <-
+      Profiles
+        .join(Cities).on(_.cityId === _.id)
+        .join(SchoolingLevels).on {
+        case ((profile, city), schooling) =>
+          profile.schoolingId === schooling.id
+      }.join(AgeGroups).on {
+        case (((profile, city), schooling), ageGroup) => profile.ageGroupId === ageGroup.id
+      }.filter {
+        case (((profile, _), _), _) => profile.year === year
+      }.filter {
+        case (((profile, _), _), _) => profile.month === month
+      }.filter {
+        case (((_, city), _), _) => city.code === cityCode
+      }
+    } yield (profile, schooling, ageGroup)
     db.run(query.result)
   }
 
   def countPeoplesByCityOnYearsAndSex(cityCode: String): Future[Vector[PeoplesByYearAndSex]] = {
     val query = sql"""
-      select
-        profile.year_or_month,
-        profile.sex,
-        sum(profile.quantity_of_peoples) as total
-      from
-        profile
-      inner join
-        city
-      on
-        city.id = profile.city_id
-      where
-        city_code = $cityCode
-      group by
-        profile.year_or_month,
-          profile.sex
-      order by profile.year_or_month;
+      SELECT
+        concat(p.year, p.month) as yearOrMonth,
+        p.sex,
+        sum(p.quantity_peoples) as total
+      FROM
+        profiles p
+      INNER JOIN
+        cities city
+      ON
+        city.id = p.city_id
+      WHERE
+        city.code = $cityCode
+      GROUP BY
+        p.year,
+        p.month,
+        p.sex
+      ORDER BY
+         p.year, p.month;
     """.as[PeoplesByYearAndSex]
     db.run(query)
   }
 
   def countPeoplesByCityOnYears(cityCode: String): Future[Vector[PeoplesByYear]] = {
     val query = sql"""
-      select
-        profile.year_or_month,
-        sum(profile.quantity_of_peoples) as total
-      from
-        profile
-      inner join
-        city
-      on
-        city.id = profile.city_id
-      where
-        city_code = $cityCode
-      group by
-        profile.year_or_month
-      order by profile.year_or_month;
+      SELECT
+        concat(p.year, p.month) as yearOrMonth,
+        sum(p.quantity_peoples) as total
+      FROM
+        profiles p
+      INNER JOIN
+        cities city
+      ON
+        city.id = p.city_id
+      WHERE
+        city.code = $cityCode
+      GROUP BY
+        p.year, p.month
+      ORDER BY
+        concat(p.year, p.month) ;
     """.as[PeoplesByYear]
     db.run(query)
   }
 
 
-  def getProfilesForAgeGroups(year: String, cityCode: String): Future[Seq[(Profile, City, AgeGroup)]] = {
+  def getProfilesForAgeGroups(year: String, month: String, cityCode: String): Future[Seq[(Profile, City, AgeGroup)]] = {
     val query = for {
-      profileCityAndGroup <- (Profiles.join(Cities).on(_.cityId === _.id))
-        .join(AgeGroups).on(_._1.ageGroupId === _.id)
-        .filter(_._1._1.yearOrMonth === year)
-        .filter(_._1._2.code === cityCode)
-    } yield (profileCityAndGroup._1._1, profileCityAndGroup._1._2, profileCityAndGroup._2)
+      ((profile, city), ageGroup) <-
+        (Profiles.join(Cities).on(_.cityId === _.id))
+          .join(AgeGroups).on {
+          case ((profile, city), ageGroup) => profile.ageGroupId === ageGroup.id
+        }.filter { case ((profile, _), _) =>
+          profile.year === year
+        }.filter { case ((profile, _), _) =>
+          profile.month === month
+        }.filter { case ((_, city), _) =>
+          city.code === cityCode
+        }.sortBy { case ((profile, city), group) =>
+          profile.sex
+        }
+    } yield (profile, city, ageGroup)
+
     db.run(query.result)
   }
 
-  def getProfilesForSchoolings(year: String, cityCode: String): Future[Seq[(Profile, City, Schooling)]] = {
+  def getProfilesForSchoolings(year: String, month: String, cityCode: String): Future[Seq[(Profile, City, Schooling)]] = {
     val query = for {
-      profileCityAndSchooling <- (Profiles.join(Cities).on(_.cityId === _.id))
-        .join(Schoolings).on(_._1.schoolingId === _.id)
-        .filter(_._1._1.yearOrMonth === year)
-        .filter(_._1._2.code === cityCode)
-        .sortBy(_._2.id)
-    } yield (profileCityAndSchooling._1._1, profileCityAndSchooling._1._2, profileCityAndSchooling._2)
+      ((profile, city), schooling) <-
+      (Profiles.join(Cities).on(_.cityId === _.id))
+        .join(SchoolingLevels).on {
+        case ((profile, city), schooling) => profile.schoolingId === schooling.id
+      }
+        .filter { case ((profile, _), _) =>
+          profile.year === year
+        }
+        .filter { case ((profile, _), _) =>
+          profile.month === month
+        }
+        .filter { case ((_, city), _) =>
+          city.code === cityCode
+        }
+    } yield (profile, city, schooling)
     db.run(query.result)
   }
 
@@ -158,12 +205,12 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     (Profiles += profile).asTry
   }.recover { case ex => Logger.debug("Error occurred while inserting profile", ex) }
 
-  def remove(yearMonth: String) = db.run {
-    Profiles.filter(_.yearOrMonth === yearMonth).delete
+  def remove(year: String, month: String) = db.run {
+    Profiles.filter(_.year === year).filter(_.month === month).delete
   }
 
-  def tryRemove(yearMonth: String) = db.run {
-    Profiles.filter(_.yearOrMonth === yearMonth).delete.asTry
+  def tryRemove(year: String, month: String) = db.run {
+    Profiles.filter(_.year === year).filter(_.month === month).delete.asTry
   }
 
 }

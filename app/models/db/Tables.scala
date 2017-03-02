@@ -7,7 +7,6 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
-
 object Tables {
 
 }
@@ -20,7 +19,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
   import dbConfig.driver.api._
 
-  class UserTable(tag: Tag) extends Table[User](tag, "user") {
+  class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
@@ -33,17 +32,17 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
     def * = (id, email, password, active) <> (User.tupled, User.unapply)
   }
 
-  class AgeGroupTable(tag: Tag) extends Table[AgeGroup](tag, "age_group") {
+  class AgeGroupTable(tag: Tag) extends Table[AgeGroup](tag, "age_groups") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
-    def group = column[String]("group_description", O.Length(30))
+    def group = column[String]("description", O.Length(30))
 
     def * = (id, group) <> (AgeGroup.tupled, AgeGroup.unapply)
   }
 
 
-  class SchoolingTable(tag: Tag) extends Table[Schooling](tag, "schooling") {
+  class SchoolingTable(tag: Tag) extends Table[Schooling](tag, "schooling_levels") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
@@ -54,26 +53,31 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
     def * = (id, level, position) <> (Schooling.tupled, Schooling.unapply)
   }
 
-  class CityTable(tag: Tag) extends Table[City](tag, "city") {
+
+  class CityTable(tag: Tag) extends Table[City](tag, "cities") {
+
+    import MyPostgresDriver.api._
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
-    def name = column[String]("name", O.Length(45))
+    def names = column[List[String]]("names")
 
-    def code = column[String]("city_code", O.Length(7))
+    def code = column[String]("code", O.Length(7))
 
     def state = column[String]("state", O.Length(2))
 
     def country = column[String]("country", O.Length(35))
 
-    def * = (id, name, code, state, country) <> (City.tupled, City.unapply)
+    def * = (id, names, code, state, country) <> (City.tupled, City.unapply)
   }
 
-  class ProfileTable(tag: Tag) extends Table[Profile](tag, "profile") {
+  class ProfileTable(tag: Tag) extends Table[Profile](tag, "profiles") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
-    def yearOrMonth = column[String]("year_or_month", O.Length(7))
+    def year = column[String]("year", O.Length(4))
+
+    def month = column[String]("month", O.Length(2))
 
     def electoralDistrict = column[String]("electoral_district", O.Length(10))
 
@@ -83,20 +87,20 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def ageGroupId = column[Int]("age_group_id")
 
-    def schoolingId = column[Int]("schooling_id")
+    def schoolingId = column[Int]("schooling_level_id")
 
-    def quantityOfPeoples = column[Int]("quantity_of_peoples")
+    def quantityOfPeoples = column[Int]("quantity_peoples")
 
-    def * = (id, yearOrMonth, electoralDistrict, sex, cityId, ageGroupId, schoolingId, quantityOfPeoples).
+    def * = (id, year, month, electoralDistrict, sex, cityId, ageGroupId, schoolingId, quantityOfPeoples).
       <>(Profile.tupled, Profile.unapply)
 
   }
 
-  class DataImportTable(tag: Tag) extends Table[DataImport](tag, "data_import") {
+  class DataImportTable(tag: Tag) extends Table[DataImport](tag, "data_imports") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
-    def importDateTime = column[java.sql.Date]("import_date_time")
+    def importDateTime = column[java.sql.Timestamp]("import_date_time")
 
     def fileName = column[String]("file_name", O.Length(150))
 
@@ -104,10 +108,12 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def fileMonth = column[String]("file_month", O.Length(2))
 
-    def * = (id, importDateTime, fileName, fileYear, fileMonth) <> (DataImport.tupled, DataImport.unapply)
+    def userId = column[Int]("user_id")
+
+    def * = (id, importDateTime, fileName, fileYear, fileMonth, userId) <> (DataImport.tupled, DataImport.unapply)
   }
 
-  class TaskTable(tag: Tag) extends Table[Task](tag, "task") {
+  class TaskTable(tag: Tag) extends Table[Task](tag, "tasks") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
@@ -125,7 +131,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
   }
 
 
-  class AgeGroupRankingTable(tag: Tag) extends Table[AgeGroupRanking](tag, "age_group_ranking") {
+  class AgeGroupRankingTable(tag: Tag) extends Table[AgeGroupRanking](tag, "age_group_rankings") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
@@ -144,7 +150,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
     def * = (id, cityCode, yearMonth, ageGroupId, peoples, percentageOfTotal, total) <> (AgeGroupRanking.tupled, AgeGroupRanking.unapply)
   }
 
-  class SchoolingRankingTable(tag: Tag) extends Table[SchoolingRanking](tag, "schooling_ranking") {
+  class SchoolingRankingTable(tag: Tag) extends Table[SchoolingRanking](tag, "schooling_level_rankings") {
 
     def id = column[Option[Int]]("id", O.AutoInc, O.PrimaryKey)
 
@@ -152,7 +158,7 @@ class Tables @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) {
 
     def yearMonth = column[String]("year_or_month", O.Length(7))
 
-    def schoolingId = column[Int]("schooling_id")
+    def schoolingId = column[Int]("schooling_level_id")
 
     def peoples = column[Int]("peoples")
 

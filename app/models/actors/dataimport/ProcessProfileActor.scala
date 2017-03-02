@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorRef}
 import akka.util.Timeout
 import models.db.{AgeGroupRepository, CityRepository, ProfileRepository, SchoolingRepository}
 import models.entity._
+import models.query.YearMonth
 import models.service.ProfileFileParser
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -17,7 +18,7 @@ object ProcessProfileActor {
     def apply(): Actor
   }
 
-  case class StartFileReading(valuesManagerActor: ActorRef, path: String)
+  case class StartFileReading(valuesManagerActor: ActorRef, path: String, userId: Int)
 
   case class ValuesLoaded(profiles: Stream[FullProfile])
 
@@ -44,7 +45,7 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
   implicit val timeout: Timeout = 2 minutes
 
   // for db item cache
-  var cities = Map[(String, String, String), City]()
+  var cities = Map[String, City]()
   var ages = Map[String, AgeGroup]()
   var schoolings = Map[String, Schooling]()
 
@@ -52,30 +53,31 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
   val fs = scala.collection.mutable.ListBuffer[Future[Any]]()
 
   var filePath: String = ""
+  var userId = 0
 
   // parent
   var valuesManagerActor: ActorRef = null
 
-
   def receive: Receive = {
-    case StartFileReading(ref, path) => {
+    case StartFileReading(ref, path, userId) => {
       this.filePath = path
       this.valuesManagerActor = ref
+      this.userId = userId
       val profiles = profileFileParser.parseProfile(path)
       self ! LoadValuesWithDb(profiles)
     }
 
     case LoadValuesWithDb(profiles) => {
       val values: Future[(Seq[City], Seq[AgeGroup], Seq[Schooling])] = for {
-        cs <- cityRepository.getAll
-        as <- ageGroupRepository.getAll
-        sc <- schoolingRepository.getAll
-      } yield (cs, as, sc)
+        cities <- cityRepository.getAll
+        ageGroups <- ageGroupRepository.getAll
+        schoolingLevels <- schoolingRepository.getAll
+      } yield (cities, ageGroups, schoolingLevels)
 
       values.map { vals =>
-        cities = cities ++ (vals._1.map(c => ((c.code, c.name, c.country), c)))
-        ages = ages ++ (vals._2.map(age => (age.group, age)))
-        schoolings = schoolings ++ (vals._3.map(sc => (sc.level, sc)))
+        cities = cities ++ vals._1.map(city => (city.code, city))
+        ages = ages ++ vals._2.map(age => (age.group, age))
+        schoolings = schoolings ++ vals._3.map(sc => (sc.level, sc))
         self ! ValuesLoaded(profiles)
       }
     }
@@ -84,10 +86,10 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
 
       implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-      implicit val timeout: Timeout = 5.minutes
+      implicit val timeout: Timeout = 5 minutes
 
-      // Stream[_] map doesn't map the elements
-      profiles.grouped(5000).foreach { chunk =>
+      // Stream[_] map doesn't map through the elements
+      profiles.grouped(10000).foreach { chunk =>
         val profiles: List[Profile] = chunk.toList.map(persistProfiles)
         fs += profileRepository.insertAll(profiles)
       }
@@ -98,8 +100,9 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
 
     case DataPersistComplete => {
       val importActor = injectedChild(dataImportFactory(), "data-import-actor$" + System.nanoTime())
-      importActor ! DataImportActor.SaveNewImport(filePath)
+      importActor ! DataImportActor.SaveNewImport(filePath, userId)
       valuesManagerActor ! ValuesManagerActor.ProfilePesistenceDone
+      context.stop(self)
     }
   }
 
@@ -108,7 +111,7 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
     val values: Option[(FullProfile, AgeGroup, Schooling, City)] = for {
       ageF <- ages.get(profile.ageGroup.group)
       schoolingF <- schoolings.get(profile.schooling.level)
-      cityF <- cities.get((profile.city.code, profile.city.name, profile.city.country))
+      cityF <- cities.get(profile.city.id)
     } yield (profile, ageF, schoolingF, cityF)
 
     // map those values
@@ -120,7 +123,10 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
   }
 
   def convertToProfile(p: FullProfile, ageGroup: AgeGroup, schooling: Schooling, city: City): Profile = {
-    Profile(yearOrMonth = p.yearOrMonth,
+    val yearAndMonth = YearMonth.split(p.yearOrMonth)
+
+    Profile(year = yearAndMonth.year,
+      month = yearAndMonth.month,
       electoralDistrict = p.electoralDistrict,
       sex = SexParser.convert(p.sex),
       quantityOfPeoples = p.quantityOfPeoples,

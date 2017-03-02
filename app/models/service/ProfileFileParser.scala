@@ -1,7 +1,8 @@
 package models.service
 
 import java.nio.file.Paths
-import java.util.Date
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 import models.entity._
@@ -30,7 +31,16 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
 
   import ProfileFileParser._
 
-  def parseValues(path: String): (Set[City], Set[AgeGroup], Set[Schooling]) = {
+  def parseProfile(path: String): Stream[FullProfile] = {
+    Source.fromFile(path, "latin1")
+      .getLines
+      .map { line =>
+        val cleanLine = line.replaceAll(cleanPattern, "").split(";")
+        fullLineParser(cleanLine)
+      }.toStream
+  }
+
+  def parseValues(path: String): (Set[SimpleCity], Set[AgeGroup], Set[Schooling]) = {
     val mappedValues = Source.fromFile(path, "latin1")
       .getLines
       .map { line =>
@@ -48,16 +58,7 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
     (cities, ages, schoolings)
   }
 
-  def parseProfile(path: String): Stream[FullProfile] = {
-    Source.fromFile(path, "latin1")
-      .getLines
-      .map { line =>
-        val cleanLine = line.replaceAll(cleanPattern, "").split(";")
-        fullLineParser(cleanLine)
-      }.toStream
-  }
-
-  def parseFileData(path: String): DataImport = {
+  def parseFileData(path: String, userId: Int): DataImport = {
     val yearCol = Source.fromFile(path, "latin1")
       .getLines
       .map { line =>
@@ -72,9 +73,10 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
 
     val fileNameExtracted = Paths.get(path).getFileName.toString
     DataImport(fileName = fileNameExtracted,
-      importDateTime = new java.sql.Date(new Date().getTime),
+      importDateTime = Timestamp.valueOf(LocalDateTime.now()),
       fileYear = yearMonth._1,
-      fileMonth = yearMonth._2)
+      fileMonth = yearMonth._2,
+      userId = userId)
   }
 
   private def fullLineParser(arr: Array[String]) =
@@ -88,20 +90,21 @@ class ProfileFileParser @Inject()(val cacheService: CacheService) {
       sex = sexColumnParser(arr)
     )
 
-  private def cityColumnParser(line: Array[String]): City = line(stateColumn) match {
+  private def cityColumnParser(line: Array[String]): SimpleCity = line(stateColumn) match {
     case "ZZ" => {
       val city = line(cityColumn).intern
       val containCity = cityCountryPattern.findFirstIn(city).isDefined
       if (containCity) {
         val cityCountry = city.split("-")
 
-        City(code = line(cityCodeColumn), name = cityCountry(0).intern(), state = line(stateColumn),
+        SimpleCity(id = line(cityCodeColumn), name = cityCountry(0).intern(), state = line(stateColumn),
           country = cityCountry(1).intern)
       } else {
-        City(code = line(cityCodeColumn), name = notInformed, state = line(stateColumn).intern, country = city)
+        SimpleCity(id = line(cityCodeColumn), name = notInformed, state = line(stateColumn).intern, country = city)
       }
     }
-    case _ => City(code = line(cityCodeColumn), name = line(cityColumn).intern, state = line(stateColumn).intern, country = defaultCountry)
+    case _ => SimpleCity(id = line(cityCodeColumn),
+      name = line(cityColumn).intern, state = line(stateColumn).intern, country = defaultCountry)
   }
 
   private def yearColumnParser(line: Array[String]): String = line(yearColumn).intern

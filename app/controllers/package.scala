@@ -60,12 +60,15 @@ package object controllers {
       val newMonth = if (month.length == 1) "0" + month else month
       val newYear = if (!month.isEmpty) (year + "-" + newMonth) else year
       val valueId = if (!month.isEmpty) year + newMonth else year
+      println((valueId, newYear))
       (valueId, newYear)
     }.sortBy(_._2).reverse
 
   def formatYears(years: Vector[YearOrMonth]) = {
-    years.map(y => (y.yearMonth, yearMonthFormat(y.yearMonth))).sortBy(_._2).reverse.toSeq
+    years.map(y => (y.year, yearMonthFormat(y.year))).sortBy(_._2).reverse.toSeq
   }
+
+
 
   def yearMonthFormat(year: String) = if (year.length > 4) year.substring(0, 4) + "-" + year.substring(4) else year
 
