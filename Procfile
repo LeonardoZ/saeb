@@ -1,1 +1,1 @@
-web: target/universal/tmp/bin/saeb -Dhttp.port=${PORT} -Dconfig.file=conf/prod.conf
+web: target/universal/stage/bin/saeb -Dhttp.port=${PORT} -Dconfig.file=conf/prod.conf

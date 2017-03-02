@@ -9,6 +9,7 @@ scalaVersion := "2.11.7"
 routesGenerator := InjectedRoutesGenerator
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
+
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
