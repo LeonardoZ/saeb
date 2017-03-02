@@ -3,7 +3,7 @@ SAEB - Sistema de Análise do Eleitorado Brasileiro
 
 Software desenvolvido utilizando Play Framework 2.5, Slick 3.1 and Akka.
 
-==================
+===============
 
 <h2>Configurar banco de dados</h2>
 
@@ -11,9 +11,9 @@ Software desenvolvido utilizando Play Framework 2.5, Slick 3.1 and Akka.
  O schema deve ser chamado de <strong>"saeb"</strong>.</p>
 
 <ul>
-    <li>MYSQL_HOST</li>
-    <li>MYSQL_USER</li> 
-    <li>MYSQL_PASS</li>
+    <li>SAEB_DB_HOST</li>
+    <li>SAEB_DB_USER</li> 
+    <li>SAEB_DB_PASS</li>
 </ul>
 
 ===================
@@ -24,12 +24,12 @@ Software desenvolvido utilizando Play Framework 2.5, Slick 3.1 and Akka.
  Não há suporte para https, efetivamente, por enquanto.</p>
 
 <ul>
-   <li>PLAY_MAIL_HOST</li>
-   <li>PLAY_MAIL_PORT</li>
-   <li>PLAY_MAIL_SSl</li>
-   <li>PLAY_MAIL_TSL</li>
-   <li>PLAY_MAIL_USER</li>
-   <li>PLAY_MAIL_PASS</li>
+   <li>SAEB_MAIL_HOST</li>
+   <li>SAEB_MAIL_PORT</li>
+   <li>SAEB_MAIL_SSl</li>
+   <li>SAEB_MAIL_TSL</li>
+   <li>SAEB_MAIL_USER</li>
+   <li>SAEB_MAIL_PASS</li>
 </ul>
 
 ===================
