@@ -32,9 +32,10 @@ class ProfileRepository @Inject()(protected val tables: Tables,
   implicit val getProfileWithCode = GetResult(r => ProfileWithCode(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
 
 
-  def insertAll(profiles: List[Profile]): Future[Any] = db.run {
-    (Profiles ++= profiles).transactionally.asTry
+  def insertAll(profiles: List[Profile]) = db.run {
+      (Profiles ++= profiles)
   }.recover { case ex => Logger.debug("Error occurred while inserting profiles", ex) }
+
 
 
   def getProfilesForCity(cityCode: String): Future[Seq[(Profile, City)]] = {

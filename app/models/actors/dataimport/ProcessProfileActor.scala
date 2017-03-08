@@ -8,6 +8,7 @@ import models.db.{AgeGroupRepository, CityRepository, ProfileRepository, Schooli
 import models.entity._
 import models.query.YearMonth
 import models.service.ProfileFileParser
+import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.{Await, ExecutionContext, Future}

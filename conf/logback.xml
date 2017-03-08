@@ -18,6 +18,9 @@
     <logger name="slick.jdbc.JdbcBackend.statement"  level="DEBUG" /><!-- Will log all statements -->
     <!--<logger name="slick.compiler.QueryCompilerBenchmark"  level="DEBUG" />&lt;!&ndash; Will log all statements &ndash;&gt;-->
     <logger name="models.db"  level="DEBUG" />
+    <logger name="models.db"  level="ERROR" />
+    <logger name="models.db.ProfileRepository"  level="DEBUG" />
+    <logger name="models.db.ProfileRepository"  level="ERROR" />
 
     <root level="INFO">
         <appender-ref ref="ASYNCSTDOUT" />

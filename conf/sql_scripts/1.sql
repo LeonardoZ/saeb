@@ -29,8 +29,8 @@ CREATE TABLE age_groups(
 
 CREATE TABLE profiles(
 	id SERIAL PRIMARY KEY,
-    year SMALLINT NOT NULL,
-    month SMALLINT,
+    year VARCHAR(4) NOT NULL,
+    month VARCHAR(2),
     sex CHAR(1) NOT NULL,
     electoral_district VARCHAR(10) NOT NULL,
     quantity_peoples INTEGER NOT NULL,

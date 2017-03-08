@@ -33,6 +33,6 @@ fork in run := true
 
 maintainer in Linux := "Leonardo Zapparoli <leo.zapparoli@gmail.com>"
 
-packageSummary in Linux := "SAEB for Debian Servers =)"
+packageSummary in Linux := "SAEB for Debian-like Servers =)"
 
 packageDescription := "Software de análise do eleitorado brasileiro"

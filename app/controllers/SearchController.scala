@@ -28,6 +28,7 @@ class SearchController @Inject()(val cityRepository: CityRepository,
   }
 
   def cityPage = Action.async { implicit request =>
+
     searchForm.bindFromRequest.fold(
       error => Future {
         Redirect(routes.SearchController.main())
@@ -102,6 +103,9 @@ class SearchController @Inject()(val cityRepository: CityRepository,
   }
 
   def main() = Action.async {
+    println(System.getenv("SAEB_DB_PASS"))
+    println(System.getenv("SAEB_DB_USER"))
+    println(System.getenv("SAEB_DB_HOST"))
     Future {
       Ok(views.html.saeb(searchForm))
     }
