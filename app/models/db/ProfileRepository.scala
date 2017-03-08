@@ -94,8 +94,7 @@ class ProfileRepository @Inject()(protected val tables: Tables,
     db.run(query.asTry)
   }
 
-  def getProfilesFullByCityAndYear(year: String, month: String, cityCode: String)
-  : Future[Seq[(Profile, Schooling, AgeGroup)]] = {
+  def getProfilesFullByCityAndYear(year: String, month: String, cityCode: String) : Future[Seq[(Profile, Schooling, AgeGroup)]] = {
     val query = for {
       (((profile, city), schooling), ageGroup) <-
       Profiles
