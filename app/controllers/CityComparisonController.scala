@@ -23,15 +23,15 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
 
   def comparisonPage() = Action.async { implicit request =>
     dataImportRepository.getAll map { imports =>
-        val years = imports
-            .map { data =>
-              val year = data.fileYear
-              val month = data.fileMonth
-              val newMonth = if (month.length == 1) "0" + month else month
-              val newYear = if (!month.isEmpty) (year + "-" + newMonth) else year
-              val valueId = if (!month.isEmpty) year + newMonth else year
-              (newYear, valueId)
-            }
+      val years = imports
+        .map { data =>
+          val year = data.fileYear
+          val month = data.fileMonth
+          val newMonth = if (month.length == 1) "0" + month else month
+          val newYear = if (!month.isEmpty) (year + "-" + newMonth) else year
+          val valueId = if (!month.isEmpty) year + newMonth else year
+          (newYear, valueId)
+        }
       Ok (views.html.city_comp(years))
     }
   }
@@ -104,10 +104,10 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
       case (comparedCityOne, comparedCityTwo) =>
         Future {
           Ok(Json.obj("comparisons" -> SchoolingComparison(
-                        comparedCityOne._1,
-                        comparedCityOne._2,
-                        comparedCityTwo._1,
-                        comparedCityTwo._2)
+            comparedCityOne._1,
+            comparedCityOne._2,
+            comparedCityTwo._1,
+            comparedCityTwo._2)
           ))
         }
     }
@@ -147,10 +147,10 @@ class CityComparisonController @Inject()(val cityRepository: CityRepository,
       case (comparedCityOne, comparedCityTwo) =>
         Future {
           Ok(Json.obj("comparisons" -> AgeGroupComparison(
-                        comparedCityOne._1,
-                        comparedCityOne._2,
-                        comparedCityTwo._1,
-                        comparedCityTwo._2)
+            comparedCityOne._1,
+            comparedCityOne._2,
+            comparedCityTwo._1,
+            comparedCityTwo._2)
           ))
         }
     }
