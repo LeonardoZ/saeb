@@ -35,8 +35,6 @@ class DocumentUploadController @Inject()(@Named("manager-actor") val managerActo
   implicit val peoplesInAgeGroupSchoolingFormat = Json.format[FileUploadReturn]
   implicit val yearCityCodesReads = Json.reads[FileUploadReturn]
 
-
-
   def uploadPage() = SecureRequest.async { implicit request =>
     Future(Ok(views.html.file_upload()).flashing())
   }

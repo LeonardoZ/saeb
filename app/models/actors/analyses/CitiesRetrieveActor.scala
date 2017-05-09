@@ -9,8 +9,6 @@ import models.db.CityRepository
 import models.entity.Task
 import play.api.libs.concurrent.InjectedActorSupport
 
-import scala.concurrent.ExecutionContext
-
 object CitiesRetrieveActor {
 
   trait Factory {
@@ -27,7 +25,7 @@ object CitiesRetrieveActor {
 
 class CitiesRetrieveActor @Inject()(val cityRepository: CityRepository) extends Actor with InjectedActorSupport {
 
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
 
   override def receive: Receive = LoggingReceive {
     case RetrieveCities(analysesActorRef, yearMonth, task) =>

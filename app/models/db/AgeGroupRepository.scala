@@ -16,7 +16,6 @@ class AgeGroupRepository @Inject()(protected val tables: Tables,
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
-
   import dbConfig.driver.api._
 
   val AgeGroups = TableQuery[tables.AgeGroupTable]

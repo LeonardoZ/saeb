@@ -11,7 +11,6 @@ import models.db.ProfileRepository
 import models.query.ProfileWithCode
 import play.api.libs.concurrent.InjectedActorSupport
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 
@@ -29,7 +28,6 @@ class CityAnalysesActor @Inject()(val schoolingFactory: SchoolingAnalysesActor.F
                                   val ageGroupFactory: AgeGroupAnalysesActor.Factory,
                                   val profileRepository: ProfileRepository) extends Actor with InjectedActorSupport {
   implicit val timeout: Timeout = 2 minutes
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   import CityAnalysesActor._
 

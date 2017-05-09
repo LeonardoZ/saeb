@@ -35,7 +35,8 @@ class AnalysesActor @Inject()(val taskService: TaskService,
 
   import AnalysesActor._
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
+
   var counter = new AtomicInteger(0)
 
   lazy val citiesActor = injectedChild(citiesRetrieveFactory(), s"cities-retrieve-actor")

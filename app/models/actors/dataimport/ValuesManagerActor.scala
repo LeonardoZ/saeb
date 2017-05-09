@@ -31,7 +31,7 @@ object ValuesManagerActor {
 
   case class SchoolingsPersistenceDone(actorRef: ActorRef)
 
-  object ProfilePesistenceDone
+  object ProfilePersistenceDone
 
 }
 
@@ -44,6 +44,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Facto
   import ValuesManagerActor._
 
 
+  import play.api.libs.concurrent.Execution.Implicits._
   var citiesReady: Boolean = false
   var agesReady: Boolean = false
   var schoolingsReady: Boolean = false
@@ -78,9 +79,6 @@ class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Facto
     }
 
     case ReadValuesFromFile(managerActor, task, file) => {
-
-      import scala.concurrent.ExecutionContext.Implicits.global
-
       implicit val timeout: Timeout = 2 minutes
 
       this.filePath = file
@@ -104,7 +102,7 @@ class ValuesManagerActor @Inject()(val profileFactory: ProcessProfileActor.Facto
       persistActor ! ProcessProfileActor.StartFileReading(self, file, task.userId)
     }
 
-    case ProfilePesistenceDone => {
+    case ProfilePersistenceDone => {
       managerActor ! ManagerActor.DataImportDone(task)
       context.stop(self)
 

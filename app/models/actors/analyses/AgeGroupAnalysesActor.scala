@@ -30,7 +30,8 @@ class AgeGroupAnalysesActor @Inject()(val rankingRepository: AgeGroupRankingRepo
   extends Actor with InjectedActorSupport {
 
   implicit val timeout: Timeout = 2 minutes
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
+  import play.api.libs.concurrent.Execution.Implicits._
 
   import AgeGroupAnalysesActor._
 

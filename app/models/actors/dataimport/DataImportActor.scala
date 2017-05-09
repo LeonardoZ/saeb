@@ -26,7 +26,7 @@ class DataImportActor @Inject()(val dataImportRepository: DataImportRepository,
 
   import DataImportActor._
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
 
   def receive: Receive = {
     case CheckFileAlreadyImported(ref, task, path) => {

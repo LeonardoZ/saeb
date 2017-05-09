@@ -11,11 +11,12 @@ import slick.driver.JdbcProfile
 import slick.jdbc.GetResult
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class ProfileRepository @Inject()(protected val tables: Tables,
-                                  protected val dbConfigProvider: DatabaseConfigProvider) {
+                                  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+
 
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db

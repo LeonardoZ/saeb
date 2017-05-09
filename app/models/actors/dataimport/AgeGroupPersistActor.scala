@@ -23,11 +23,11 @@ class AgeGroupPersistActor @Inject()(val ageGroupRepository: AgeGroupRepository)
 
   import AgeGroupPersistActor._
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
 
   def receive: Receive = LoggingReceive {
     case AgeGroupPersistence(ref, newAgeGroups) => {
-      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
       val ageGroupsToPersist: Future[Set[AgeGroup]] = ageGroupRepository.getAll map { oldAgeGroups =>
         newAgeGroups.filter(nag => oldAgeGroups.filter(nag.group == _.group).isEmpty)
       }

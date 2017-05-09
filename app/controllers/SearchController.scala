@@ -39,11 +39,11 @@ class SearchController @Inject()(val cityRepository: CityRepository,
 
   def cityPageWithCode(cityCode: String) = Action.async { implicit request =>
     cityRepository.getByCode(cityCode).flatMap {
-        case None => Future {
-          Redirect(routes.SearchController.main())
-        }
-        case Some(city: City) => analyzeACity(Some(city))
+      case None => Future {
+        Redirect(routes.SearchController.main())
       }
+      case Some(city: City) => analyzeACity(Some(city))
+    }
   }
 
   def analyzeACity(aCity: Option[City]) = {
@@ -96,16 +96,13 @@ class SearchController @Inject()(val cityRepository: CityRepository,
       )
   }
 
-  def about() = Action.async  {
+  def about() = Action.async {
     Future {
       Ok(views.html.about())
     }
   }
 
   def main() = Action.async {
-    println(System.getenv("SAEB_DB_PASS"))
-    println(System.getenv("SAEB_DB_USER"))
-    println(System.getenv("SAEB_DB_HOST"))
     Future {
       Ok(views.html.saeb(searchForm))
     }

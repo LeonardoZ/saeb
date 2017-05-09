@@ -10,9 +10,7 @@ import models.entity.SchoolingRanking
 import models.query.ProfileWithCode
 import play.api.libs.concurrent.InjectedActorSupport
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-
 
 object SchoolingAnalysesActor {
 
@@ -24,16 +22,19 @@ object SchoolingAnalysesActor {
 
 }
 
-class SchoolingAnalysesActor @Inject()(val rankingRepository: SchoolingRankingRepository) extends Actor with InjectedActorSupport {
+class SchoolingAnalysesActor @Inject()(val rankingRepository: SchoolingRankingRepository)
+                                                                            extends Actor with InjectedActorSupport {
 
   implicit val timeout: Timeout = 2 minutes
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-  import SchoolingAnalysesActor._
 
+  import play.api.libs.concurrent.Execution.Implicits._
+
+  import SchoolingAnalysesActor._
 
   override def receive: Receive = LoggingReceive {
     case SchoolingMultiAnalyses(cityAnalysesActor, yearMonth, profiles: Vector[ProfileWithCode]) => {
-      val allSchoolingAnalysesInChunk: Seq[SchoolingRanking] = profiles.groupBy(_.cityCode).flatMap {
+
+      val allSchoolingAnalysesInChunk = profiles.groupBy(_.cityCode).flatMap {
         case (code, profiles) => profilesAnalyze(code, yearMonth, profiles)
       }.toSeq
       rankingRepository.insertAll(allSchoolingAnalysesInChunk)

@@ -8,10 +8,9 @@ import models.db.{AgeGroupRepository, CityRepository, ProfileRepository, Schooli
 import models.entity._
 import models.query.YearMonth
 import models.service.ProfileFileParser
-import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 
 object ProcessProfileActor {
 
@@ -40,7 +39,8 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
 
   import ProcessProfileActor._
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
+
   import scala.concurrent.duration._
 
   implicit val timeout: Timeout = 2 minutes
@@ -85,8 +85,6 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
 
     case ValuesLoaded(profiles) => {
 
-      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
       implicit val timeout: Timeout = 5 minutes
 
       // Stream[_] map doesn't map through the elements
@@ -102,7 +100,7 @@ class ProcessProfileActor @Inject()(val dataImportFactory: DataImportActor.Facto
     case DataPersistComplete => {
       val importActor = injectedChild(dataImportFactory(), "data-import-actor$" + System.nanoTime())
       importActor ! DataImportActor.SaveNewImport(filePath, userId)
-      valuesManagerActor ! ValuesManagerActor.ProfilePesistenceDone
+      valuesManagerActor ! ValuesManagerActor.ProfilePersistenceDone
       context.stop(self)
     }
   }

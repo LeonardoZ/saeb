@@ -6,7 +6,7 @@ import akka.actor.{Actor, ActorRef}
 import models.db.SchoolingRepository
 import models.entity.Schooling
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 
 object SchoolingsPersistActor {
@@ -25,7 +25,7 @@ class SchoolingsPersistActor @Inject()(val schoolingRepository: SchoolingReposit
 
   def receive: Receive = {
     case SchoolingsPersistence(ref, newSchoolings) => {
-      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+      import play.api.libs.concurrent.Execution.Implicits._
       val schoolingsToPersist: Future[Set[Schooling]] = schoolingRepository.getAll map { oldSchoolings =>
         newSchoolings.filter(ns => oldSchoolings.filter(ns.level == _.level).isEmpty)
       }

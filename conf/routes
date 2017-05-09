@@ -27,6 +27,9 @@ GET     /admin/removeFile/                         controllers.DocumentUploadCon
 POST    /admin/removeFile/                         controllers.DocumentUploadController.doRemove()
 GET     /admin/analyses/                           controllers.AnalysesController.analysesPage()
 POST    /admin/analyses/                           controllers.AnalysesController.doAnalyses()
+GET     /admin/automatic/                          controllers.AutomaticImportController.automaticPage()
+POST    /admin/automatic/                          controllers.AutomaticImportController.doAutomatic()
+POST    /admin/automatic/specific                  controllers.AutomaticImportController.doSpecificAutomaticImport()
 
 # Public
 GET    /                                           controllers.SearchController.main

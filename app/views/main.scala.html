@@ -97,9 +97,25 @@
             <ul class="sidebar-menu">
                 <li class="header">Ações</li>
                 <!-- Optionally, you can add icons to the links -->
-                <li class="active"><a href=@routes.UserController.register><i class="fa fa-user-plus"></i> <span>Novo usuário</span></a></li>
-                <li><a href=@routes.UserController.users><i class="fa fa-users"></i> <span>Todos Usuários</span></a></li>
-                <li><a href="@routes.DocumentUploadController.uploadPage"><i class="fa fa-link"></i> <span>Novo arquivo</span></a></li>
+                <li class="active">
+                    <a href=@routes.UserController.register><i class="fa fa-user-plus"></i> <span>Novo usuário</span>
+                    </a>
+                </li>
+                <li>
+                    <a href=@routes.UserController.users><i class="fa fa-users"></i> <span>Todos Usuários</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="@routes.DocumentUploadController.uploadPage">
+                        <i class="fa fa-link"></i><span>Novo arquivo</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="@routes.AutomaticImportController.automaticPage()">
+                        <i class="fa fa-link"></i><span>Imoportarção automática</span>
+                    </a>
+                </li>
+
                 <li>
                     <a href=@routes.SchoolingController.classification>
                         <i class="fa fa-balance-scale "></i> <span>Classificar escolaridade</span>
@@ -154,7 +170,7 @@
 
         </div>
         <!-- Default to the left -->
-        <strong>SAEB 2016.</strong> Uso consciente.<span class="pull-right">Fonte dos dados:<a href="http://www.dados.gov.br"> dados.gov.br</a><span>
+        <strong>SAEB 2017.</strong> Uso consciente.<span class="pull-right">Fonte dos dados:<a href="http://www.dados.gov.br"> dados.gov.br</a><span>
     </footer>
 
 </div>

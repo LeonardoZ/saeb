@@ -2,15 +2,15 @@ package models.actors
 import com.google.inject.AbstractModule
 import models.actors.analyses._
 import models.actors.dataimport._
+import models.actors.scraper.ScraperActor
 import play.api.libs.concurrent.AkkaGuiceSupport
-/**
-  * Created by Leonardo on 15/08/2016.
-  */
+
 class ActorsModule extends AbstractModule with AkkaGuiceSupport {
 
   def configure(): Unit = {
     bindActor[ManagerActor]("manager-actor")
     bindActor[AnalysesActor]("analyses-actor")
+    bindActor[ScraperActor]("scraper-actor")
 
     // import data actors
     bindActorFactory[ValuesManagerActor, ValuesManagerActor.Factory]
@@ -26,6 +26,8 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActorFactory[CitiesRetrieveActor, CitiesRetrieveActor.Factory]
     bindActorFactory[CityAnalysesActor, CityAnalysesActor.Factory]
     bindActorFactory[SchoolingAnalysesActor, SchoolingAnalysesActor.Factory]
+
+    // scraper actors
 
   }
 }

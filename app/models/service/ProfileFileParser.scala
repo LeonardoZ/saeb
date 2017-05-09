@@ -27,7 +27,7 @@ object ProfileFileParser {
   val defaultCountry = "Brazil"
 }
 
-class ProfileFileParser @Inject()(val cacheService: CacheService) {
+class ProfileFileParser @Inject()() {
 
   import ProfileFileParser._
 

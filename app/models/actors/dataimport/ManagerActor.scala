@@ -9,7 +9,7 @@ import models.service.TaskService
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object ManagerActor {
 
@@ -39,7 +39,7 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
                              val taskService: TaskService) extends Actor with InjectedActorSupport {
   import ManagerActor._
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
 
   override def preStart(): Unit = {
     Logger.debug("Starting SAEB Data Import...")
@@ -48,6 +48,7 @@ class ManagerActor @Inject()(val dataImportFactory: DataImportActor.Factory,
   val receivingOrdersState: Receive = LoggingReceive {
     case DataImportOrder(path, userEmail) => {
       val dataImportActor = injectedChild(dataImportFactory(), "data-import-actor$" + userEmail)
+
       generateTask(userEmail,"Importar aquivo", "Importação sendo analisada") map {
         case Some(task) => dataImportActor ! DataImportActor.CheckFileAlreadyImported(self, task, path)
         case None => None

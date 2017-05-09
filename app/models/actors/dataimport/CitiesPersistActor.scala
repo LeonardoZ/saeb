@@ -32,12 +32,11 @@ class CitiesPersistActor @Inject()(val cityRepository: CityRepository) extends A
 
   implicit val timeout: Timeout = 2 minutes
 
-
   def receive: Receive = LoggingReceive {
 
     case CitiesPersistence(actorRef, newCities) =>
-      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-      val citiesToPersist = cityRepository.getAll map { oldCities =>
+      import play.api.libs.concurrent.Execution.Implicits._
+      cityRepository.getAll map { oldCities =>
         val checkedCities: Set[Option[City]] = newCities.map { city =>
           oldCities.find(nc => nc.code.equals(city.id)) match {
             case Some(cityInBD) =>

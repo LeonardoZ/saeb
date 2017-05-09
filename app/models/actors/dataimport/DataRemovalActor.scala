@@ -26,7 +26,7 @@ class DataRemovalActor @Inject()(val taskService: TaskService,
 
   import DataRemovalActor._
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import play.api.libs.concurrent.Execution.Implicits._
 
   override def receive: Receive = {
     case RemoveData(managerActor, yearMonth, task) => {
